@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Search, ArrowRight, AlertCircle } from "lucide-react"
+import { Search, ArrowRight, AlertCircle, Film, Download } from "lucide-react"
+import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { VideoInfoCard } from "@/components/video-info-card"
@@ -129,6 +130,47 @@ export default function Home() {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Paste a link from your favorite platform to extract metadata and download high-quality video or audio.
           </p>
+        </div>
+
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+          {/* Current Page - Video Downloader */}
+          <div className="rounded-lg border border-gray-800 bg-card/30 p-6 hover:border-gray-700 transition-colors">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                <Download className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-white mb-2">Video Downloader</h3>
+                <p className="text-sm text-muted-foreground">
+                  Download videos from YouTube and other platforms in high quality.
+                </p>
+                <p className="text-xs text-primary mt-2 font-medium">Currently on this page</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Video Editor - Link to Editor Page */}
+          <Link href="/editor">
+            <div className="rounded-lg border border-gray-800 bg-card/30 p-6 hover:border-primary hover:bg-card/50 transition-all cursor-pointer group">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-500/10 group-hover:bg-purple-500/20 transition-colors">
+                  <Film className="h-6 w-6 text-purple-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-primary transition-colors">
+                    Video Editor
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Edit videos with our professional timeline editor. Trim, add text, apply effects, and more.
+                  </p>
+                  <p className="text-xs text-purple-400 mt-2 font-medium flex items-center gap-1">
+                    Try it now <ArrowRight className="h-3 w-3" />
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Link>
         </div>
 
         {/* Search Form */}

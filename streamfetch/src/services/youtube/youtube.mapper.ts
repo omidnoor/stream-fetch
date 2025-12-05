@@ -43,21 +43,50 @@ export class YouTubeMapper {
   private extractThumbnail(rawInfo: any): string {
     let thumbnails: any[] = [];
 
-    // Try different possible locations
+    // Try different possible locations (matching youtube-helper.ts logic)
     if (rawInfo.basic_info?.thumbnail) {
+      console.log('[YouTubeMapper] Found thumbnails in basic_info.thumbnail');
       thumbnails = rawInfo.basic_info.thumbnail;
     } else if (rawInfo.videoDetails?.thumbnail?.thumbnails) {
+      console.log('[YouTubeMapper] Found thumbnails in videoDetails.thumbnail.thumbnails');
       thumbnails = rawInfo.videoDetails.thumbnail.thumbnails;
     } else if (rawInfo.videoDetails?.thumbnail) {
+      console.log('[YouTubeMapper] Found thumbnails in videoDetails.thumbnail');
       thumbnails = rawInfo.videoDetails.thumbnail;
     } else if (rawInfo.videoDetails?.thumbnails) {
+      console.log('[YouTubeMapper] Found thumbnails in videoDetails.thumbnails');
       thumbnails = rawInfo.videoDetails.thumbnails;
+    } else if (rawInfo.video_details?.thumbnail?.thumbnails) {
+      console.log('[YouTubeMapper] Found thumbnails in video_details.thumbnail.thumbnails');
+      thumbnails = rawInfo.video_details.thumbnail.thumbnails;
+    } else if (rawInfo.video_details?.thumbnail) {
+      console.log('[YouTubeMapper] Found thumbnails in video_details.thumbnail');
+      thumbnails = rawInfo.video_details.thumbnail;
+    } else if (rawInfo.video_details?.thumbnails) {
+      console.log('[YouTubeMapper] Found thumbnails in video_details.thumbnails');
+      thumbnails = rawInfo.video_details.thumbnails;
+    } else {
+      console.log('[YouTubeMapper] No thumbnails found in any location');
+      console.log('[YouTubeMapper] Available keys in rawInfo:', Object.keys(rawInfo));
+      if (rawInfo.videoDetails || rawInfo.video_details) {
+        const details = rawInfo.videoDetails || rawInfo.video_details;
+        console.log('[YouTubeMapper] Available keys in videoDetails:', Object.keys(details));
+      }
     }
 
-    // Return highest quality (first) thumbnail
-    return Array.isArray(thumbnails) && thumbnails.length > 0
-      ? thumbnails[0]?.url || ''
-      : '';
+    if (Array.isArray(thumbnails) && thumbnails.length > 0) {
+      console.log('[YouTubeMapper] Thumbnails array length:', thumbnails.length);
+      console.log('[YouTubeMapper] First thumbnail (highest quality):', thumbnails[0]);
+      console.log('[YouTubeMapper] Last thumbnail:', thumbnails[thumbnails.length - 1]);
+
+      // Return highest quality (first) thumbnail
+      // YouTube provides thumbnails in descending quality order,
+      // so the first one is the highest quality
+      return thumbnails[0]?.url || '';
+    }
+
+    console.log('[YouTubeMapper] Returning empty thumbnail URL');
+    return '';
   }
 
   /**

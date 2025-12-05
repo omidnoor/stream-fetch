@@ -2,12 +2,14 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Play, Download, Settings } from "lucide-react"
+import { Play, Download, Settings, Film, FolderOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navigation = [
   { name: "Fetch Media", href: "/", icon: Play },
   { name: "Downloads", href: "/downloads", icon: Download },
+  { name: "Video Editor", href: "/editor", icon: Film },
+  { name: "Projects", href: "/projects", icon: FolderOpen },
   { name: "Settings", href: "/settings", icon: Settings },
 ]
 
