@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Download, Settings, Film, Mic2 } from "lucide-react"
+import { LayoutDashboard, Download, Settings, Film, Mic2, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navigation = [
@@ -10,6 +10,7 @@ const navigation = [
   { name: "YouTube", href: "/youtube", icon: Download },
   { name: "Dubbing", href: "/dubbing", icon: Mic2 },
   { name: "Studio", href: "/studio", icon: Film },
+  { name: "PDF Editor", href: "/pdf", icon: FileText },
   { name: "Settings", href: "/settings", icon: Settings },
 ]
 
@@ -20,8 +21,8 @@ export function Sidebar() {
     <div className="flex h-screen w-64 flex-col bg-[#0f0f0f] border-r border-gray-800">
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 px-6 border-b border-gray-800">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-          <Play className="h-5 w-5 text-white" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
+          <span className="text-lg font-bold text-white">S</span>
         </div>
         <span className="text-xl font-semibold text-white">StreamFetch</span>
       </div>
