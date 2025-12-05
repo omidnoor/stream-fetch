@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { Sidebar } from "@/components/sidebar";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "StreamFetch - Universal Media Saver",
-  description: "Educational tool for learning about streaming, CORS, and media downloads",
+  title: "StreamFetch - Download, Dub, and Edit Videos with AI",
+  description: "Your complete video workflow solution. Download from YouTube, translate with AI dubbing, and edit with professional tools.",
 };
 
 export default function RootLayout({
@@ -15,12 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <div className="flex h-screen overflow-hidden">
-          <Sidebar />
-          <main className="flex-1 overflow-y-auto">
-            {children}
-          </main>
-        </div>
+        {children}
       </body>
     </html>
   );
