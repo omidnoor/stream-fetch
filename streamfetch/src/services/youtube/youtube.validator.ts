@@ -4,10 +4,6 @@ import { InvalidUrlError } from '@/lib/errors/youtube.errors';
  * YouTube URL Validator
  *
  * Handles validation and extraction of YouTube video IDs from URLs.
- *
- * EDUCATIONAL NOTE:
- * Separation of Concerns - Validation logic is isolated here,
- * making it easy to test and reuse across the application.
  */
 export class YouTubeValidator {
   private readonly URL_PATTERNS = [

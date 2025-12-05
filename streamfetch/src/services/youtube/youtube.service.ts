@@ -10,13 +10,6 @@ import { FormatNotFoundError } from '@/lib/errors/youtube.errors';
  *
  * Main service for YouTube operations.
  * Orchestrates validation, caching, data fetching, and transformation.
- *
- * EDUCATIONAL NOTE:
- * Service Pattern - Business logic lives here.
- * - Coordinates between validator, repository, and mapper
- * - Implements caching strategy
- * - Provides clean API for consumers
- * - Easy to test with mocked dependencies
  */
 export class YouTubeService {
   constructor(

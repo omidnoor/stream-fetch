@@ -29,7 +29,7 @@ export class PDFError extends AppError {
  */
 export class PDFLoadError extends PDFError {
   constructor(message: string = 'Failed to load PDF file', details?: Record<string, unknown>) {
-    super(message, 'PDF_LOAD_ERROR', 400, details);
+    super(message, 400, 'PDF_LOAD_ERROR', details);
     this.name = 'PDFLoadError';
   }
 }
@@ -40,7 +40,7 @@ export class PDFLoadError extends PDFError {
  */
 export class PDFRenderError extends PDFError {
   constructor(message: string = 'Failed to render PDF', details?: Record<string, unknown>) {
-    super(message, 'PDF_RENDER_ERROR', 500, details);
+    super(message, 500, 'PDF_RENDER_ERROR', details);
     this.name = 'PDFRenderError';
   }
 }
@@ -51,7 +51,7 @@ export class PDFRenderError extends PDFError {
  */
 export class PDFProcessingError extends PDFError {
   constructor(message: string = 'PDF processing failed', details?: Record<string, unknown>) {
-    super(message, 'PDF_PROCESSING_ERROR', 500, details);
+    super(message, 500, 'PDF_PROCESSING_ERROR', details);
     this.name = 'PDFProcessingError';
   }
 }
@@ -62,7 +62,7 @@ export class PDFProcessingError extends PDFError {
  */
 export class InvalidPDFError extends PDFError {
   constructor(message: string = 'Invalid or corrupted PDF file', details?: Record<string, unknown>) {
-    super(message, 'INVALID_PDF', 400, details);
+    super(message, 400, 'INVALID_PDF', details);
     this.name = 'InvalidPDFError';
   }
 }
@@ -73,7 +73,7 @@ export class InvalidPDFError extends PDFError {
  */
 export class AnnotationError extends PDFError {
   constructor(message: string = 'Annotation operation failed', details?: Record<string, unknown>) {
-    super(message, 'ANNOTATION_ERROR', 400, details);
+    super(message, 400, 'ANNOTATION_ERROR', details);
     this.name = 'AnnotationError';
   }
 }
@@ -84,7 +84,7 @@ export class AnnotationError extends PDFError {
  */
 export class PDFExportError extends PDFError {
   constructor(message: string = 'Failed to export PDF', details?: Record<string, unknown>) {
-    super(message, 'PDF_EXPORT_ERROR', 500, details);
+    super(message, 500, 'PDF_EXPORT_ERROR', details);
     this.name = 'PDFExportError';
   }
 }
@@ -95,7 +95,7 @@ export class PDFExportError extends PDFError {
  */
 export class PDFMergeError extends PDFError {
   constructor(message: string = 'Failed to merge PDF files', details?: Record<string, unknown>) {
-    super(message, 'PDF_MERGE_ERROR', 500, details);
+    super(message, 500, 'PDF_MERGE_ERROR', details);
     this.name = 'PDFMergeError';
   }
 }
@@ -106,7 +106,7 @@ export class PDFMergeError extends PDFError {
  */
 export class PDFSplitError extends PDFError {
   constructor(message: string = 'Failed to split PDF', details?: Record<string, unknown>) {
-    super(message, 'PDF_SPLIT_ERROR', 500, details);
+    super(message, 500, 'PDF_SPLIT_ERROR', details);
     this.name = 'PDFSplitError';
   }
 }
@@ -117,7 +117,7 @@ export class PDFSplitError extends PDFError {
  */
 export class PDFUploadError extends PDFError {
   constructor(message: string = 'Failed to upload PDF', details?: Record<string, unknown>) {
-    super(message, 'PDF_UPLOAD_ERROR', 400, details);
+    super(message, 400, 'PDF_UPLOAD_ERROR', details);
     this.name = 'PDFUploadError';
   }
 }
@@ -128,7 +128,7 @@ export class PDFUploadError extends PDFError {
  */
 export class PDFSizeError extends PDFError {
   constructor(message: string = 'PDF file size exceeds limit', details?: Record<string, unknown>) {
-    super(message, 'PDF_SIZE_ERROR', 413, details);
+    super(message, 413, 'PDF_SIZE_ERROR', details);
     this.name = 'PDFSizeError';
   }
 }
@@ -139,7 +139,7 @@ export class PDFSizeError extends PDFError {
  */
 export class PDFPageError extends PDFError {
   constructor(message: string = 'Invalid page number or operation', details?: Record<string, unknown>) {
-    super(message, 'PDF_PAGE_ERROR', 400, details);
+    super(message, 400, 'PDF_PAGE_ERROR', details);
     this.name = 'PDFPageError';
   }
 }
@@ -152,8 +152,8 @@ export class PDFProjectNotFoundError extends PDFError {
   constructor(projectId: string) {
     super(
       `PDF project not found: ${projectId}`,
-      'PDF_PROJECT_NOT_FOUND',
       404,
+      'PDF_PROJECT_NOT_FOUND',
       { projectId }
     );
     this.name = 'PDFProjectNotFoundError';
@@ -168,8 +168,8 @@ export class AnnotationNotFoundError extends PDFError {
   constructor(annotationId: string) {
     super(
       `Annotation not found: ${annotationId}`,
-      'ANNOTATION_NOT_FOUND',
       404,
+      'ANNOTATION_NOT_FOUND',
       { annotationId }
     );
     this.name = 'AnnotationNotFoundError';
@@ -182,7 +182,7 @@ export class AnnotationNotFoundError extends PDFError {
  */
 export class PDFCompressionError extends PDFError {
   constructor(message: string = 'Failed to compress PDF', details?: Record<string, unknown>) {
-    super(message, 'PDF_COMPRESSION_ERROR', 500, details);
+    super(message, 500, 'PDF_COMPRESSION_ERROR', details);
     this.name = 'PDFCompressionError';
   }
 }
@@ -193,7 +193,7 @@ export class PDFCompressionError extends PDFError {
  */
 export class PDFWatermarkError extends PDFError {
   constructor(message: string = 'Failed to add watermark to PDF', details?: Record<string, unknown>) {
-    super(message, 'PDF_WATERMARK_ERROR', 500, details);
+    super(message, 500, 'PDF_WATERMARK_ERROR', details);
     this.name = 'PDFWatermarkError';
   }
 }
@@ -206,8 +206,8 @@ export class UnsupportedPDFVersionError extends PDFError {
   constructor(version: string) {
     super(
       `Unsupported PDF version: ${version}`,
-      'UNSUPPORTED_PDF_VERSION',
       400,
+      'UNSUPPORTED_PDF_VERSION',
       { version }
     );
     this.name = 'UnsupportedPDFVersionError';
@@ -220,7 +220,7 @@ export class UnsupportedPDFVersionError extends PDFError {
  */
 export class PDFPermissionError extends PDFError {
   constructor(message: string = 'PDF is encrypted or password-protected', details?: Record<string, unknown>) {
-    super(message, 'PDF_PERMISSION_ERROR', 403, details);
+    super(message, 403, 'PDF_PERMISSION_ERROR', details);
     this.name = 'PDFPermissionError';
   }
 }
@@ -233,8 +233,8 @@ export class InvalidAnnotationTypeError extends PDFError {
   constructor(type: string) {
     super(
       `Invalid annotation type: ${type}`,
-      'INVALID_ANNOTATION_TYPE',
       400,
+      'INVALID_ANNOTATION_TYPE',
       { type }
     );
     this.name = 'InvalidAnnotationTypeError';
@@ -249,8 +249,8 @@ export class InvalidExportFormatError extends PDFError {
   constructor(format: string) {
     super(
       `Invalid export format: ${format}`,
-      'INVALID_EXPORT_FORMAT',
       400,
+      'INVALID_EXPORT_FORMAT',
       { format }
     );
     this.name = 'InvalidExportFormatError';
@@ -263,7 +263,7 @@ export class InvalidExportFormatError extends PDFError {
  */
 export class PDFStorageError extends PDFError {
   constructor(message: string = 'PDF storage operation failed', details?: Record<string, unknown>) {
-    super(message, 'PDF_STORAGE_ERROR', 500, details);
+    super(message, 500, 'PDF_STORAGE_ERROR', details);
     this.name = 'PDFStorageError';
   }
 }

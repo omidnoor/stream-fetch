@@ -14,7 +14,19 @@
       "Bash(find:*)",
       "Bash(git init:*)",
       "Bash(git config:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(ffmpeg:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfix: return highest quality thumbnail from YouTube API\n\n- Fixed thumbnail selection to return first thumbnail (highest quality) instead of last\n- Added support for snake_case video_details paths\n- Added comprehensive debug logging to track thumbnail sources\n- Handles multiple possible thumbnail locations from YouTube API\n\nResolves issue where lowest quality thumbnails were being returned.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(mkdir:*)",
+      "Bash(ls:*)",
+      "Bash(timeout:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nrefactor: clean up educational comments in editor services\n\nRemove verbose educational notes from editor service files for cleaner production code.\nService layer architecture and functionality remain unchanged.\n\nChanges:\n- Removed EDUCATIONAL NOTE comments from factory, mapper, repository, service, and validator\n- Core video editing functionality intact\n- All methods and patterns preserved\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(npx tsc:*)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []

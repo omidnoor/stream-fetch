@@ -189,19 +189,6 @@ export default function DashboardPage() {
           videoUrl={url}
         />
       )}
-
-      {/* Educational Note */}
-      {!videoInfo && (
-        <div className="rounded-lg border bg-card p-6">
-          <h3 className="text-sm font-semibold text-primary mb-2">
-            Educational Purpose
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            This application demonstrates how to overcome CORS restrictions through server-side proxying,
-            handle streaming data efficiently, and integrate with third-party APIs.
-          </p>
-        </div>
-      )}
     </div>
   )
 }

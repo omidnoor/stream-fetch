@@ -13,7 +13,7 @@ import {
   FFmpegNotFoundError,
   VideoProcessingError,
   ThumbnailGenerationError,
-} from "@/lib/errors/editor.errors.js";
+} from "@/lib/errors/editor.errors";
 import type {
   TrimOptions,
   ConcatenateOptions,
@@ -25,8 +25,8 @@ import type {
   FFmpegResult,
   ProgressInfo,
   QUALITY_PRESETS,
-} from "./ffmpeg.types.js";
-import type { VideoMetadata } from "../editor/editor.types.js";
+} from "./ffmpeg.types";
+import type { VideoMetadata } from "../editor/editor.types";
 
 export class FFmpegService {
   private ffmpegPath?: string;
@@ -297,8 +297,8 @@ export class FFmpegService {
     }
 
     // Import quality presets dynamically
-    const { QUALITY_PRESETS } = await import("./ffmpeg.types.js");
-    const qualityPreset = (QUALITY_PRESETS as typeof import("./ffmpeg.types.js").QUALITY_PRESETS)[settings.quality];
+    const { QUALITY_PRESETS } = await import("./ffmpeg.types");
+    const qualityPreset = (QUALITY_PRESETS as typeof import("./ffmpeg.types").QUALITY_PRESETS)[settings.quality];
 
     return new Promise(async (resolve, reject) => {
       try {

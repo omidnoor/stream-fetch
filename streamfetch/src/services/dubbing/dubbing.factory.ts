@@ -3,13 +3,6 @@
  *
  * Creates and manages DubbingService instances.
  * Implements singleton pattern for efficiency.
- *
- * EDUCATIONAL NOTE:
- * Factory Pattern - Centralizes object creation.
- * - Manages dependencies
- * - Provides singleton instances
- * - Makes testing easier (can reset for tests)
- * - Alternative to dependency injection containers
  */
 
 import { DubbingService } from './dubbing.service';

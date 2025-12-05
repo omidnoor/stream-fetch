@@ -1,13 +1,3 @@
-/**
- * EDUCATIONAL NOTE: TypeScript Types
- *
- * Defining types helps us:
- * - Catch errors at compile time instead of runtime
- * - Get better IDE autocomplete
- * - Document our data structures
- * - Ensure API consistency between frontend and backend
- */
-
 export interface VideoDetails {
   title: string
   thumbnail: string
@@ -41,18 +31,3 @@ export interface DownloadRequest {
   url: string
   itag?: number
 }
-
-/**
- * EDUCATIONAL NOTE: Type Safety Benefits
- *
- * With these types, TypeScript will:
- * - Warn us if we try to access a property that doesn't exist
- * - Ensure we handle both success and error cases
- * - Prevent typos in property names
- * - Make refactoring safer
- *
- * Example:
- * const response: VideoInfoResponse = await fetch(...)
- * response.data.video.title // ✅ TypeScript knows this exists
- * response.data.video.foo   // ❌ TypeScript error: property doesn't exist
- */

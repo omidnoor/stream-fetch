@@ -18,18 +18,18 @@ import type {
   VideoClip,
   TextOverlay,
   TimelineData,
-} from "./editor.types.js";
-import { EditorValidator } from "./editor.validator.js";
-import { EditorRepository } from "./editor.repository.js";
-import { EditorMapper } from "./editor.mapper.js";
-import { FFmpegService } from "../ffmpeg/ffmpeg.service.js";
-import type { CacheService } from "@/lib/cache/cache.interface.js";
+} from "./editor.types";
+import { EditorValidator } from "./editor.validator";
+import { EditorRepository } from "./editor.repository";
+import { EditorMapper } from "./editor.mapper";
+import { FFmpegService } from "../ffmpeg/ffmpeg.service";
+import type { CacheService } from "@/lib/cache/cache.interface";
 import {
   ProjectNotFoundError,
   InvalidProjectStateError,
   VideoProcessingError,
   FFmpegNotFoundError,
-} from "@/lib/errors/editor.errors.js";
+} from "@/lib/errors/editor.errors";
 
 /**
  * Main Editor Service
@@ -490,5 +490,58 @@ export class EditorService {
    */
   async cleanupTempFiles(): Promise<void> {
     await this.repository.cleanupOldFiles();
+  }
+
+  /**
+   * Validate video file before upload
+   *
+   * @param file File metadata to validate
+   * @throws InvalidVideoFileError if file is invalid
+   * @throws FileSizeExceededError if file is too large
+   * @throws UnsupportedFormatError if format is not supported
+   */
+  validateFile(file: { name: string; size: number; type?: string }): void {
+    this.validator.validateVideoFile(file);
+  }
+
+  /**
+   * Save uploaded video file to temp storage
+   *
+   * @param filename Original filename
+   * @param buffer File buffer
+   * @returns Path to saved file
+   * @throws StorageError if save fails
+   */
+  async saveUploadedFile(filename: string, buffer: Buffer): Promise<string> {
+    return this.repository.saveUploadedFile(filename, buffer);
+  }
+
+  /**
+   * Get video metadata for a file
+   *
+   * @param filePath Path to video file
+   * @returns Video metadata
+   */
+  async getVideoMetadata(filePath: string) {
+    return this.ffmpegService.getVideoMetadata(filePath);
+  }
+
+  /**
+   * Generate thumbnail for a video
+   *
+   * @param videoPath Path to video file
+   * @param outputPath Path to save thumbnail
+   * @param timeOffset Time offset in seconds (default 1)
+   */
+  async generateThumbnail(
+    videoPath: string,
+    outputPath: string,
+    timeOffset: number = 1
+  ) {
+    return this.ffmpegService.extractThumbnail({
+      inputPath: videoPath,
+      outputPath,
+      timestamp: timeOffset,
+    });
   }
 }

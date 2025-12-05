@@ -10,8 +10,8 @@ import path from "path";
 import {
   ProjectNotFoundError,
   StorageError,
-} from "@/lib/errors/editor.errors.js";
-import type { VideoProject } from "./editor.types.js";
+} from "@/lib/errors/editor.errors";
+import type { VideoProject } from "./editor.types";
 
 /**
  * In-memory storage for projects (temporary solution)

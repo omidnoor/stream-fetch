@@ -6,14 +6,6 @@ import { AllStrategiesFailedError, VideoNotFoundError } from '@/lib/errors/youtu
  *
  * Handles all direct communication with YouTube's API.
  * Implements multiple fallback strategies for reliability.
- *
- * EDUCATIONAL NOTE:
- * Repository Pattern - Isolates data access logic.
- * Makes it easy to:
- * - Mock for testing
- * - Switch to different data sources
- * - Implement caching at the data layer
- * - Add retry logic and fallbacks
  */
 export class YouTubeRepository {
   private readonly FALLBACK_CLIENTS = [

@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-StreamFetch is an educational YouTube downloader built with Next.js 16 (App Router). The project demonstrates CORS bypass patterns, streaming data handling, and modern web development practices. All code includes extensive educational comments marked with `EDUCATIONAL NOTE:` for teaching purposes.
+StreamFetch is a YouTube downloader built with Next.js 16 (App Router). The project demonstrates CORS bypass patterns, streaming data handling, and modern web development practices.
 
-**Important:** This is an educational project only. Respect YouTube's Terms of Service.
+**Important:** Respect YouTube's Terms of Service.
 
 ## Project Structure
 
@@ -156,20 +156,6 @@ This means `format.decipher()` wasn't awaited. The fix:
 
 Next.js automatically uses next available port (3001, 3002, etc.). Check terminal output for actual port.
 
-## Educational Comments Pattern
-
-All critical code sections include educational comments:
-
-```typescript
-/**
- * EDUCATIONAL NOTE: [Topic]
- *
- * Explanation of why/how/what
- */
-```
-
-When adding features, maintain this pattern to preserve the educational value.
-
 ## Technology Stack Context
 
 - **Next.js 16 App Router**: File-based routing, Server Components, API Routes
@@ -180,8 +166,8 @@ When adding features, maintain this pattern to preserve the educational value.
 
 ## Key Constraints
 
-1. **Educational Focus**: Code clarity over optimization
+1. **Code Clarity**: Maintain clear and readable code
 2. **Type Safety**: All functions properly typed
 3. **Streaming Architecture**: Never buffer entire videos in memory
 4. **Multi-Strategy**: Always provide fallback mechanisms
-5. **Legal Compliance**: Emphasize educational use only
+5. **Legal Compliance**: Respect YouTube's Terms of Service

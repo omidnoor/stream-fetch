@@ -5,12 +5,6 @@ import { CacheService } from './cache.interface';
  *
  * Simple cache for development/testing.
  * For production, use Redis or similar distributed cache.
- *
- * EDUCATIONAL NOTE:
- * - Data is stored in a Map (fast lookups)
- * - Each entry has an expiration timestamp
- * - Expired entries are cleaned up on access
- * - Not shared across instances (single-server only)
  */
 
 interface CacheEntry<T> {

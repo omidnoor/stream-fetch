@@ -4,7 +4,7 @@
  * Types and interfaces for FFmpeg video processing operations
  */
 
-import type { VideoMetadata, ExportSettings } from "../editor/editor.types.js";
+import type { VideoMetadata, ExportSettings } from "../editor/editor.types";
 
 /**
  * FFmpeg processing options

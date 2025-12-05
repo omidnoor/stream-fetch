@@ -68,8 +68,9 @@ export async function GET(
     // Convert stream to web stream
     const readableStream = new ReadableStream({
       async start(controller) {
-        fileStream.on("data", (chunk: Buffer) => {
-          controller.enqueue(new Uint8Array(chunk));
+        fileStream.on("data", (chunk) => {
+          const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+          controller.enqueue(new Uint8Array(buffer));
         });
         fileStream.on("end", () => {
           controller.close();

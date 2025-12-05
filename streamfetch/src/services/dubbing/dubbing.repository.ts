@@ -3,12 +3,6 @@
  *
  * Data access layer for ElevenLabs API.
  * Handles all direct API communication.
- *
- * EDUCATIONAL NOTE:
- * Repository Pattern - This class ONLY talks to external APIs.
- * - Abstracts away ElevenLabs SDK details
- * - Makes testing easier (can mock this layer)
- * - Centralizes API error handling
  */
 
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";

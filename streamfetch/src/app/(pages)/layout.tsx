@@ -1,6 +1,5 @@
 import { Sidebar } from "@/components/sidebar";
 import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 
 export default function PagesLayout({
@@ -25,9 +24,6 @@ export default function PagesLayout({
             {children}
           </div>
         </main>
-
-        {/* Footer */}
-        <Footer />
       </div>
     </div>
   );

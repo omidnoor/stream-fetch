@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 
 export default function YouTubeHistoryPage() {
   // Placeholder data - in a real app, this would come from a database or local storage
-  const downloadHistory = [
+  const downloadHistory: any[] = [
     // Empty for now - this will be implemented when we add persistence
   ]
 

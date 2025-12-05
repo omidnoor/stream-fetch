@@ -14,8 +14,8 @@ import {
   InvalidExportSettingsError,
   InvalidTextOverlayError,
   InvalidEffectError,
-} from "@/lib/errors/editor.errors.js";
-import { ValidationError } from "@/lib/errors/validation.error.js";
+} from "@/lib/errors/editor.errors";
+import { ValidationError } from "@/lib/errors/validation.error";
 import type {
   CreateProjectDto,
   UpdateProjectDto,

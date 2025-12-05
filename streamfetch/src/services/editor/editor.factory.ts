@@ -5,13 +5,13 @@
  * Implements singleton pattern for efficiency.
  */
 
-import { EditorService } from "./editor.service.js";
-import { EditorValidator } from "./editor.validator.js";
-import { EditorRepository } from "./editor.repository.js";
-import { EditorMapper } from "./editor.mapper.js";
-import { FFmpegService } from "../ffmpeg/ffmpeg.service.js";
-import { getCacheService } from "@/lib/cache/cache.factory.js";
-import type { EditorServiceOptions } from "./editor.types.js";
+import { EditorService } from "./editor.service";
+import { EditorValidator } from "./editor.validator";
+import { EditorRepository } from "./editor.repository";
+import { EditorMapper } from "./editor.mapper";
+import { FFmpegService } from "../ffmpeg/ffmpeg.service";
+import { getCacheService } from "@/lib/cache/cache.factory";
+import type { EditorServiceOptions } from "./editor.types";
 
 /**
  * Singleton instance of EditorService

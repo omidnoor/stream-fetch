@@ -7,7 +7,8 @@
  */
 
 import { PDFDocument, rgb, degrees, StandardFonts, PDFPage as PDFLibPage } from 'pdf-lib';
-import * as pdfjsLib from 'pdfjs-dist';
+// NOTE: PDF.js should only be used in client-side components for rendering
+// Server-side operations use pdf-lib only
 import type { PDFRepository } from './pdf.repository';
 import type {
   PDFProject,
@@ -30,8 +31,8 @@ import type {
   DrawingAnnotation,
   ShapeAnnotation,
   ImageAnnotation,
-  DEFAULT_PDF_SETTINGS,
 } from './pdf.types';
+import { DEFAULT_PDF_SETTINGS } from './pdf.types';
 import {
   validatePDFFile,
   validateProjectData,
@@ -54,13 +55,9 @@ import {
 } from '@/lib/errors/pdf.errors';
 
 /**
- * Configure PDF.js worker
- * Note: In a real implementation, you'd need to configure the worker path properly
+ * PDF.js is now only used in client-side components
+ * Server-side operations use pdf-lib only
  */
-if (typeof window === 'undefined') {
-  // Server-side configuration
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-}
 
 /**
  * PDF Service Class

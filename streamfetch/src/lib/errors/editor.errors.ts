@@ -5,7 +5,7 @@
  * Each error maps to an appropriate HTTP status code.
  */
 
-import { AppError } from "./base.error.js";
+import { AppError } from "./base.error";
 
 /**
  * Base error for all editor-related errors

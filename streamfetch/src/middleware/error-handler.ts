@@ -6,13 +6,6 @@ import { AppError } from '@/lib/errors/base.error';
  *
  * Converts errors into standardized JSON responses.
  * Handles both known application errors and unexpected errors.
- *
- * EDUCATIONAL NOTE:
- * Centralized error handling ensures:
- * - Consistent error response format
- * - Proper HTTP status codes
- * - No internal error details leaked to clients
- * - Easier debugging with structured logging
  */
 
 /**

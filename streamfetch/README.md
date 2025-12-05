@@ -1,10 +1,6 @@
-# StreamFetch - Educational YouTube Downloader
+# StreamFetch - YouTube Downloader
 
-An educational web application demonstrating modern web development concepts including CORS workarounds, streaming data handling, and API integration.
-
-## Purpose
-
-This project is built for **educational purposes only** to teach students about:
+A web application for downloading YouTube videos with support for multiple quality options, built with modern web technologies including CORS workarounds, streaming data handling, and API integration.
 
 - **CORS (Cross-Origin Resource Sharing)** and server-side proxying
 - **Streaming vs buffering** data
@@ -20,7 +16,6 @@ This project is built for **educational purposes only** to teach students about:
 - YouTube video metadata fetching
 - Multiple quality options for downloads
 - Video streaming through server proxy
-- Comprehensive educational comments throughout the codebase
 - Type-safe API with TypeScript
 
 ## Tech Stack
@@ -130,38 +125,27 @@ streamfetch/
 └── README.md
 ```
 
-## Key Learning Points
+## Technical Implementation
 
 ### 1. CORS Bypass ([app/api/video-info/route.ts](app/api/video-info/route.ts))
 
-Learn how server-side proxying solves CORS restrictions.
+Server-side proxying to solve CORS restrictions.
 
 ### 2. Streaming Data ([app/api/download/route.ts](app/api/download/route.ts))
 
-Understand the difference between buffering and streaming, and how to implement efficient data transfer.
+Efficient data transfer using streaming instead of buffering.
 
 ### 3. Type Safety ([lib/types.ts](lib/types.ts))
 
-See how TypeScript prevents bugs and improves developer experience.
+TypeScript for preventing bugs and improving developer experience.
 
 ### 4. Modern React Patterns ([app/page.tsx](app/page.tsx))
 
-Learn about React hooks, state management, and error handling.
+React hooks, state management, and error handling.
 
 ### 5. UI Components ([components/](components/))
 
-Explore component composition and reusable UI patterns.
-
-## Educational Comments
-
-Every critical section of code includes educational comments explaining:
-
-- **Why** we're doing something
-- **How** it works
-- **What** problems it solves
-- **Where** students can learn more
-
-Look for comments starting with `EDUCATIONAL NOTE:` throughout the codebase.
+Component composition and reusable UI patterns.
 
 ## Testing the Application
 
@@ -176,12 +160,11 @@ Look for comments starting with `EDUCATIONAL NOTE:` throughout the codebase.
 
 ### Legal & Terms of Service
 
-- This is for **educational purposes only**
 - Downloading YouTube videos may violate YouTube's Terms of Service
 - Only use with:
   - Your own uploaded content
   - Content with explicit download permission
-  - Educational/archival purposes where legally permitted
+  - Archival purposes where legally permitted
 
 ### Technical Limitations
 
@@ -192,7 +175,7 @@ Look for comments starting with `EDUCATIONAL NOTE:` throughout the codebase.
 
 ## Future Enhancements
 
-Students can extend this project by implementing:
+Potential features to implement:
 
 1. **Download Queue**: Manage multiple simultaneous downloads
 2. **Progress Tracking**: Real-time progress bars using Fetch API streaming
@@ -203,17 +186,17 @@ Students can extend this project by implementing:
 7. **Download History**: Track and manage past downloads with localStorage or database
 8. **Settings Panel**: Configure default quality, naming conventions, etc.
 
-## Learning Resources
+## Documentation
 
 - [Next.js Documentation](https://nextjs.org/docs)
-- [CORS Explained](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
+- [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
 - [Streams API](https://developer.mozilla.org/en-US/docs/Web/API/Streams_API)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [Tailwind CSS](https://tailwindcss.com/docs)
 
 ## Contributing
 
-This is an educational project. Feel free to fork and extend it for learning purposes!
+Contributions are welcome!
 
 ## License
 
@@ -221,8 +204,4 @@ MIT License - See LICENSE file for details
 
 ## Disclaimer
 
-This tool is for educational purposes only. Users are responsible for complying with all applicable laws and terms of service when using this software.
-
----
-
-Built with ❤️ for education
+Users are responsible for complying with all applicable laws and terms of service when using this software.

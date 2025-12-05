@@ -4,11 +4,6 @@ import { VideoInfoDto, FormatDto } from './youtube.types';
  * YouTube Data Mapper
  *
  * Transforms raw YouTube API responses into our application DTOs.
- *
- * EDUCATIONAL NOTE:
- * - Isolates data transformation logic
- * - Handles different response formats from different YouTube clients
- * - Makes it easy to change internal data structures without affecting external APIs
  */
 export class YouTubeMapper {
   /**

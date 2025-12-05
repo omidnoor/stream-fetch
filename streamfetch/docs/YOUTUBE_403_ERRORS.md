@@ -1,4 +1,4 @@
-# Understanding YouTube 403 Errors - Educational Guide
+# Understanding YouTube 403 Errors
 
 ## What is a 403 Error?
 
@@ -22,11 +22,11 @@ This is an ongoing battle:
 Download Tool → Works → YouTube Updates → Tool Breaks → Tool Updates → Works Again
 ```
 
-## Educational Lessons
+## Key Considerations
 
-### Lesson 1: API Stability is Not Guaranteed
+### 1. API Stability is Not Guaranteed
 
-**Key Takeaway**: Third-party integrations can break at any time.
+**Key Point**: Third-party integrations can break at any time.
 
 When you build applications that depend on external services:
 - The service can change without notice
@@ -41,9 +41,9 @@ const videoStream = ytdl(url) // ✅ Works today
 const videoStream = ytdl(url) // ❌ 403 Error tomorrow
 ```
 
-### Lesson 2: Library Maintenance Matters
+### 2. Library Maintenance Matters
 
-**Key Takeaway**: Dependencies need regular updates and choosing actively maintained libraries is critical.
+**Key Point**: Dependencies need regular updates and choosing actively maintained libraries is critical.
 
 **Important Update (2025)**: We migrated from `@distube/ytdl-core` to `youtubei.js`:
 - `@distube/ytdl-core` was **archived on August 16, 2025** and is no longer maintained
@@ -57,9 +57,9 @@ npm outdated
 npm update youtubei.js
 ```
 
-### Lesson 3: Error Handling is Critical
+### 3. Error Handling is Critical
 
-**Key Takeaway**: Always expect failures.
+**Key Point**: Always expect failures.
 
 ```typescript
 try {
@@ -72,16 +72,15 @@ try {
 }
 ```
 
-### Lesson 4: Terms of Service Matter
+### 4. Terms of Service Matter
 
-**Key Takeaway**: Legal and ethical considerations.
+**Key Point**: Legal and ethical considerations.
 
 - YouTube prohibits unauthorized downloads
-- Building this for education is acceptable
-- Using it at scale or commercially is not
+- Using at scale or commercially is prohibited
 - Respecting ToS builds trust with platforms
 
-## Common Workarounds (Educational Purpose)
+## Common Workarounds
 
 ### 1. Use Actively Maintained Libraries ✅ **Our Current Approach**
 ```bash

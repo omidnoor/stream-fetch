@@ -3,13 +3,6 @@
  *
  * Main service for ElevenLabs dubbing operations.
  * Orchestrates validation, API calls, and data transformation.
- *
- * EDUCATIONAL NOTE:
- * Service Pattern - Business logic lives here.
- * - Coordinates between validator, repository, and mapper
- * - Implements caching strategy (optional)
- * - Provides clean API for consumers
- * - Easy to test with mocked dependencies
  */
 
 import {

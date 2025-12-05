@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 
 export default function DubbingJobsPage() {
   // Placeholder data - in a real app, this would come from a backend API
-  const dubbingJobs = [
+  const dubbingJobs: any[] = [
     // Empty for now - will be populated when users create dubbing jobs
   ]
 

@@ -2,12 +2,6 @@
  * Dubbing Mapper
  *
  * Transforms raw ElevenLabs API responses to application DTOs.
- *
- * EDUCATIONAL NOTE:
- * Mapper Pattern - Converts external API shapes to our internal DTOs.
- * - Isolates API response format changes
- * - Provides consistent data structure
- * - Makes DTO changes easier
  */
 
 import {

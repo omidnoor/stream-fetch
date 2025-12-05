@@ -1,43 +1,8 @@
-# YouTube Streaming Download Webapp - Educational Project Plan
+# YouTube Streaming Download Webapp - Project Plan
 
 ## Project Overview
 
-An educational web application built with Next.js 15 and TypeScript that demonstrates how to overcome CORS restrictions, handle streaming data, and work with third-party APIs. Students will learn real-world techniques for downloading and streaming video content from YouTube.
-
-**Purpose**: Educational only - Teaching students about:
-- CORS (Cross-Origin Resource Sharing) and how to handle it
-- Server-side proxying patterns
-- Streaming data handling
-- API integration challenges
-- Modern web architecture patterns
-
----
-
-## Educational Objectives
-
-### Key Learning Points for Students
-
-1. **Understanding CORS**
-   - Why browsers block direct YouTube access
-   - Same-origin policy
-   - How server-side proxying bypasses CORS
-   - When CORS is a security feature vs. a hurdle
-
-2. **Streaming Architecture**
-   - Difference between buffering and streaming
-   - Chunked transfer encoding
-   - Server-Sent Events (SSE) vs WebSockets
-   - Progress tracking during downloads
-
-3. **Backend/Frontend Separation**
-   - Why certain operations must happen server-side
-   - API route design in Next.js
-   - Request/response flow
-
-4. **Error Handling**
-   - Graceful degradation
-   - User feedback mechanisms
-   - Handling rate limits and blocks
+A web application built with Next.js 15 and TypeScript that demonstrates how to overcome CORS restrictions, handle streaming data, and work with third-party APIs.
 
 ---
 
@@ -138,9 +103,9 @@ youtube-downloader/
 │   ├── stream-utils.ts               # Streaming utilities
 │   └── types.ts                      # TypeScript interfaces
 ├── docs/
-│   ├── CORS_EXPLANATION.md           # Educational: CORS concepts
-│   ├── STREAMING_GUIDE.md            # Educational: Streaming patterns
-│   └── API_DESIGN.md                 # Educational: API architecture
+│   ├── CORS_EXPLANATION.md           # CORS concepts
+│   ├── STREAMING_GUIDE.md            # Streaming patterns
+│   └── API_DESIGN.md                 # API architecture
 ├── package.json
 ├── tsconfig.json
 ├── tailwind.config.ts
@@ -217,15 +182,7 @@ youtube-downloader/
 - Implement backpressure handling
 - Error recovery
 
-### Phase 5: Educational Documentation
-
-#### Create Learning Materials:
-1. **CORS_EXPLANATION.md**: Deep dive into CORS
-2. **STREAMING_GUIDE.md**: Streaming vs downloading patterns
-3. **API_DESIGN.md**: Why this architecture works
-4. **Inline code comments**: Explain every critical section
-
-### Phase 6: Error Handling & Polish
+### Phase 5: Error Handling & Polish
 
 - Handle rate limiting
 - Handle unavailable videos
@@ -368,25 +325,6 @@ Headers:
 
 ---
 
-## Educational Code Comments Strategy
-
-Every critical section will include comments like:
-
-```typescript
-/**
- * EDUCATIONAL NOTE: CORS Bypass
- *
- * Why this works:
- * - Browser blocks client → YouTube (CORS)
- * - Server → YouTube allowed (no browser enforcement)
- * - We proxy the request through our server
- *
- * Flow: Client → Our API → YouTube → Our API → Client
- */
-```
-
----
-
 ## Testing Strategy
 
 1. **Manual Testing Checklist**:
@@ -396,12 +334,6 @@ Every critical section will include comments like:
    - [ ] Different quality options
    - [ ] Long videos (>1 hour)
    - [ ] Network interruption handling
-
-2. **Student Exercises**:
-   - Inspect network tab during download
-   - Compare client-side vs server-side requests
-   - Measure memory usage during streaming
-   - Modify code to break CORS bypass (learning by breaking)
 
 ---
 
@@ -418,12 +350,6 @@ Every critical section will include comments like:
 
 ## Security & Legal Considerations
 
-### For Educational Use:
-- Add prominent disclaimer about ToS
-- Limit to educational content
-- Don't deploy publicly without proper authorization
-- Teach students about responsible use
-
 ### Code Security:
 - Validate all inputs
 - Sanitize URLs
@@ -438,22 +364,20 @@ Every critical section will include comments like:
 - **Phase 2 (Backend)**: ~2-3 hours
 - **Phase 3 (Frontend)**: ~2-3 hours
 - **Phase 4 (Streaming)**: ~2-4 hours
-- **Phase 5 (Documentation)**: ~1-2 hours
-- **Phase 6 (Polish)**: ~1-2 hours
+- **Phase 5 (Polish)**: ~1-2 hours
 
-**Total**: ~8-15 hours for complete implementation with full documentation
+**Total**: ~6-11 hours for complete implementation
 
 ---
 
 ## Success Criteria
 
-Students should be able to:
-1. ✅ Explain why CORS exists and how we bypass it
-2. ✅ Understand client-server architecture
-3. ✅ Work with streaming data
-4. ✅ Handle API errors gracefully
-5. ✅ Read and understand TypeScript code
-6. ✅ Deploy a Next.js application
+1. ✅ CORS bypass is working correctly
+2. ✅ Client-server architecture is properly implemented
+3. ✅ Streaming data functionality works
+4. ✅ API errors are handled gracefully
+5. ✅ TypeScript types are properly defined
+6. ✅ Application is deployable
 
 ---
 
@@ -462,7 +386,7 @@ Students should be able to:
 1. Review this plan
 2. Confirm technical approach
 3. Begin Phase 1: Project setup
-4. Iterative development with student feedback
+4. Iterative development and testing
 
 ---
 

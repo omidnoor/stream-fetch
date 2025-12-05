@@ -9,14 +9,6 @@ import { getCacheService } from '@/lib/cache/cache.factory';
  *
  * Creates and manages YouTubeService instances.
  * Implements singleton pattern to reuse service instances.
- *
- * EDUCATIONAL NOTE:
- * Factory Pattern - Centralizes object creation.
- * Benefits:
- * - Single place to configure dependencies
- * - Easy to swap implementations
- * - Singleton pattern for efficiency
- * - Easy to reset for testing
  */
 
 let youtubeServiceInstance: YouTubeService | null = null;

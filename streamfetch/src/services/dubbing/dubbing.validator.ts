@@ -3,10 +3,6 @@
  *
  * Validates input for dubbing operations.
  * Throws typed errors for invalid input.
- *
- * EDUCATIONAL NOTE:
- * Single Responsibility - This class ONLY validates input.
- * No business logic, no API calls, just validation.
  */
 
 import { InvalidLanguageError, InvalidSourceUrlError } from '@/lib/errors/dubbing.errors';
