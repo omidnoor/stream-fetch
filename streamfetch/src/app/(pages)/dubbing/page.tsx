@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { Search, ArrowRight, AlertCircle, List, Languages } from "lucide-react"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
@@ -8,8 +9,19 @@ import { Button } from "@/components/ui/button"
 import { DubbingCard } from "@/components/dubbing-card"
 
 export default function DubbingPage() {
+  const searchParams = useSearchParams()
+  const urlParam = searchParams.get("url")
+
   const [url, setUrl] = useState("")
   const [showDubbingCard, setShowDubbingCard] = useState(false)
+
+  // Pre-fill URL from query params
+  useEffect(() => {
+    if (urlParam) {
+      setUrl(urlParam)
+      setShowDubbingCard(true)
+    }
+  }, [urlParam])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

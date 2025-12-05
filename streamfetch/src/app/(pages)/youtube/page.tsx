@@ -130,6 +130,8 @@ export default function YouTubePage() {
             formats={videoInfo.data.formats}
             onDownload={handleDownload}
             downloading={downloading}
+            videoUrl={url}
+            showCrossFeatureButtons={false}
           />
 
           {/* Dubbing Card */}

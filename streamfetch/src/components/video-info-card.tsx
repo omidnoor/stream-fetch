@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { Download, Clock, Eye, User } from "lucide-react"
+import Link from "next/link"
+import { Download, Clock, Eye, User, Languages, Film } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { VideoDetails, VideoFormat } from "@/lib/types"
 
@@ -11,16 +12,13 @@ interface VideoInfoCardProps {
   formats: VideoFormat[]
   onDownload: (itag: number, quality: string) => void
   downloading: boolean
+  videoUrl?: string
+  showCrossFeatureButtons?: boolean
 }
 
-export function VideoInfoCard({ video, formats, onDownload, downloading }: VideoInfoCardProps) {
+export function VideoInfoCard({ video, formats, onDownload, downloading, videoUrl, showCrossFeatureButtons = true }: VideoInfoCardProps) {
   const [selectedFormat, setSelectedFormat] = useState<VideoFormat | null>(formats[0] || null)
 
-  /**
-   * EDUCATIONAL NOTE: Time Formatting
-   *
-   * Converting seconds to a readable format (HH:MM:SS or MM:SS)
-   */
   const formatDuration = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600)
     const mins = Math.floor((seconds % 3600) / 60)
@@ -32,21 +30,10 @@ export function VideoInfoCard({ video, formats, onDownload, downloading }: Video
     return `${mins}:${secs.toString().padStart(2, "0")}`
   }
 
-  /**
-   * EDUCATIONAL NOTE: Number Formatting
-   *
-   * Format large numbers with commas for readability
-   * e.g., 1000000 → "1,000,000"
-   */
   const formatViews = (views: string) => {
     return parseInt(views).toLocaleString()
   }
 
-  /**
-   * EDUCATIONAL NOTE: File Size Formatting
-   *
-   * Convert bytes to human-readable format (MB, GB)
-   */
   const formatFileSize = (bytes: number | null) => {
     if (!bytes) return "Unknown"
 
@@ -110,13 +97,6 @@ export function VideoInfoCard({ video, formats, onDownload, downloading }: Video
       <div className="rounded-lg border border-gray-800 bg-card p-6 space-y-4">
         <h3 className="text-lg font-semibold text-white">Select Quality</h3>
 
-        {/**
-         * EDUCATIONAL NOTE: Format Selection UI
-         *
-         * We show all video formats with quality indicators.
-         * Formats with audio are ready to play immediately.
-         * Video-only formats can be downloaded but need audio merging.
-         */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {formats.map((format, index) => (
             <button
@@ -197,15 +177,28 @@ export function VideoInfoCard({ video, formats, onDownload, downloading }: Video
           {downloading ? "Downloading..." : "Download Video"}
         </Button>
 
-        {/**
-         * EDUCATIONAL NOTE: Why This UI Pattern?
-         *
-         * We separate fetching metadata from downloading:
-         * 1. Show user what's available before committing to download
-         * 2. Let user choose quality (save bandwidth)
-         * 3. Display file size estimate (user can make informed choice)
-         * 4. Better UX - user sees options before waiting for download
-         */}
+        {/* Cross-Feature Action Buttons */}
+        {showCrossFeatureButtons && videoUrl && (
+          <div className="pt-4 border-t">
+            <p className="text-sm text-muted-foreground mb-3">
+              What would you like to do next?
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Button variant="outline" size="sm" className="gap-2" asChild>
+                <Link href={`/dubbing?url=${encodeURIComponent(videoUrl)}`}>
+                  <Languages className="h-4 w-4" />
+                  Dub to Another Language
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" className="gap-2" asChild>
+                <Link href="/studio/editor">
+                  <Film className="h-4 w-4" />
+                  Edit in Studio
+                </Link>
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
