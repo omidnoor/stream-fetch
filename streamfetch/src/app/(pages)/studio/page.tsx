@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { FolderOpen, Plus, Trash2, Edit, Clock } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 
 interface Project {
   id: string
@@ -56,12 +57,13 @@ export default function StudioPage() {
 
       if (response.ok) {
         setProjects(projects.filter((p) => p.id !== projectId))
+        toast.success("Project deleted successfully")
       } else {
-        alert("Failed to delete project")
+        toast.error("Failed to delete project")
       }
     } catch (err) {
       console.error("Error deleting project:", err)
-      alert("Failed to delete project")
+      toast.error("Failed to delete project")
     }
   }
 

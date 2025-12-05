@@ -1,10 +1,45 @@
 "use client"
 
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Film, Upload, Plus, FolderOpen } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 
 export default function EditorPage() {
+  const router = useRouter()
+  const [creating, setCreating] = useState(false)
+
+  const handleCreateProject = async () => {
+    setCreating(true)
+    try {
+      const response = await fetch("/api/editor/project", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: `New Project ${new Date().toLocaleDateString()}`,
+          description: "Created from video editor",
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.success && data.data) {
+        toast.success("Project created successfully!")
+        // Navigate to the new project editor
+        router.push(`/studio/editor/${data.data.id}`)
+      } else {
+        toast.error("Failed to create project")
+      }
+    } catch (error) {
+      console.error("Error creating project:", error)
+      toast.error("Failed to create project")
+    } finally {
+      setCreating(false)
+    }
+  }
+
   return (
     <div className="w-full space-y-8">
       {/* Header */}
@@ -29,21 +64,25 @@ export default function EditorPage() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Create New Project */}
-        <div className="rounded-lg border bg-card p-8 hover:border-primary hover:bg-card/80 transition-all cursor-pointer group">
+        <button
+          onClick={handleCreateProject}
+          disabled={creating}
+          className="rounded-lg border bg-card p-8 hover:border-primary hover:bg-card/80 transition-all cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           <div className="flex flex-col items-center text-center gap-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
               <Plus className="h-8 w-8 text-primary" />
             </div>
             <div>
               <h3 className="text-xl font-semibold mb-2">
-                Create New Project
+                {creating ? "Creating..." : "Create New Project"}
               </h3>
               <p className="text-sm text-muted-foreground">
                 Start a new video editing project from scratch
               </p>
             </div>
           </div>
-        </div>
+        </button>
 
         {/* Upload Video */}
         <div className="rounded-lg border bg-card p-8 hover:border-purple-500 hover:bg-card/80 transition-all cursor-pointer group">
