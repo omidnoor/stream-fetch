@@ -3,12 +3,6 @@
  *
  * Data access layer for video editor projects.
  * Handles all data persistence operations.
- *
- * EDUCATIONAL NOTE:
- * Repository Pattern - This class ONLY handles data storage/retrieval.
- * - Currently uses in-memory storage
- * - Can be easily swapped for database implementation
- * - Abstracts storage details from business logic
  */
 
 import { promises as fs } from "fs";

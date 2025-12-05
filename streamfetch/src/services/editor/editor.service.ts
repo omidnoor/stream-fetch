@@ -3,13 +3,6 @@
  *
  * Main service for video editing operations.
  * Orchestrates validation, storage, FFmpeg operations, and data transformation.
- *
- * EDUCATIONAL NOTE:
- * Service Pattern - Business logic lives here.
- * - Coordinates between validator, repository, mapper, and FFmpeg service
- * - Implements project management and video processing
- * - Provides clean API for consumers
- * - Easy to test with mocked dependencies
  */
 
 import { v4 as uuidv4 } from "uuid";

@@ -2,12 +2,6 @@
  * Editor Mapper
  *
  * Transforms internal project data to DTOs and vice versa.
- *
- * EDUCATIONAL NOTE:
- * Mapper Pattern - Converts between internal models and DTOs.
- * - Isolates internal data structure changes
- * - Provides consistent API responses
- * - Makes refactoring easier
  */
 
 import type {
