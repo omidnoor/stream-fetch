@@ -4,31 +4,70 @@
 
 @layer base {
   :root {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 263 70% 60%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 263 70% 60%;
+    /* ===========================================
+       SINGLE SOURCE OF TRUTH - Raycast-inspired
+       Warm coral/amber on premium dark
+       Change colors HERE only
+       =========================================== */
+
+    /* Core palette */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Brand colors - Coral/Orange */
+    --primary: 12 90% 64%;
+    --primary-foreground: 0 0% 0%;
+    --accent: 24 95% 58%;
+    --accent-foreground: 0 0% 0%;
+
+    /* Secondary/muted */
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 60%;
+
+    /* Feedback colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --success: 142 76% 46%;
+    --warning: 38 92% 50%;
+    --info: 199 89% 48%;
+
+    /* Borders & inputs */
+    --border: 0 0% 15%;
+    --input: 0 0% 12%;
+    --ring: 12 90% 64%;
+
+    /* Surface hierarchy (dark to light) */
+    --surface-0: 0 0% 2%;
+    --surface-1: 0 0% 4%;
+    --surface-2: 0 0% 7%;
+    --surface-3: 0 0% 11%;
+    --surface-4: 0 0% 15%;
+
+    /* Gradient stops - warm coral to amber */
+    --gradient-start: 12 90% 64%;
+    --gradient-mid: 24 95% 58%;
+    --gradient-end: 38 92% 50%;
+
+    /* Feature colors (for cards, icons, etc.) */
+    --feature-1: 12 90% 64%;
+    --feature-2: 38 92% 50%;
+    --feature-3: 142 76% 46%;
+
+    /* Misc */
     --radius: 0.5rem;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+
+    /* Charts */
+    --chart-1: 12 90% 64%;
+    --chart-2: 38 92% 50%;
+    --chart-3: 142 76% 46%;
+    --chart-4: 199 89% 48%;
+    --chart-5: 270 70% 60%;
   }
 }
 
@@ -42,4 +81,79 @@
       'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
       sans-serif;
   }
+}
+
+/* PDF.js Text Layer Styles - Required for text selection */
+.textLayer {
+  position: absolute;
+  text-align: initial;
+  inset: 0;
+  overflow: hidden;
+  opacity: 1;
+  line-height: 1;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  z-index: 2;
+}
+
+.textLayer :is(span, br) {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+}
+
+.textLayer span.markedContent {
+  top: 0;
+  height: 0;
+}
+
+.textLayer .highlight {
+  margin: -1px;
+  padding: 1px;
+  background-color: rgb(180 0 170 / 0.25);
+  border-radius: 4px;
+}
+
+.textLayer .highlight.appended {
+  position: initial;
+}
+
+.textLayer .highlight.begin {
+  border-radius: 4px 0 0 4px;
+}
+
+.textLayer .highlight.end {
+  border-radius: 0 4px 4px 0;
+}
+
+.textLayer .highlight.middle {
+  border-radius: 0;
+}
+
+.textLayer .highlight.selected {
+  background-color: rgb(0 100 0 / 0.25);
+}
+
+.textLayer ::selection {
+  background: rgb(0 0 255 / 0.25);
+}
+
+.textLayer br::selection {
+  background: transparent;
+}
+
+.textLayer .endOfContent {
+  display: block;
+  position: absolute;
+  inset: 100% 0 0;
+  z-index: -1;
+  cursor: default;
+  user-select: none;
+}
+
+.textLayer .endOfContent.active {
+  top: 0;
 }

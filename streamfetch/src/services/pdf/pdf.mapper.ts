@@ -24,6 +24,7 @@ export function mapToProjectDto(project: PDFProject): PDFProjectDto {
     pageCount: project.metadata.pageCount,
     fileSize: project.metadata.fileSize,
     annotationCount: project.annotations.length,
+    fileUrl: project.fileData || undefined,
     createdAt: project.createdAt.toISOString(),
     updatedAt: project.updatedAt.toISOString(),
   };

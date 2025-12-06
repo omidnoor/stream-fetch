@@ -24,7 +24,7 @@ export function Hero() {
             <div className="space-y-4">
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
                 Download, Dub, and Edit{" "}
-                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-gradient-start via-gradient-mid to-gradient-end bg-clip-text text-transparent">
                   Videos with AI
                 </span>
               </h1>
@@ -89,7 +89,7 @@ export function Hero() {
                 {/* Mock Editor Interface */}
                 <div className="space-y-4">
                   {/* Video Preview Area */}
-                  <div className="aspect-video rounded-lg bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                  <div className="aspect-video rounded-lg bg-gradient-to-br from-feature-1/20 via-feature-2/20 to-feature-3/20 flex items-center justify-center">
                     <div className="rounded-full bg-background/90 p-6 shadow-lg">
                       <Film className="h-12 w-12 text-primary" />
                     </div>
@@ -99,9 +99,9 @@ export function Hero() {
                   <div className="space-y-2">
                     <div className="h-16 rounded-lg border bg-muted/50">
                       <div className="flex h-full items-center gap-2 px-3">
-                        <div className="h-10 w-20 rounded bg-blue-500/20"></div>
-                        <div className="h-10 w-32 rounded bg-purple-500/20"></div>
-                        <div className="h-10 w-24 rounded bg-pink-500/20"></div>
+                        <div className="h-10 w-20 rounded bg-feature-1/20"></div>
+                        <div className="h-10 w-32 rounded bg-feature-2/20"></div>
+                        <div className="h-10 w-24 rounded bg-feature-3/20"></div>
                       </div>
                     </div>
                   </div>
@@ -111,8 +111,8 @@ export function Hero() {
               {/* Floating Feature Cards */}
               <div className="absolute -left-6 top-1/4 hidden rounded-lg border bg-background p-3 shadow-lg lg:block">
                 <div className="flex items-center gap-2">
-                  <div className="rounded-lg bg-blue-500/10 p-2">
-                    <Download className="h-4 w-4 text-blue-600" />
+                  <div className="rounded-lg bg-feature-1/10 p-2">
+                    <Download className="h-4 w-4 text-feature-1" />
                   </div>
                   <div>
                     <div className="text-xs font-semibold">Download</div>
@@ -125,8 +125,8 @@ export function Hero() {
 
               <div className="absolute -right-6 top-1/3 hidden rounded-lg border bg-background p-3 shadow-lg lg:block">
                 <div className="flex items-center gap-2">
-                  <div className="rounded-lg bg-purple-500/10 p-2">
-                    <Languages className="h-4 w-4 text-purple-600" />
+                  <div className="rounded-lg bg-feature-2/10 p-2">
+                    <Languages className="h-4 w-4 text-feature-2" />
                   </div>
                   <div>
                     <div className="text-xs font-semibold">AI Dubbing</div>
@@ -139,8 +139,8 @@ export function Hero() {
 
               <div className="absolute -bottom-4 right-12 hidden rounded-lg border bg-background p-3 shadow-lg lg:block">
                 <div className="flex items-center gap-2">
-                  <div className="rounded-lg bg-pink-500/10 p-2">
-                    <Film className="h-4 w-4 text-pink-600" />
+                  <div className="rounded-lg bg-feature-3/10 p-2">
+                    <Film className="h-4 w-4 text-feature-3" />
                   </div>
                   <div>
                     <div className="text-xs font-semibold">Edit</div>
@@ -157,8 +157,8 @@ export function Hero() {
 
       {/* Background Decorations */}
       <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-full w-full -translate-x-1/2">
-        <div className="absolute left-1/4 top-0 h-96 w-96 rounded-full bg-blue-500/5 blur-3xl"></div>
-        <div className="absolute right-1/4 top-1/4 h-96 w-96 rounded-full bg-purple-500/5 blur-3xl"></div>
+        <div className="absolute left-1/4 top-0 h-96 w-96 rounded-full bg-feature-1/5 blur-3xl"></div>
+        <div className="absolute right-1/4 top-1/4 h-96 w-96 rounded-full bg-feature-2/5 blur-3xl"></div>
       </div>
     </section>
   );

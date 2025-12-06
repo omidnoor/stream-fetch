@@ -2,7 +2,7 @@
 
 ## 📊 Quick Status
 
-**Overall Progress**: ~50% Complete (Phase 0-4 Complete)
+**Overall Progress**: ~60% Complete (Phase 0-5 Complete)
 
 | Phase | Status | Progress |
 |-------|--------|----------|
@@ -11,7 +11,8 @@
 | Phase 2: API Routes | ✅ Complete | 100% |
 | Phase 3: UI Components | ✅ Complete | 100% |
 | Phase 4: Pages & Routing | ✅ Complete | 100% |
-| Phase 5: Integration & Features | ⏳ Pending | 0% |
+| Phase 5: PDF.js Viewer Integration | ✅ Complete | 100% |
+| Phase 6: Annotation Tools | ⏳ Pending | 0% |
 
 ---
 

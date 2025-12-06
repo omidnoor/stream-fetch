@@ -26,7 +26,17 @@
       "Bash(timeout:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nrefactor: clean up educational comments in editor services\n\nRemove verbose educational notes from editor service files for cleaner production code.\nService layer architecture and functionality remain unchanged.\n\nChanges:\n- Removed EDUCATIONAL NOTE comments from factory, mapper, repository, service, and validator\n- Core video editing functionality intact\n- All methods and patterns preserved\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(npx tsc:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(dir:*)",
+      "Bash(timeout 120 npm run build:*)",
+      "Bash(touch:*)",
+      "Bash(head:*)",
+      "Bash(npm ls:*)",
+      "Bash(curl:*)",
+      "Bash(npm pkg set:*)",
+      "Bash(taskkill:*)",
+      "Bash(npm test:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

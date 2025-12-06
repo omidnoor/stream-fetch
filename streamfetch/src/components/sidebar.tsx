@@ -18,10 +18,10 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <div className="flex h-screen w-64 flex-col bg-[#0f0f0f] border-r border-gray-800">
+    <div className="flex h-screen w-64 flex-col bg-surface-1 border-r border-border">
       {/* Logo */}
-      <div className="flex h-16 items-center gap-3 px-6 border-b border-gray-800">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
+      <div className="flex h-16 items-center gap-3 px-6 border-b border-border">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-gradient-start to-gradient-end">
           <span className="text-lg font-bold text-white">S</span>
         </div>
         <span className="text-xl font-semibold text-white">StreamFetch</span>
@@ -40,7 +40,7 @@ export function Sidebar() {
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
                   ? "bg-primary/10 text-primary"
-                  : "text-gray-400 hover:bg-gray-800/50 hover:text-gray-300"
+                  : "text-muted-foreground hover:bg-surface-3/50 hover:text-foreground"
               )}
             >
               <item.icon className="h-5 w-5" />
@@ -51,14 +51,14 @@ export function Sidebar() {
       </nav>
 
       {/* User Section */}
-      <div className="border-t border-gray-800 p-4">
+      <div className="border-t border-border p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-800 text-sm font-medium text-gray-300">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-3 text-sm font-medium text-muted-foreground">
             JD
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-white truncate">John Doe</p>
-            <p className="text-xs text-gray-400 truncate">Pro Plan</p>
+            <p className="text-xs text-muted-foreground truncate">Pro Plan</p>
           </div>
         </div>
       </div>

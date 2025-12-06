@@ -38,7 +38,7 @@ export default function HomePage() {
                 "No file size limits",
               ]}
               href="/youtube"
-              gradient="from-blue-500 to-blue-600"
+              gradient="from-feature-1 to-feature-1"
             />
 
             <FeatureCard
@@ -52,7 +52,7 @@ export default function HomePage() {
                 "Fast processing times",
               ]}
               href="/dubbing"
-              gradient="from-purple-500 to-purple-600"
+              gradient="from-feature-2 to-feature-2"
             />
 
             <FeatureCard
@@ -66,7 +66,7 @@ export default function HomePage() {
                 "Cloud project storage",
               ]}
               href="/studio"
-              gradient="from-pink-500 to-pink-600"
+              gradient="from-feature-3 to-feature-3"
             />
           </div>
         </div>
@@ -88,7 +88,7 @@ export default function HomePage() {
           <div className="grid gap-8 md:grid-cols-3">
             {/* Step 1 */}
             <div className="relative">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-xl font-bold text-white">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-feature-1 text-xl font-bold text-primary-foreground">
                 1
               </div>
               <h3 className="mb-2 text-xl font-bold">Download</h3>
@@ -99,7 +99,7 @@ export default function HomePage() {
 
             {/* Step 2 */}
             <div className="relative">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-purple-600 text-xl font-bold text-white">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-feature-2 text-xl font-bold text-primary-foreground">
                 2
               </div>
               <h3 className="mb-2 text-xl font-bold">Translate</h3>
@@ -110,7 +110,7 @@ export default function HomePage() {
 
             {/* Step 3 */}
             <div className="relative">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-pink-600 text-xl font-bold text-white">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-feature-3 text-xl font-bold text-primary-foreground">
                 3
               </div>
               <h3 className="mb-2 text-xl font-bold">Edit</h3>
@@ -123,7 +123,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="w-full bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 py-20 md:py-32">
+      <section className="w-full bg-gradient-to-br from-feature-1/10 via-feature-2/10 to-feature-3/10 py-20 md:py-32">
         <div className="container px-4 md:px-6">
           <div className="mx-auto max-w-[700px] text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">

@@ -128,7 +128,7 @@ export function DubbingCard({ videoUrl, videoDuration }: DubbingCardProps) {
   }
 
   return (
-    <div className="rounded-lg border border-gray-800 bg-card p-6 space-y-4">
+    <div className="rounded-lg border border-border bg-card p-6 space-y-4">
       <div className="flex items-center gap-2">
         <Languages className="h-5 w-5 text-primary" />
         <h3 className="text-lg font-semibold text-white">AI Video Dubbing</h3>
@@ -145,7 +145,7 @@ export function DubbingCard({ videoUrl, videoDuration }: DubbingCardProps) {
           value={targetLanguage}
           onChange={(e) => setTargetLanguage(e.target.value)}
           disabled={loading}
-          className="w-full rounded-md border border-gray-800 bg-gray-900 px-3 py-2 text-white focus:border-primary focus:outline-none"
+          className="w-full rounded-md border border-border bg-surface-1 px-3 py-2 text-foreground focus:border-primary focus:outline-none"
         >
           {languages.map((lang) => (
             <option key={lang.code} value={lang.code}>
@@ -166,7 +166,7 @@ export function DubbingCard({ videoUrl, videoDuration }: DubbingCardProps) {
 
       {/* Status/Error Messages */}
       {status && (
-        <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-3 text-sm text-blue-400">
+        <div className="rounded-lg bg-info/10 border border-info/20 p-3 text-sm text-info">
           {status}
         </div>
       )}

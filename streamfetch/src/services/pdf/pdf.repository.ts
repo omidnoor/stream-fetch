@@ -252,16 +252,20 @@ export class PDFRepository {
 }
 
 /**
- * Singleton instance
+ * Global storage that persists across Next.js API calls
+ * Using globalThis to maintain state in serverless environment
  */
-let repositoryInstance: PDFRepository | null = null;
+declare global {
+  // eslint-disable-next-line no-var
+  var __pdfRepository: PDFRepository | undefined;
+}
 
 /**
- * Get repository instance (singleton)
+ * Get repository instance (singleton with global persistence)
  */
 export function getPDFRepository(): PDFRepository {
-  if (!repositoryInstance) {
-    repositoryInstance = new PDFRepository();
+  if (!globalThis.__pdfRepository) {
+    globalThis.__pdfRepository = new PDFRepository();
   }
-  return repositoryInstance;
+  return globalThis.__pdfRepository;
 }

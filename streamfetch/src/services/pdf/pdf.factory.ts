@@ -9,25 +9,28 @@ import { PDFService } from './pdf.service';
 import { getPDFRepository } from './pdf.repository';
 
 /**
- * Singleton PDF service instance
+ * Global service instance that persists across Next.js API calls
  */
-let pdfServiceInstance: PDFService | null = null;
+declare global {
+  // eslint-disable-next-line no-var
+  var __pdfService: PDFService | undefined;
+}
 
 /**
- * Get PDF Service instance (singleton pattern)
+ * Get PDF Service instance (singleton pattern with global persistence)
  *
  * Creates a new PDF service if one doesn't exist, otherwise returns the existing instance.
- * This ensures that the same service instance is used throughout the application.
+ * Uses globalThis to persist across Next.js serverless API invocations.
  *
  * @returns PDFService instance
  */
 export function getPDFService(): PDFService {
-  if (!pdfServiceInstance) {
+  if (!globalThis.__pdfService) {
     const repository = getPDFRepository();
-    pdfServiceInstance = new PDFService(repository);
+    globalThis.__pdfService = new PDFService(repository);
   }
 
-  return pdfServiceInstance;
+  return globalThis.__pdfService;
 }
 
 /**
@@ -35,5 +38,5 @@ export function getPDFService(): PDFService {
  * Useful for testing or when you need to reinitialize the service
  */
 export function resetPDFService(): void {
-  pdfServiceInstance = null;
+  globalThis.__pdfService = undefined;
 }

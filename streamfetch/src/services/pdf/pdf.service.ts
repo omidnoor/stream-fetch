@@ -88,12 +88,21 @@ export class PDFService {
     // Generate pages data
     const pages = await this.generatePagesData(pdfDoc);
 
+    // Convert file to data URL for storage
+    let fileData: string | undefined;
+    if (file) {
+      const arrayBuffer = await file.arrayBuffer();
+      const base64 = Buffer.from(arrayBuffer).toString('base64');
+      fileData = `data:application/pdf;base64,${base64}`;
+    }
+
     // Create project
     const project: PDFProject = {
       id: generateId(),
       name,
       status: 'draft',
       originalFile: filePath || (file ? `temp/${generateFileName(name)}` : ''),
+      fileData,
       metadata,
       pages,
       annotations: [],

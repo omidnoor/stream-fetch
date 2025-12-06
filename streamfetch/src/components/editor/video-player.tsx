@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useRef, useCallback, useEffect } from "react"
-import ReactPlayer from "react-player"
-import { OnProgressProps } from "react-player/base"
+import ReactPlayerBase from "react-player"
 import {
   Play,
   Pause,
@@ -14,6 +13,47 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+
+// Extended types for ReactPlayer callbacks not included in v3 types
+interface ProgressState {
+  played: number
+  playedSeconds: number
+  loaded: number
+  loadedSeconds: number
+}
+
+interface ReactPlayerConfig {
+  file?: {
+    attributes?: Record<string, string>
+  }
+}
+
+// ReactPlayer v3 types are incomplete - define the props we actually use
+interface ExtendedReactPlayerProps {
+  ref?: (player: unknown) => void
+  url?: string
+  playing?: boolean
+  volume?: number
+  muted?: boolean
+  playbackRate?: number
+  width?: string | number
+  height?: string | number
+  onReady?: () => void
+  onProgress?: (state: ProgressState) => void
+  onDuration?: (duration: number) => void
+  onError?: (error: unknown) => void
+  config?: ReactPlayerConfig
+}
+
+// Cast ReactPlayer to include extended props
+const ReactPlayer = ReactPlayerBase as unknown as React.ComponentType<ExtendedReactPlayerProps>
+
+interface ReactPlayerInstance {
+  seekTo: (amount: number, type?: "seconds" | "fraction") => void
+  getCurrentTime: () => number
+  getSecondsLoaded: () => number
+  getDuration: () => number
+}
 
 interface VideoPlayerProps {
   url?: string
@@ -32,7 +72,7 @@ export function VideoPlayer({
   onSeek,
   className,
 }: VideoPlayerProps) {
-  const playerRef = useRef<ReactPlayer>(null)
+  const playerInstanceRef = useRef<ReactPlayerInstance | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [playing, setPlaying] = useState(false)
   const [volume, setVolume] = useState(0.8)
@@ -70,17 +110,13 @@ export function VideoPlayer({
     setSeeking(true)
   }, [])
 
-  const handleSeekMouseUp = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSeeking(false)
-      const newValue = parseFloat(e.target.value)
-      playerRef.current?.seekTo(newValue)
-      if (onSeek) {
-        onSeek(newValue * duration)
-      }
-    },
-    [duration, onSeek]
-  )
+  const handleSeekMouseUp = useCallback(() => {
+    setSeeking(false)
+    playerInstanceRef.current?.seekTo(played)
+    if (onSeek) {
+      onSeek(played * duration)
+    }
+  }, [duration, onSeek, played])
 
   // Handle volume
   const handleVolumeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,7 +163,7 @@ export function VideoPlayer({
 
   // Handle progress
   const handleProgress = useCallback(
-    (state: OnProgressProps) => {
+    (state: ProgressState) => {
       if (!seeking) {
         setPlayed(state.played)
         setPlayedSeconds(state.playedSeconds)
@@ -163,7 +199,7 @@ export function VideoPlayer({
   }, [onReady])
 
   // Handle error
-  const handleError = useCallback((err: any) => {
+  const handleError = useCallback((err: unknown) => {
     setLoading(false)
     setError("Failed to load video. Please check the URL and try again.")
     console.error("Video player error:", err)
@@ -184,11 +220,11 @@ export function VideoPlayer({
           break
         case "ArrowLeft":
           e.preventDefault()
-          playerRef.current?.seekTo(Math.max(0, playedSeconds - 5))
+          playerInstanceRef.current?.seekTo(Math.max(0, playedSeconds - 5), "seconds")
           break
         case "ArrowRight":
           e.preventDefault()
-          playerRef.current?.seekTo(Math.min(duration, playedSeconds + 5))
+          playerInstanceRef.current?.seekTo(Math.min(duration, playedSeconds + 5), "seconds")
           break
         case "m":
           e.preventDefault()
@@ -254,7 +290,19 @@ export function VideoPlayer({
         )}
 
         <ReactPlayer
-          ref={playerRef}
+          ref={(player) => {
+            if (player) {
+              const typedPlayer = player as unknown as ReactPlayerInstance
+              playerInstanceRef.current = {
+                seekTo: typedPlayer.seekTo.bind(player),
+                getCurrentTime: typedPlayer.getCurrentTime.bind(player),
+                getSecondsLoaded: typedPlayer.getSecondsLoaded.bind(player),
+                getDuration: typedPlayer.getDuration.bind(player),
+              }
+            } else {
+              playerInstanceRef.current = null
+            }
+          }}
           url={url}
           playing={playing}
           volume={volume}

@@ -20,7 +20,7 @@ export function Navbar({ variant = "landing" }: NavbarProps) {
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-gradient-start to-gradient-end">
               <span className="text-lg font-bold text-white">S</span>
             </div>
             <span className="text-xl font-bold">StreamFetch</span>
@@ -130,7 +130,7 @@ export function Navbar({ variant = "landing" }: NavbarProps) {
       <div className="flex h-14 items-center justify-between px-4 md:px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-gradient-start to-gradient-end">
             <span className="text-sm font-bold text-white">S</span>
           </div>
           <span className="text-lg font-bold">StreamFetch</span>

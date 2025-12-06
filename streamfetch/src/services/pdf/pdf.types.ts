@@ -35,6 +35,7 @@ export interface PDFProject {
   status: ProjectStatus;
   originalFile: string; // Path to original PDF file
   currentFile?: string; // Path to current working PDF file
+  fileData?: string; // Base64 encoded PDF data (data URL)
   metadata: PDFMetadata;
   pages: PDFPage[];
   annotations: Annotation[];
@@ -284,6 +285,7 @@ export interface PDFProjectDto {
   pageCount: number;
   fileSize: number;
   annotationCount: number;
+  fileUrl?: string; // Data URL or file path for the PDF
   createdAt: string;
   updatedAt: string;
 }

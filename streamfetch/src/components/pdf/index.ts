@@ -4,7 +4,9 @@
  * Export all PDF-related components for easy importing
  */
 
-export { default as PDFViewer } from "./PDFViewer";
+export { PDFViewer } from "./PDFViewer";
+export { PDFZoomControls } from "./PDFZoomControls";
+export { AnnotatablePDFViewer } from "./AnnotatablePDFViewer";
 export { default as PDFPage } from "./PDFPage";
 export { default as PDFThumbnail } from "./PDFThumbnail";
 export { default as PDFThumbnailSidebar } from "./PDFThumbnailSidebar";

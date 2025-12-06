@@ -47,10 +47,10 @@ export function VideoInfoCard({ video, formats, onDownload, downloading, videoUr
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
       {/* Video Preview Card */}
-      <div className="rounded-lg border border-gray-800 bg-card overflow-hidden">
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
         <div className="grid md:grid-cols-[300px_1fr] gap-6 p-6">
           {/* Thumbnail */}
-          <div className="relative aspect-video md:aspect-auto md:h-[200px] rounded-lg overflow-hidden bg-gray-900">
+          <div className="relative aspect-video md:aspect-auto md:h-[200px] rounded-lg overflow-hidden bg-surface-1">
             {video.thumbnail ? (
               <Image
                 src={video.thumbnail}
@@ -94,7 +94,7 @@ export function VideoInfoCard({ video, formats, onDownload, downloading, videoUr
       </div>
 
       {/* Quality Selection Card */}
-      <div className="rounded-lg border border-gray-800 bg-card p-6 space-y-4">
+      <div className="rounded-lg border border-border bg-card p-6 space-y-4">
         <h3 className="text-lg font-semibold text-white">Select Quality</h3>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -107,7 +107,7 @@ export function VideoInfoCard({ video, formats, onDownload, downloading, videoUr
                 ${
                   selectedFormat?.itag === format.itag
                     ? "border-primary bg-primary/10"
-                    : "border-gray-800 hover:border-gray-700 hover:bg-gray-900/50"
+                    : "border-border hover:border-muted-foreground hover:bg-surface-2/50"
                 }
               `}
             >

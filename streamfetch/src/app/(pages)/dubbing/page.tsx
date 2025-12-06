@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { Search, ArrowRight, AlertCircle, List, Languages } from "lucide-react"
 import Link from "next/link"
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { DubbingCard } from "@/components/dubbing-card"
 
-export default function DubbingPage() {
+function DubbingPageInner() {
   const searchParams = useSearchParams()
   const urlParam = searchParams.get("url")
 
@@ -51,8 +51,8 @@ export default function DubbingPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-lg border bg-card p-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
-              <Languages className="h-5 w-5 text-purple-500" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-feature-1/10">
+              <Languages className="h-5 w-5 text-feature-1" />
             </div>
             <h3 className="font-semibold">50+ Languages</h3>
           </div>
@@ -63,8 +63,8 @@ export default function DubbingPage() {
 
         <div className="rounded-lg border bg-card p-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
-              <svg className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-feature-2/10">
+              <svg className="h-5 w-5 text-feature-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
               </svg>
             </div>
@@ -77,8 +77,8 @@ export default function DubbingPage() {
 
         <div className="rounded-lg border bg-card p-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-500/10">
-              <svg className="h-5 w-5 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-feature-3/10">
+              <svg className="h-5 w-5 text-feature-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
@@ -187,13 +187,25 @@ export default function DubbingPage() {
       )}
 
       {/* Pricing Info */}
-      <div className="rounded-lg border border-blue-900/50 bg-blue-950/20 p-6">
-        <h3 className="text-sm font-semibold text-blue-400 mb-2">Pricing Information</h3>
+      <div className="rounded-lg border border-info/50 bg-info/10 p-6">
+        <h3 className="text-sm font-semibold text-info mb-2">Pricing Information</h3>
         <p className="text-sm text-muted-foreground">
           Dubbing costs are calculated based on video duration. You'll see a cost estimate before creating a job.
           Enable watermark option to reduce costs. Powered by ElevenLabs.
         </p>
       </div>
     </div>
+  )
+}
+
+export default function DubbingPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    }>
+      <DubbingPageInner />
+    </Suspense>
   )
 }

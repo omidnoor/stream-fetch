@@ -1,344 +1,283 @@
-"use client";
+'use client';
 
 /**
  * PDFViewer Component
  *
- * Main PDF viewer with zoom, navigation, and page rendering controls.
- * Uses PDF.js for rendering PDF documents in the browser.
+ * Renders PDF documents using PDF.js with text layer for text selection
  */
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import * as pdfjsLib from "pdfjs-dist";
-import { PDFDocumentProxy } from "pdfjs-dist";
-import { Button } from "@/components/ui/button";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ZoomIn,
-  ZoomOut,
-  RotateCw,
-  Loader2,
-  AlertCircle
-} from "lucide-react";
+import { useEffect, useRef, useState } from 'react';
+import * as pdfjs from 'pdfjs-dist';
+import { TextLayer } from 'pdfjs-dist';
+import { PDFJS_OPTIONS } from '@/lib/pdf/pdfjs.config';
+import type { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist';
+import { Loader2 } from 'lucide-react';
 
 // Configure PDF.js worker
-if (typeof window !== "undefined") {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+if (typeof window !== 'undefined') {
+  pdfjs.GlobalWorkerOptions.workerSrc = PDFJS_OPTIONS.workerSrc;
 }
 
 interface PDFViewerProps {
-  pdfUrl: string;
-  initialZoom?: number;
-  onPageChange?: (page: number) => void;
+  /** PDF file URL or data URL */
+  fileUrl: string;
+
+  /** Current page number (1-indexed) */
+  currentPage: number;
+
+  /** Zoom scale (1.0 = 100%) */
+  scale?: number;
+
+  /** Callback when page changes */
+  onPageChange?: (pageNumber: number) => void;
+
+  /** Callback when document loads */
+  onDocumentLoad?: (pdf: PDFDocumentProxy) => void;
+
+  /** Callback when page renders */
+  onPageRender?: (page: PDFPageProxy) => void;
+
+  /** Additional CSS classes */
   className?: string;
 }
 
-export default function PDFViewer({
-  pdfUrl,
-  initialZoom = 1.0,
+export function PDFViewer({
+  fileUrl,
+  currentPage,
+  scale = PDFJS_OPTIONS.defaultScale,
   onPageChange,
-  className = "",
+  onDocumentLoad,
+  onPageRender,
+  className = '',
 }: PDFViewerProps) {
-  const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [zoom, setZoom] = useState(initialZoom);
-  const [rotation, setRotation] = useState(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const textLayerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [rendering, setRendering] = useState(false);
+  const renderTaskRef = useRef<any>(null);
+  const textLayerRef2 = useRef<TextLayer | null>(null);
+  const onPageRenderRef = useRef(onPageRender);
+  const onDocumentLoadRef = useRef(onDocumentLoad);
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Load PDF document
+  // Update refs when callbacks change (avoids re-running effects)
   useEffect(() => {
-    let mounted = true;
+    onPageRenderRef.current = onPageRender;
+  }, [onPageRender]);
+
+  useEffect(() => {
+    onDocumentLoadRef.current = onDocumentLoad;
+  }, [onDocumentLoad]);
+
+  /**
+   * Load PDF document
+   */
+  useEffect(() => {
+    let isMounted = true;
 
     const loadPDF = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const loadingTask = pdfjsLib.getDocument(pdfUrl);
-        const pdf = await loadingTask.promise;
+        const loadingTask = pdfjs.getDocument(fileUrl);
+        const pdfDoc = await loadingTask.promise;
 
-        if (!mounted) return;
+        if (!isMounted) return;
 
-        setPdfDoc(pdf);
-        setTotalPages(pdf.numPages);
+        setPdf(pdfDoc);
+
+        if (onDocumentLoadRef.current) {
+          onDocumentLoadRef.current(pdfDoc);
+        }
+
         setLoading(false);
       } catch (err) {
-        console.error("Error loading PDF:", err);
-        if (mounted) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : "Failed to load PDF document"
-          );
-          setLoading(false);
-        }
+        if (!isMounted) return;
+
+        console.error('Failed to load PDF:', err);
+        setError('Failed to load PDF document');
+        setLoading(false);
       }
     };
 
-    if (pdfUrl) {
-      loadPDF();
-    }
+    loadPDF();
 
     return () => {
-      mounted = false;
+      isMounted = false;
+      if (renderTaskRef.current) {
+        renderTaskRef.current.cancel();
+      }
     };
-  }, [pdfUrl]);
+  }, [fileUrl]);
 
-  // Render current page
-  const renderPage = useCallback(
-    async (pageNum: number) => {
-      if (!pdfDoc || !canvasRef.current || rendering) return;
+  /**
+   * Render current page with text layer
+   */
+  useEffect(() => {
+    if (!pdf || !canvasRef.current || !textLayerRef.current) return;
 
+    const renderPage = async () => {
       try {
-        setRendering(true);
-        const page = await pdfDoc.getPage(pageNum);
-        const canvas = canvasRef.current;
-        const context = canvas.getContext("2d");
-
-        if (!context) {
-          throw new Error("Could not get canvas context");
+        // Cancel any ongoing render task
+        if (renderTaskRef.current) {
+          renderTaskRef.current.cancel();
         }
 
-        // Calculate scale based on zoom and container width
-        const viewport = page.getViewport({ scale: 1, rotation });
-        const containerWidth = containerRef.current?.clientWidth || 800;
-        const scale = (containerWidth / viewport.width) * zoom;
+        // Cancel any existing text layer
+        if (textLayerRef2.current) {
+          textLayerRef2.current.cancel();
+          textLayerRef2.current = null;
+        }
 
-        const scaledViewport = page.getViewport({ scale, rotation });
+        // Ensure page number is valid
+        const pageNum = Math.max(1, Math.min(currentPage, pdf.numPages));
+
+        // Get page
+        const page = await pdf.getPage(pageNum);
+
+        // Calculate viewport
+        const viewport = page.getViewport({ scale });
+
+        // Get canvas and context
+        const canvas = canvasRef.current;
+        if (!canvas) {
+          console.error('Canvas ref is null');
+          return;
+        }
+
+        const context = canvas.getContext('2d');
+        if (!context) {
+          console.error('Failed to get canvas context');
+          return;
+        }
 
         // Set canvas dimensions
-        canvas.width = scaledViewport.width;
-        canvas.height = scaledViewport.height;
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
 
-        // Render PDF page
+        // Render page to canvas
         const renderContext = {
           canvasContext: context,
-          viewport: scaledViewport,
+          viewport: viewport,
           canvas: canvas,
         };
 
-        await page.render(renderContext).promise;
-        setRendering(false);
-      } catch (err) {
-        console.error("Error rendering page:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to render page"
-        );
-        setRendering(false);
-      }
-    },
-    [pdfDoc, zoom, rotation, rendering]
-  );
+        renderTaskRef.current = page.render(renderContext);
+        await renderTaskRef.current.promise;
 
-  // Re-render when page, zoom, or rotation changes
-  useEffect(() => {
-    if (pdfDoc && currentPage) {
-      renderPage(currentPage);
-    }
-  }, [pdfDoc, currentPage, zoom, rotation, renderPage]);
+        // Render text layer for text selection
+        const textLayerDiv = textLayerRef.current;
+        if (textLayerDiv) {
+          // Clear previous text layer content
+          textLayerDiv.innerHTML = '';
+          textLayerDiv.style.width = `${viewport.width}px`;
+          textLayerDiv.style.height = `${viewport.height}px`;
 
-  // Navigation handlers
-  const goToPreviousPage = () => {
-    if (currentPage > 1) {
-      const newPage = currentPage - 1;
-      setCurrentPage(newPage);
-      onPageChange?.(newPage);
-    }
-  };
+          // Get text content
+          const textContent = await page.getTextContent();
 
-  const goToNextPage = () => {
-    if (currentPage < totalPages) {
-      const newPage = currentPage + 1;
-      setCurrentPage(newPage);
-      onPageChange?.(newPage);
-    }
-  };
+          // Create and render text layer
+          textLayerRef2.current = new TextLayer({
+            textContentSource: textContent,
+            container: textLayerDiv,
+            viewport: viewport,
+          });
 
-  const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-      onPageChange?.(page);
-    }
-  };
+          await textLayerRef2.current.render();
+        }
 
-  // Zoom handlers
-  const zoomIn = () => {
-    setZoom((prev) => Math.min(prev + 0.25, 3.0));
-  };
-
-  const zoomOut = () => {
-    setZoom((prev) => Math.max(prev - 0.25, 0.5));
-  };
-
-  const resetZoom = () => {
-    setZoom(1.0);
-  };
-
-  // Rotation handler
-  const rotateClockwise = () => {
-    setRotation((prev) => (prev + 90) % 360);
-  };
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") {
-        goToPreviousPage();
-      } else if (e.key === "ArrowRight") {
-        goToNextPage();
-      } else if (e.key === "+" || e.key === "=") {
-        zoomIn();
-      } else if (e.key === "-") {
-        zoomOut();
-      } else if (e.key === "0") {
-        resetZoom();
+        // Callback when page renders
+        if (onPageRenderRef.current) {
+          onPageRenderRef.current(page);
+        }
+      } catch (err: any) {
+        // Ignore cancelled render tasks
+        if (err?.name === 'RenderingCancelledException') {
+          return;
+        }
+        console.error('Failed to render page:', err);
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentPage, totalPages]);
+    renderPage();
+  }, [pdf, currentPage, scale]);
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className={`flex items-center justify-center min-h-[400px] ${className}`}>
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-gray-400">Loading PDF...</p>
-        </div>
-      </div>
-    );
-  }
+  /**
+   * Handle keyboard navigation
+   */
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (!pdf) return;
 
-  // Error state
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const newPage = Math.max(1, currentPage - 1);
+        if (newPage !== currentPage && onPageChange) {
+          onPageChange(newPage);
+        }
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        const newPage = Math.min(pdf.numPages, currentPage + 1);
+        if (newPage !== currentPage && onPageChange) {
+          onPageChange(newPage);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [pdf, currentPage, onPageChange]);
+
+  // Error state - only case where we don't show canvas
   if (error) {
     return (
-      <div className={`flex items-center justify-center min-h-[400px] ${className}`}>
-        <div className="text-center max-w-md">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-white mb-2">Failed to Load PDF</h3>
-          <p className="text-gray-400 text-sm">{error}</p>
+      <div className="flex h-full items-center justify-center bg-zinc-900">
+        <div className="max-w-md rounded-lg border border-red-500/20 bg-red-500/10 p-6 text-center">
+          <p className="text-sm text-red-400">{error}</p>
         </div>
       </div>
     );
   }
 
+  // Always render canvas to avoid ref issues - overlay loading state
   return (
-    <div className={`flex flex-col h-full ${className}`}>
-      {/* Controls */}
-      <div className="flex items-center justify-between bg-[#1a1a1a] border-b border-gray-800 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToPreviousPage}
-            disabled={currentPage <= 1}
-            className="border-gray-700"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-
-          <div className="flex items-center gap-2 px-3">
-            <input
-              type="number"
-              value={currentPage}
-              onChange={(e) => goToPage(parseInt(e.target.value))}
-              className="w-16 px-2 py-1 text-sm text-center bg-[#0a0a0a] border border-gray-700 rounded text-white"
-              min={1}
-              max={totalPages}
-            />
-            <span className="text-sm text-gray-400">/ {totalPages}</span>
+    <div
+      ref={containerRef}
+      className={`relative flex h-full items-center justify-center overflow-auto bg-zinc-900 ${className}`}
+    >
+      {/* Loading overlay - shown on top of canvas */}
+      {loading && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-zinc-900">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+            <p className="text-sm text-gray-400">Loading PDF...</p>
           </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToNextPage}
-            disabled={currentPage >= totalPages}
-            className="border-gray-700"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
         </div>
+      )}
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={zoomOut}
-            disabled={zoom <= 0.5}
-            className="border-gray-700"
-            title="Zoom Out (-)"
-          >
-            <ZoomOut className="h-4 w-4" />
-          </Button>
-
-          <div className="px-3 min-w-[80px] text-center">
-            <span className="text-sm text-gray-400">
-              {Math.round(zoom * 100)}%
-            </span>
-          </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={zoomIn}
-            disabled={zoom >= 3.0}
-            className="border-gray-700"
-            title="Zoom In (+)"
-          >
-            <ZoomIn className="h-4 w-4" />
-          </Button>
-
-          <div className="h-6 w-px bg-gray-700 mx-2" />
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={rotateClockwise}
-            className="border-gray-700"
-            title="Rotate Clockwise"
-          >
-            <RotateCw className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Canvas Container */}
-      <div
-        ref={containerRef}
-        className="flex-1 overflow-auto bg-[#0a0a0a] flex items-start justify-center p-8"
-      >
-        <div className="relative">
+      {/* Canvas and text layer container */}
+      <div className="p-4">
+        <div
+          className="relative"
+          style={{ visibility: loading ? 'hidden' : 'visible' }}
+        >
+          {/* PDF Canvas */}
           <canvas
             ref={canvasRef}
-            className="shadow-2xl bg-white"
+            className="shadow-2xl"
             style={{
-              display: "block",
-              maxWidth: "100%",
-              height: "auto",
+              maxWidth: '100%',
+              height: 'auto',
             }}
           />
-          {rendering && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-              <Loader2 className="h-8 w-8 animate-spin text-white" />
-            </div>
-          )}
+          {/* Text Layer - positioned on top for text selection */}
+          <div
+            ref={textLayerRef}
+            className="textLayer absolute top-0 left-0"
+          />
         </div>
-      </div>
-
-      {/* Helper Text */}
-      <div className="bg-[#1a1a1a] border-t border-gray-800 px-4 py-2">
-        <p className="text-xs text-gray-500 text-center">
-          Use arrow keys to navigate, +/- to zoom, or click controls above
-        </p>
       </div>
     </div>
   );

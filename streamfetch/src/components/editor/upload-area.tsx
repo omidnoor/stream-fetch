@@ -145,7 +145,7 @@ export function UploadArea({
             relative border-2 border-dashed rounded-lg p-12 text-center transition-colors
             ${dragActive
               ? "border-primary bg-primary/5"
-              : "border-gray-700 hover:border-gray-600"
+              : "border-border hover:border-muted-foreground"
             }
           `}
         >
@@ -157,7 +157,7 @@ export function UploadArea({
             onChange={handleInputChange}
           />
 
-          <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+          <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
 
           <h3 className="text-lg font-semibold mb-2">
             Drop video file here
@@ -201,7 +201,7 @@ export function UploadArea({
                       <span>Uploading...</span>
                       <span>{uploadProgress}%</span>
                     </div>
-                    <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-2 bg-surface-3 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-primary transition-all duration-300"
                         style={{ width: `${uploadProgress}%` }}
