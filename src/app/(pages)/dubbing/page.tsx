@@ -6,7 +6,7 @@ import { Search, ArrowRight, AlertCircle, List, Languages } from "lucide-react"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { DubbingCard } from "@/components/dubbing-card"
+import { DubbingCard } from "@/components/dubbing/dubbing-card"
 
 function DubbingPageInner() {
   const searchParams = useSearchParams()

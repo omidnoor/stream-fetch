@@ -5,8 +5,8 @@ import { Search, ArrowRight, AlertCircle, History } from "lucide-react"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { VideoInfoCard } from "@/components/video-info-card"
-import { DubbingCard } from "@/components/dubbing-card"
+import { VideoInfoCard } from "@/components/youtube/video-info-card"
+import { DubbingCard } from "@/components/dubbing/dubbing-card"
 import { VideoInfoResponse } from "@/lib/types"
 
 export default function YouTubePage() {

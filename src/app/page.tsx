@@ -1,7 +1,7 @@
-import { Navbar } from "@/components/navbar";
-import { Hero } from "@/components/hero";
-import { FeatureCard } from "@/components/feature-card";
-import { Footer } from "@/components/footer";
+import { Navbar } from "@/components/layout/navbar";
+import { Hero } from "@/components/landing/hero";
+import { FeatureCard } from "@/components/landing/feature-card";
+import { Footer } from "@/components/landing/footer";
 import { Download, Languages, Film, ArrowRight } from "lucide-react";
 
 export default function HomePage() {

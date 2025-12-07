@@ -1,6 +1,6 @@
-import { Sidebar } from "@/components/sidebar";
-import { Navbar } from "@/components/navbar";
-import { Breadcrumbs } from "@/components/breadcrumbs";
+import { Sidebar } from "@/components/layout/sidebar";
+import { Navbar } from "@/components/layout/navbar";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 
 export default function PagesLayout({
   children,

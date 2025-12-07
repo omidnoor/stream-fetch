@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Play, AlertCircle, Zap, Languages, Settings2 } from 'lucide-react';
 import { StartPipelineRequest, StartPipelineResponse, VideoInfo } from '@/services/automation';
-import { ErrorDisplay } from '@/components/automation/ErrorDisplay';
 import { EstimateCard } from '@/components/automation/EstimateCard';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import type { VideoInfoDto } from '@/services/youtube/youtube.types';
 
 export default function AutomationPage() {
@@ -107,68 +109,125 @@ export default function AutomationPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-3xl font-bold mb-6">Automated Dubbing Pipeline</h1>
+    <div className="w-full space-y-8">
+      {/* Header */}
+      <div className="space-y-1">
+        <h1 className="text-3xl font-bold tracking-tight">Automated Dubbing Pipeline</h1>
+        <p className="text-muted-foreground">
+          Upload a YouTube video and automatically dub it with AI-powered translation and voice synthesis
+        </p>
+      </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      {/* Features Grid */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-lg border bg-card p-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-feature-1/10">
+              <Zap className="h-5 w-5 text-feature-1" />
+            </div>
+            <h3 className="font-semibold">Parallel Processing</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Process multiple chunks simultaneously for faster completion
+          </p>
+        </div>
+
+        <div className="rounded-lg border bg-card p-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-feature-2/10">
+              <Languages className="h-5 w-5 text-feature-2" />
+            </div>
+            <h3 className="font-semibold">Multi-Language</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Support for 50+ languages with natural-sounding AI voices
+          </p>
+        </div>
+
+        <div className="rounded-lg border bg-card p-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-feature-3/10">
+              <Settings2 className="h-5 w-5 text-feature-3" />
+            </div>
+            <h3 className="font-semibold">Customizable</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Fine-tune chunk duration, quality, and processing options
+          </p>
+        </div>
+      </div>
+
+      {/* Configuration Form */}
+      <div className="rounded-lg border bg-card p-6 space-y-6">
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold">Pipeline Configuration</h2>
+          <p className="text-sm text-muted-foreground">
+            Configure your automated dubbing pipeline settings
+          </p>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* YouTube URL */}
-          <div>
-            <label htmlFor="youtubeUrl" className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="space-y-2">
+            <label htmlFor="youtubeUrl" className="text-sm font-medium">
               YouTube URL
             </label>
             <div className="flex gap-2">
-              <input
+              <Input
                 id="youtubeUrl"
                 type="url"
                 value={youtubeUrl}
                 onChange={(e) => {
                   setYoutubeUrl(e.target.value);
-                  setVideoInfo(null); // Clear video info when URL changes
+                  setVideoInfo(null);
                 }}
                 placeholder="https://www.youtube.com/watch?v=..."
                 required
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1"
               />
-              <button
+              <Button
                 type="button"
                 onClick={fetchVideoInfo}
                 disabled={isFetchingInfo || !youtubeUrl.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium whitespace-nowrap"
+                variant="outline"
+                className="whitespace-nowrap"
               >
                 {isFetchingInfo ? 'Loading...' : 'Get Estimate'}
-              </button>
+              </Button>
             </div>
           </div>
 
           {/* Chunk Duration */}
-          <div>
-            <label htmlFor="chunkDuration" className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="space-y-2">
+            <label htmlFor="chunkDuration" className="text-sm font-medium">
               Chunk Duration
             </label>
             <select
               id="chunkDuration"
               value={chunkDuration}
               onChange={(e) => setChunkDuration(Number(e.target.value))}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input-field"
             >
               <option value={30}>30 seconds</option>
               <option value={60}>1 minute</option>
               <option value={120}>2 minutes</option>
               <option value={300}>5 minutes</option>
             </select>
+            <p className="text-xs text-muted-foreground">
+              Smaller chunks = faster parallel processing, larger chunks = fewer API calls
+            </p>
           </div>
 
           {/* Target Language */}
-          <div>
-            <label htmlFor="targetLanguage" className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="space-y-2">
+            <label htmlFor="targetLanguage" className="text-sm font-medium">
               Target Language
             </label>
             <select
               id="targetLanguage"
               value={targetLanguage}
               onChange={(e) => setTargetLanguage(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input-field"
             >
               <option value="es">Spanish (es)</option>
               <option value="fr">French (fr)</option>
@@ -182,10 +241,13 @@ export default function AutomationPage() {
           </div>
 
           {/* Max Parallel Jobs */}
-          <div>
-            <label htmlFor="maxParallelJobs" className="block text-sm font-medium text-gray-700 mb-2">
-              Max Parallel Jobs: {maxParallelJobs}
-            </label>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label htmlFor="maxParallelJobs" className="text-sm font-medium">
+                Max Parallel Jobs
+              </label>
+              <span className="text-sm font-semibold text-primary">{maxParallelJobs}</span>
+            </div>
             <input
               id="maxParallelJobs"
               type="range"
@@ -193,45 +255,68 @@ export default function AutomationPage() {
               max={5}
               value={maxParallelJobs}
               onChange={(e) => setMaxParallelJobs(Number(e.target.value))}
-              className="w-full"
+              className="w-full accent-primary"
             />
+            <p className="text-xs text-muted-foreground">
+              Higher values = faster processing but increased API costs
+            </p>
           </div>
 
           {/* Use Watermark */}
-          <div className="flex items-center">
+          <div className="flex items-start gap-3 rounded-lg border border-success/50 bg-success/10 p-4">
             <input
               id="useWatermark"
               type="checkbox"
               checked={useWatermark}
               onChange={(e) => setUseWatermark(e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="mt-0.5 h-4 w-4 rounded border-border bg-background accent-primary"
             />
-            <label htmlFor="useWatermark" className="ml-2 block text-sm text-gray-700">
-              Use watermark (50% discount)
-            </label>
+            <div className="flex-1">
+              <label htmlFor="useWatermark" className="text-sm font-medium cursor-pointer">
+                Use watermark (50% discount)
+              </label>
+              <p className="text-xs text-muted-foreground mt-1">
+                Add ElevenLabs watermark to reduce costs by half
+              </p>
+            </div>
           </div>
 
           {/* Error Display */}
           {error && (
-            <ErrorDisplay
-              error={error}
-              title="Failed to Start Pipeline"
-              showDetails={true}
-              onDismiss={() => setError(null)}
-            />
+            <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-destructive">Failed to Start Pipeline</h3>
+                <p className="text-sm text-muted-foreground mt-1">{error}</p>
+              </div>
+              <button
+                onClick={() => setError(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                ×
+              </button>
+            </div>
           )}
 
           {/* Submit Button */}
-          <button
+          <Button
             type="submit"
             disabled={isLoading || !videoInfo}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+            className="w-full gap-2"
+            size="lg"
           >
-            {isLoading ? 'Starting Pipeline...' : 'Start Dubbing Pipeline'}
-          </button>
+            {isLoading ? (
+              'Starting Pipeline...'
+            ) : (
+              <>
+                <Play className="h-4 w-4" />
+                Start Dubbing Pipeline
+              </>
+            )}
+          </Button>
 
           {!videoInfo && (
-            <p className="text-sm text-gray-500 text-center">
+            <p className="text-sm text-muted-foreground text-center">
               Click "Get Estimate" to preview the cost and time before starting
             </p>
           )}
@@ -240,7 +325,7 @@ export default function AutomationPage() {
 
       {/* Estimate Card */}
       {videoInfo && (
-        <div className="mt-6">
+        <div className="space-y-3">
           <EstimateCard
             videoInfo={videoInfo}
             config={{
@@ -254,23 +339,64 @@ export default function AutomationPage() {
               chunkingStrategy: 'fixed',
             }}
           />
-          <div className="mt-3 text-center">
-            <p className="text-sm text-gray-600">
-              Estimates update automatically as you adjust settings above
-            </p>
-          </div>
+          <p className="text-sm text-muted-foreground text-center">
+            Estimates update automatically as you adjust settings above
+          </p>
         </div>
       )}
 
-      <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h2 className="font-semibold text-blue-900 mb-2">How it works:</h2>
-        <ol className="list-decimal list-inside space-y-1 text-sm text-blue-800">
-          <li>Downloads the YouTube video</li>
-          <li>Splits it into manageable chunks</li>
-          <li>Processes chunks in parallel with ElevenLabs</li>
-          <li>Merges dubbed chunks into final video</li>
-          <li>Provides download link when complete</li>
-        </ol>
+      {/* How It Works */}
+      <div className="rounded-lg border bg-card p-6">
+        <h2 className="text-lg font-semibold mb-4">How the Pipeline Works</h2>
+        <div className="space-y-4">
+          <div className="flex gap-4">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+              1
+            </div>
+            <div>
+              <h4 className="font-semibold mb-1">Download Video</h4>
+              <p className="text-sm text-muted-foreground">
+                Downloads the YouTube video in the highest available quality
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-4">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+              2
+            </div>
+            <div>
+              <h4 className="font-semibold mb-1">Split into Chunks</h4>
+              <p className="text-sm text-muted-foreground">
+                Divides the video into manageable chunks based on your configured duration
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-4">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+              3
+            </div>
+            <div>
+              <h4 className="font-semibold mb-1">Parallel Processing</h4>
+              <p className="text-sm text-muted-foreground">
+                Processes chunks in parallel with ElevenLabs AI dubbing for faster completion
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-4">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+              4
+            </div>
+            <div>
+              <h4 className="font-semibold mb-1">Merge & Finalize</h4>
+              <p className="text-sm text-muted-foreground">
+                Merges all dubbed chunks into the final video and provides a download link
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

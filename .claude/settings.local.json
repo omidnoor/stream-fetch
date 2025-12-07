@@ -42,7 +42,17 @@
       "Bash(if not exist \"src\\__tests__\\lib\" mkdir \"src\\__tests__\\lib\")",
       "Bash(if not exist \"src\\__tests__\\services\" mkdir \"src\\__tests__\\services\")",
       "Bash(if not exist \"src\\__tests__\\services\\youtube\" mkdir \"src\\__tests__\\services\\youtube\")",
-      "Bash(if not exist \"src\\__tests__\\services\\dubbing\" mkdir \"src\\__tests__\\services\\dubbing\")"
+      "Bash(if not exist \"src\\__tests__\\services\\dubbing\" mkdir \"src\\__tests__\\services\\dubbing\")",
+      "Bash(move hero.tsx landing/)",
+      "Bash(move footer.tsx landing/)",
+      "Bash(move feature-card.tsx landing/)",
+      "Bash(move navbar.tsx layout/)",
+      "Bash(move sidebar.tsx layout/)",
+      "Bash(move breadcrumbs.tsx layout/)",
+      "Bash(move video-info-card.tsx youtube/)",
+      "Bash(move dubbing-card.tsx dubbing/)",
+      "Bash(if exist \".next\" rmdir /S /Q .next)",
+      "Bash(xargs:*)"
     ],
     "deny": [],
     "ask": []
