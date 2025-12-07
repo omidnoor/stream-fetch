@@ -12,18 +12,27 @@ export function EstimateCard({ videoInfo, config }: EstimateCardProps) {
   // Calculate cost (ElevenLabs pricing: $0.24 per minute)
   const durationMinutes = videoInfo.duration / 60;
   const baseCost = durationMinutes * 0.24;
-  const finalCost = config.useWatermark ? baseCost * 0.5 : baseCost;
+  const processingCost = 0.01 * totalChunks; // $0.01 per chunk
+  const dubbingCost = config.useWatermark ? baseCost * 0.5 : baseCost;
+  const finalCost = dubbingCost + processingCost;
 
-  // Calculate time estimate
-  // Download: ~30s per minute of video
-  // Chunking: ~5s per minute
-  // Dubbing: ~2x real-time per chunk (parallelized)
-  // Merging: ~10s per minute
-  const downloadTime = (durationMinutes * 30) / 60; // in minutes
-  const chunkingTime = (durationMinutes * 5) / 60;
-  const dubbingTime = (videoInfo.duration * 2) / config.maxParallelJobs / 60; // parallelized
-  const mergingTime = (durationMinutes * 10) / 60;
-  const totalTime = downloadTime + chunkingTime + dubbingTime + mergingTime;
+  // Calculate time estimate (matching cost-calculator.ts formulas)
+  // Download: 45s per minute of video
+  // Chunking: 1s per minute
+  // Dubbing: 2.5x real-time per batch (parallelized)
+  // Merging: 2s per minute
+  // Finalization: 5s fixed
+  const downloadTimeSeconds = durationMinutes * 45;
+  const chunkingTimeSeconds = durationMinutes * 1;
+
+  // Dubbing time: calculate batches and apply multiplier
+  const batches = Math.ceil(totalChunks / config.maxParallelJobs);
+  const dubbingTimeSeconds = batches * config.chunkDuration * 2.5;
+
+  const mergingTimeSeconds = durationMinutes * 2;
+  const finalizationTimeSeconds = 5;
+  const totalTimeSeconds = downloadTimeSeconds + chunkingTimeSeconds + dubbingTimeSeconds + mergingTimeSeconds + finalizationTimeSeconds;
+  const totalTime = totalTimeSeconds / 60; // convert to minutes
 
   const formatTime = (minutes: number): string => {
     if (minutes < 1) {
@@ -100,12 +109,12 @@ export function EstimateCard({ videoInfo, config }: EstimateCardProps) {
           <p className="text-2xl font-bold text-gray-900">{formatCost(finalCost)}</p>
           {config.useWatermark && (
             <p className="text-xs text-green-600 mt-1">
-              50% discount applied
+              50% dubbing discount applied
             </p>
           )}
           {!config.useWatermark && (
             <p className="text-xs text-gray-500 mt-1">
-              ${(baseCost * 0.5).toFixed(2)} with watermark
+              ${((baseCost * 0.5) + processingCost).toFixed(2)} with watermark
             </p>
           )}
         </div>

@@ -50,6 +50,13 @@ export class JobStore {
 
   /**
    * Update a job with partial data
+   *
+   * WARNING: This method has a race condition with concurrent updates.
+   * The read-modify-write cycle is not atomic. Concurrent updates may
+   * result in lost changes. For production use, consider:
+   * - Using a database with transaction support
+   * - Implementing file locking
+   * - Using optimistic locking with version numbers
    */
   async update(jobId: string, updates: Partial<AutomationJob>): Promise<void> {
     const job = await this.get(jobId);
@@ -120,8 +127,33 @@ export class JobStore {
    * Count jobs with optional filter
    */
   async count(filter?: { status?: JobStatus }): Promise<number> {
-    const jobs = await this.list(filter);
-    return jobs.length;
+    await this.ensureInitialized();
+
+    const files = await fs.readdir(this.jobsPath);
+    const jobFiles = files.filter(f => f.endsWith('.json'));
+
+    // If no status filter, just return file count
+    if (!filter?.status) {
+      return jobFiles.length;
+    }
+
+    // With status filter, we need to read files (but only extract status field)
+    let count = 0;
+    for (const file of jobFiles) {
+      try {
+        const filePath = path.join(this.jobsPath, file);
+        const data = await fs.readFile(filePath, 'utf-8');
+        const parsed = JSON.parse(data);
+
+        if (parsed.status === filter.status) {
+          count++;
+        }
+      } catch (error) {
+        console.error(`Error reading job file ${file}:`, error);
+      }
+    }
+
+    return count;
   }
 
   /**
@@ -209,6 +241,15 @@ export class JobStore {
           ...log,
           timestamp: new Date(log.timestamp),
         })),
+        // Convert ChunkStatus dates if dubbing progress exists
+        dubbing: parsed.progress.dubbing ? {
+          ...parsed.progress.dubbing,
+          chunks: parsed.progress.dubbing.chunks.map((chunk: any) => ({
+            ...chunk,
+            startedAt: chunk.startedAt ? new Date(chunk.startedAt) : undefined,
+            completedAt: chunk.completedAt ? new Date(chunk.completedAt) : undefined,
+          })),
+        } : undefined,
       },
     };
   }

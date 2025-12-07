@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { StartPipelineRequest, StartPipelineResponse } from '@/services/automation';
+import { StartPipelineRequest, StartPipelineResponse, VideoInfo } from '@/services/automation';
 import { ErrorDisplay } from '@/components/automation/ErrorDisplay';
 import { EstimateCard } from '@/components/automation/EstimateCard';
-import type { VideoInfo } from '@/lib/types';
+import type { VideoInfoDto } from '@/services/youtube/youtube.types';
 
 export default function AutomationPage() {
   const router = useRouter();
@@ -37,8 +37,23 @@ export default function AutomationPage() {
         throw new Error(errorData.error || 'Failed to fetch video info');
       }
 
-      const data: VideoInfo = await response.json();
-      setVideoInfo(data);
+      const result = await response.json();
+
+      // Convert VideoInfoDto to VideoInfo format
+      if (result.success && result.data) {
+        const dto: VideoInfoDto = result.data;
+        const videoInfo: VideoInfo = {
+          title: dto.video.title,
+          duration: dto.video.duration,
+          thumbnail: dto.video.thumbnail,
+          resolution: dto.formats[0]?.quality || 'unknown',
+          codec: dto.formats[0]?.codec || 'video/mp4',
+          fileSize: dto.formats[0]?.filesize ?? undefined,
+        };
+        setVideoInfo(videoInfo);
+      } else {
+        throw new Error(result.error || 'Failed to fetch video info');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch video info');
       setVideoInfo(null);

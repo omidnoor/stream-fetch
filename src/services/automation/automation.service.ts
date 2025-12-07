@@ -117,6 +117,11 @@ export class AutomationService {
       stage: job.progress.stage,
       recoverable: false,
     });
+
+    // Cleanup event listeners for cancelled job
+    setTimeout(() => {
+      this.progressEmitter.unsubscribeAll(jobId);
+    }, 5000); // Wait 5s to ensure SSE clients receive the cancel event
   }
 
   /**
@@ -195,6 +200,11 @@ export class AutomationService {
 
       this.progressEmitter.emitComplete(jobId, job.outputFile!, Date.now() - job.progress.startedAt.getTime());
 
+      // Cleanup event listeners for completed job
+      setTimeout(() => {
+        this.progressEmitter.unsubscribeAll(jobId);
+      }, 5000); // Wait 5s to ensure SSE clients receive the complete event
+
       return chunksToRetry;
     } catch (error) {
       await this.handlePipelineError(jobId, error as Error);
@@ -233,6 +243,11 @@ export class AutomationService {
       await this.addLog(jobId, 'finalize', 'info', 'Pipeline completed successfully');
 
       this.progressEmitter.emitComplete(jobId, job.outputFile!, Date.now() - job.progress.startedAt.getTime());
+
+      // Cleanup event listeners for completed job
+      setTimeout(() => {
+        this.progressEmitter.unsubscribeAll(jobId);
+      }, 5000); // Wait 5s to ensure SSE clients receive the complete event
     } catch (error) {
       await this.handlePipelineError(jobId, error as Error);
     }
@@ -553,5 +568,10 @@ export class AutomationService {
     await this.addLog(jobId, job.progress.stage, 'error', `Pipeline failed: ${error.message}`);
 
     this.progressEmitter.emitError(jobId, jobError);
+
+    // Cleanup event listeners for failed job
+    setTimeout(() => {
+      this.progressEmitter.unsubscribeAll(jobId);
+    }, 5000); // Wait 5s to ensure SSE clients receive the error event
   }
 }
