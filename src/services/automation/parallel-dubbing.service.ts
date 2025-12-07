@@ -25,6 +25,7 @@ interface DubbingQueueItem {
 export class ParallelDubbingService {
   private queue: DubbingQueueItem[] = [];
   private active: Map<number, Promise<void>> = new Map();
+  private activeItems: Map<number, DubbingQueueItem> = new Map(); // Track active item status
   private completed: Map<number, DubbingResult> = new Map();
   private failed: Set<number> = new Set();
   private dubbingService: DubbingService;
@@ -100,9 +101,11 @@ export class ParallelDubbingService {
         const item = this.queue.shift()!;
         const promise = this.processChunk(item, outputDir, targetLanguage, onProgress);
         this.active.set(item.chunk.index, promise);
+        this.activeItems.set(item.chunk.index, item); // Track active item
 
         promise.finally(() => {
           this.active.delete(item.chunk.index);
+          this.activeItems.delete(item.chunk.index); // Remove from active items
         });
       }
 
@@ -233,15 +236,7 @@ export class ParallelDubbingService {
 
     const allChunks = [
       ...this.queue.map((item) => item.status),
-      ...Array.from(this.active.keys()).map((index) => {
-        const item = this.queue.find((q) => q.chunk.index === index);
-        return item?.status || {
-          index,
-          filename: `chunk_${String(index).padStart(3, '0')}.mp4`,
-          status: 'processing' as ChunkState,
-          retryCount: 0,
-        };
-      }),
+      ...Array.from(this.activeItems.values()).map((item) => item.status), // Use activeItems map
       ...Array.from(this.completed.values()).map((result) => ({
         index: result.chunkIndex,
         filename: path.basename(result.outputPath),

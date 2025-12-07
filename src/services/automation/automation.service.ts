@@ -515,7 +515,13 @@ export class AutomationService {
         }
       }
 
-      writer.end();
+      // Wait for write stream to finish before closing file
+      await new Promise<void>((resolve, reject) => {
+        writer.on('finish', resolve);
+        writer.on('error', reject);
+        writer.end();
+      });
+
       await fileHandle.close();
     } catch (error) {
       await fileHandle.close();
