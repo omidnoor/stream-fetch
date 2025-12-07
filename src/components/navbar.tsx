@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface NavbarProps {
   variant?: "landing" | "app";
@@ -13,6 +13,20 @@ interface NavbarProps {
 export function Navbar({ variant = "landing" }: NavbarProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
 
   if (variant === "landing") {
     return (
@@ -41,16 +55,16 @@ export function Navbar({ variant = "landing" }: NavbarProps) {
               How It Works
             </Link>
             <Link
-              href="#pricing"
+              href="/youtube"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-              Pricing
+              YouTube
             </Link>
             <Link
-              href="/docs"
+              href="/dubbing"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-              Docs
+              Dubbing
             </Link>
           </div>
 
@@ -96,18 +110,18 @@ export function Navbar({ variant = "landing" }: NavbarProps) {
                 How It Works
               </Link>
               <Link
-                href="#pricing"
+                href="/youtube"
                 className="block rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Pricing
+                YouTube
               </Link>
               <Link
-                href="/docs"
+                href="/dubbing"
                 className="block rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Docs
+                Dubbing
               </Link>
               <div className="space-y-2 pt-4">
                 <Button variant="outline" className="w-full" asChild>

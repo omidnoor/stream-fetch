@@ -6,7 +6,7 @@ export function Hero() {
   return (
     <section className="relative w-full overflow-hidden border-b bg-gradient-to-b from-background to-muted/20 py-20 md:py-32">
       <div className="container px-4 md:px-6">
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="grid gap-8 lg:grid-cols-2 lg:gap-16">
           {/* Left Column - Text Content */}
           <div className="flex flex-col justify-center space-y-8">
             {/* Badge */}
@@ -22,13 +22,13 @@ export function Hero() {
 
             {/* Main Headline */}
             <div className="space-y-4">
-              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl lg:text-6xl">
                 Download, Dub, and Edit{" "}
                 <span className="bg-gradient-to-r from-gradient-start via-gradient-mid to-gradient-end bg-clip-text text-transparent">
                   Videos with AI
                 </span>
               </h1>
-              <p className="max-w-[600px] text-lg text-muted-foreground md:text-xl">
+              <p className="max-w-[600px] text-base text-muted-foreground md:text-lg">
                 Your complete video workflow solution. Download from YouTube,
                 translate with AI dubbing, and edit with professional tools. All
                 in one place.
@@ -154,9 +154,9 @@ export function Hero() {
       </div>
 
       {/* Background Decorations */}
-      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-full w-full -translate-x-1/2">
-        <div className="absolute left-1/4 top-0 h-96 w-96 rounded-full bg-feature-1/5 blur-3xl"></div>
-        <div className="absolute right-1/4 top-1/4 h-96 w-96 rounded-full bg-feature-2/5 blur-3xl"></div>
+      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-full w-full -translate-x-1/2 overflow-hidden">
+        <div className="absolute left-0 top-0 h-64 w-64 rounded-full bg-feature-1/5 blur-2xl sm:h-80 sm:w-80 sm:blur-3xl lg:left-1/4 lg:h-96 lg:w-96"></div>
+        <div className="absolute right-0 top-1/3 h-64 w-64 rounded-full bg-feature-2/5 blur-2xl sm:h-80 sm:w-80 sm:top-1/4 sm:blur-3xl lg:right-1/4 lg:h-96 lg:w-96"></div>
       </div>
     </section>
   );

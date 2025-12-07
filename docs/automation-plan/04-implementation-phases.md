@@ -438,10 +438,13 @@ function calculateOverallProgress(progress: PipelineProgress): number {
   - [ ] Integration tests for API
   - [ ] E2E test for full pipeline
 
-- [ ] Documentation
-  - [ ] Update main README
-  - [ ] API documentation
-  - [ ] User guide
+- [x] Documentation
+  - [x] Update main README with comprehensive automation guide
+  - [x] API endpoints documented (inline in README)
+  - [x] User guide with step-by-step instructions
+  - [x] Cost and performance details
+  - [x] Error handling documentation
+  - [x] File storage and cleanup policies
 
 ### Deliverables 🚧
 - ✅ Cancel working
@@ -450,9 +453,9 @@ function calculateOverallProgress(progress: PipelineProgress): number {
 - ✅ History complete (with DELETE endpoint and UI)
 - ✅ Error handling comprehensive
 - ✅ UI components complete (EstimateCard, CompletionCard)
+- ✅ Documentation complete (README, API docs, user guides)
 - ⏳ Edge cases pending
 - ⏳ Testing pending
-- ⏳ Documentation pending
 
 ---
 
@@ -512,6 +515,6 @@ function calculateOverallProgress(progress: PipelineProgress): number {
 - [x] History management (with DELETE)
 - [x] Error handling
 - [x] UI polish (CompletionCard, EstimateCard)
+- [x] Documentation (README, API, guides)
 - [ ] Edge cases
 - [ ] Testing
-- [ ] Documentation
