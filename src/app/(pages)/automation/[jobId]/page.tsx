@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import type { AutomationJob, PipelineProgress, LogEntry } from '@/services/automation';
 import { ErrorDisplay } from '@/components/automation/ErrorDisplay';
+import { CompletionCard } from '@/components/automation/CompletionCard';
 
 export default function JobProgressPage() {
   const params = useParams();
@@ -254,7 +255,12 @@ export default function JobProgressPage() {
         />
       )}
 
-      {progress && (
+      {/* Completion Card */}
+      {job?.status === 'complete' && job && (
+        <CompletionCard job={job} onDownload={handleDownload} />
+      )}
+
+      {progress && job?.status !== 'complete' && (
         <div className="space-y-6">
           {/* Overall Progress */}
           <div className="bg-white rounded-lg shadow-md p-6">

@@ -38,7 +38,11 @@
       "Bash(npm test:*)",
       "Bash(grep:*)",
       "Bash(tree:*)",
-      "Bash(diff:*)"
+      "Bash(diff:*)",
+      "Bash(if not exist \"src\\__tests__\\lib\" mkdir \"src\\__tests__\\lib\")",
+      "Bash(if not exist \"src\\__tests__\\services\" mkdir \"src\\__tests__\\services\")",
+      "Bash(if not exist \"src\\__tests__\\services\\youtube\" mkdir \"src\\__tests__\\services\\youtube\")",
+      "Bash(if not exist \"src\\__tests__\\services\\dubbing\" mkdir \"src\\__tests__\\services\\dubbing\")"
     ],
     "deny": [],
     "ask": []
