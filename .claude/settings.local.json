@@ -37,7 +37,8 @@
       "Bash(taskkill:*)",
       "Bash(npm test:*)",
       "Bash(grep:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(diff:*)"
     ],
     "deny": [],
     "ask": []

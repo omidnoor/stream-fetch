@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import type { AutomationJob, PipelineProgress, LogEntry } from '@/services/automation';
+import { ErrorDisplay } from '@/components/automation/ErrorDisplay';
 
 export default function JobProgressPage() {
   const params = useParams();
@@ -13,6 +14,80 @@ export default function JobProgressPage() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'complete' | 'error'>('connecting');
   const [error, setError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
+  const [retrying, setRetrying] = useState(false);
+
+  const handleDownload = async () => {
+    if (!job) return;
+
+    try {
+      setDownloading(true);
+      setError(null);
+      const response = await fetch(`/api/automation/download/${jobId}`);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Download failed');
+      }
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${job.videoInfo.title}_dubbed_${job.config.targetLanguage}.mp4`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Download failed');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleRetry = async () => {
+    try {
+      setRetrying(true);
+      setError(null);
+      const response = await fetch(`/api/automation/retry/${jobId}`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Retry failed');
+      }
+
+      // Reload the page to see updated progress
+      window.location.reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Retry failed');
+      setRetrying(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    if (!confirm('Are you sure you want to cancel this job?')) return;
+
+    try {
+      setError(null);
+      const response = await fetch(`/api/automation/cancel/${jobId}`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Cancel failed');
+      }
+
+      // Reload to see cancelled status
+      window.location.reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Cancel failed');
+    }
+  };
 
   useEffect(() => {
     // Fetch initial job status
@@ -123,7 +198,39 @@ export default function JobProgressPage() {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-bold">Pipeline Progress</h1>
-          {getStatusBadge()}
+          <div className="flex items-center gap-3">
+            {getStatusBadge()}
+
+            {/* Action Buttons */}
+            {job?.status === 'complete' && (
+              <button
+                onClick={handleDownload}
+                disabled={downloading}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {downloading ? 'Downloading...' : 'Download Video'}
+              </button>
+            )}
+
+            {job?.status === 'failed' && (
+              <button
+                onClick={handleRetry}
+                disabled={retrying}
+                className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {retrying ? 'Retrying...' : 'Retry Failed Chunks'}
+              </button>
+            )}
+
+            {job?.status && !['complete', 'failed', 'cancelled'].includes(job.status) && (
+              <button
+                onClick={handleCancel}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Cancel Job
+              </button>
+            )}
+          </div>
         </div>
         {job && (
           <div className="bg-gray-50 rounded-lg p-4">
@@ -138,9 +245,13 @@ export default function JobProgressPage() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
-          {error}
-        </div>
+        <ErrorDisplay
+          error={error}
+          title="Pipeline Error"
+          showDetails={true}
+          onDismiss={() => setError(null)}
+          onRetry={job?.status === 'failed' ? handleRetry : undefined}
+        />
       )}
 
       {progress && (

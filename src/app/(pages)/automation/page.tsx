@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { StartPipelineRequest, StartPipelineResponse } from '@/services/automation';
+import { ErrorDisplay } from '@/components/automation/ErrorDisplay';
 
 export default function AutomationPage() {
   const router = useRouter();
@@ -152,9 +153,12 @@ export default function AutomationPage() {
 
           {/* Error Display */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
+            <ErrorDisplay
+              error={error}
+              title="Failed to Start Pipeline"
+              showDetails={true}
+              onDismiss={() => setError(null)}
+            />
           )}
 
           {/* Submit Button */}

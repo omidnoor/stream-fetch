@@ -120,11 +120,86 @@ export class AutomationService {
   }
 
   /**
-   * Retry failed chunks (stub for now)
+   * Retry failed chunks
    */
-  async retryFailedChunks(jobId: string): Promise<void> {
-    // TODO: Implement in Phase 2
-    throw new Error('Not implemented yet');
+  async retryFailedChunks(jobId: string, chunkIndices?: number[]): Promise<number[]> {
+    const job = await this.jobStore.get(jobId);
+    if (!job) {
+      throw new Error('Job not found');
+    }
+
+    if (job.status !== 'failed') {
+      throw new Error('Can only retry failed jobs');
+    }
+
+    // Get chunk manifest
+    const manifest = await this.chunkService.getManifest(job.paths.chunks);
+    if (!manifest) {
+      throw new Error('Chunk manifest not found');
+    }
+
+    // Determine which chunks to retry
+    let chunksToRetry: number[];
+    if (chunkIndices && chunkIndices.length > 0) {
+      chunksToRetry = chunkIndices;
+    } else if (job.error?.failedChunks) {
+      chunksToRetry = job.error.failedChunks;
+    } else {
+      throw new Error('No failed chunks to retry');
+    }
+
+    // Update job status
+    await this.updateStatus(jobId, 'dubbing');
+    await this.addLog(jobId, 'dub', 'info', `Retrying ${chunksToRetry.length} failed chunks`);
+
+    // Filter chunks to retry
+    const chunks = manifest.chunks.filter((c) => chunksToRetry.includes(c.index));
+
+    // Create parallel dubbing service
+    const dubbingService = new ParallelDubbingService(
+      job.config.maxParallelJobs,
+      3,
+      5000,
+      2
+    );
+
+    try {
+      // Retry chunks
+      const results = await dubbingService.retryFailedChunks(
+        chunksToRetry,
+        manifest.chunks,
+        job.paths.dubbed,
+        job.config.targetLanguage,
+        (progress) => {
+          this.updateProgress(jobId, {
+            stage: 'dub',
+            dubbing: progress,
+          });
+        }
+      );
+
+      // Check if retry was successful
+      const failedResults = results.filter((r) => !r.success);
+      if (failedResults.length > 0) {
+        throw new Error(`${failedResults.length} chunks still failed after retry`);
+      }
+
+      await this.addLog(jobId, 'dub', 'info', 'Retry successful, continuing pipeline');
+
+      // Continue with merging
+      await this.mergeChunks(job);
+      await this.finalize(job);
+
+      await this.updateStatus(jobId, 'complete');
+      await this.addLog(jobId, 'finalize', 'info', 'Pipeline completed after retry');
+
+      this.progressEmitter.emitComplete(jobId, job.outputFile!, Date.now() - job.progress.startedAt.getTime());
+
+      return chunksToRetry;
+    } catch (error) {
+      await this.handlePipelineError(jobId, error as Error);
+      throw error;
+    }
   }
 
   // ============================================================================
