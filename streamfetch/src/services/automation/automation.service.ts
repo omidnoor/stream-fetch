@@ -21,6 +21,8 @@ import { getTempManager } from '@/lib/automation/temp-manager';
 import { getProgressEmitter, createLogEntry } from '@/lib/automation/progress-emitter';
 import { getCostCalculator } from '@/lib/automation/cost-calculator';
 import { getChunkService } from './chunk.service';
+import { ParallelDubbingService } from './parallel-dubbing.service';
+import { getMergeService } from './merge.service';
 import { YouTubeService } from '@/services/youtube/youtube.service';
 
 export class AutomationService {
@@ -29,6 +31,7 @@ export class AutomationService {
   private progressEmitter = getProgressEmitter();
   private costCalculator = getCostCalculator();
   private chunkService = getChunkService();
+  private mergeService = getMergeService();
 
   constructor(
     private youtubeService: YouTubeService
@@ -42,12 +45,12 @@ export class AutomationService {
     const videoInfoDto = await this.youtubeService.getVideoInfo(youtubeUrl);
 
     const videoInfo: VideoInfo = {
-      title: videoInfoDto.title,
-      duration: videoInfoDto.duration,
-      thumbnail: videoInfoDto.thumbnail,
-      resolution: `${videoInfoDto.formats[0]?.width || 0}x${videoInfoDto.formats[0]?.height || 0}`,
-      codec: videoInfoDto.formats[0]?.mimeType?.split(';')[0] || 'video/mp4',
-      fileSize: videoInfoDto.formats[0]?.contentLength,
+      title: videoInfoDto.video.title,
+      duration: videoInfoDto.video.duration,
+      thumbnail: videoInfoDto.video.thumbnail,
+      resolution: `${videoInfoDto.formats[0]?.quality || 'unknown'}`,
+      codec: videoInfoDto.formats[0]?.codec || 'video/mp4',
+      fileSize: videoInfoDto.formats[0]?.filesize ?? undefined,
     };
 
     // Create job
@@ -175,7 +178,7 @@ export class AutomationService {
 
       // Find best mp4 format with video and audio
       const bestFormat = videoInfo.formats.find(
-        (f) => f.mimeType?.includes('video/mp4') && f.hasAudio && f.hasVideo
+        (f) => f.container?.includes('mp4') && f.hasAudio && f.hasVideo
       );
 
       if (!bestFormat) {
@@ -194,7 +197,7 @@ export class AutomationService {
           download: {
             percent,
             bytesDownloaded: 0,
-            totalBytes: downloadUrl.contentLength || 0,
+            totalBytes: downloadUrl.contentLength ? parseInt(downloadUrl.contentLength, 10) : 0,
             speed: '0 MB/s',
             eta: 0,
           },
@@ -248,38 +251,123 @@ export class AutomationService {
   }
 
   // ============================================================================
-  // Stage 3: Dub Chunks (Stub)
+  // Stage 3: Dub Chunks
   // ============================================================================
 
   private async dubChunks(job: AutomationJob): Promise<void> {
     await this.updateStatus(job.id, 'dubbing');
     await this.updateProgress(job.id, { stage: 'dub', overallPercent: 25 });
-    await this.addLog(job.id, 'dub', 'info', 'Starting parallel dubbing (stub)');
+    await this.addLog(job.id, 'dub', 'info', 'Starting parallel dubbing');
 
-    // TODO: Implement in Phase 2
-    // For now, just simulate progress
-    for (let i = 0; i <= 70; i += 10) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      await this.updateProgress(job.id, { stage: 'dub', overallPercent: 25 + i });
+    try {
+      // Get chunk manifest
+      const manifest = await this.chunkService.getManifest(job.paths.chunks);
+      if (!manifest) {
+        throw new Error('Chunk manifest not found');
+      }
+
+      // Create parallel dubbing service
+      const dubbingService = new ParallelDubbingService(
+        job.config.maxParallelJobs,
+        3, // max retries
+        5000, // initial retry delay
+        2 // backoff multiplier
+      );
+
+      // Process chunks in parallel
+      const results = await dubbingService.processChunks(
+        manifest.chunks,
+        job.paths.dubbed,
+        job.config.targetLanguage,
+        (progress) => {
+          // Calculate overall progress (25% + 70% of dubbing progress)
+          const dubbingPercent = progress.completed / progress.chunks.length;
+          const overallPercent = 25 + Math.floor(dubbingPercent * 70);
+
+          this.updateProgress(job.id, {
+            stage: 'dub',
+            overallPercent,
+            dubbing: progress,
+          });
+
+          this.addLog(
+            job.id,
+            'dub',
+            'info',
+            `Dubbing progress: ${progress.completed}/${progress.chunks.length} chunks complete (${progress.activeJobs} active, ${progress.failed} failed)`
+          );
+        }
+      );
+
+      // Check for failures
+      const failedResults = results.filter((r) => !r.success);
+      if (failedResults.length > 0) {
+        throw new Error(`${failedResults.length} chunks failed to dub`);
+      }
+
+      await this.addLog(
+        job.id,
+        'dub',
+        'info',
+        `Successfully dubbed all ${results.length} chunks`
+      );
+      await this.updateProgress(job.id, { stage: 'dub', overallPercent: 95 });
+    } catch (error) {
+      throw new Error(`Dubbing failed: ${(error as Error).message}`);
     }
-
-    await this.addLog(job.id, 'dub', 'info', 'Dubbing completed (stub)');
   }
 
   // ============================================================================
-  // Stage 4: Merge Chunks (Stub)
+  // Stage 4: Merge Chunks
   // ============================================================================
 
   private async mergeChunks(job: AutomationJob): Promise<void> {
     await this.updateStatus(job.id, 'merging');
     await this.updateProgress(job.id, { stage: 'merge', overallPercent: 95 });
-    await this.addLog(job.id, 'merge', 'info', 'Starting chunk merging (stub)');
+    await this.addLog(job.id, 'merge', 'info', 'Starting chunk merging');
 
-    // TODO: Implement in Phase 3
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      // Get chunk manifest
+      const manifest = await this.chunkService.getManifest(job.paths.chunks);
+      if (!manifest) {
+        throw new Error('Chunk manifest not found');
+      }
 
-    await this.updateProgress(job.id, { stage: 'merge', overallPercent: 98 });
-    await this.addLog(job.id, 'merge', 'info', 'Merging completed (stub)');
+      const finalOutputPath = path.join(job.paths.output, 'final_dubbed_video.mp4');
+
+      // Merge all chunks
+      await this.mergeService.mergeChunks(
+        manifest.chunks,
+        job.paths.dubbed,
+        job.paths.output,
+        finalOutputPath,
+        (progress) => {
+          // Calculate overall progress (95% + 3% of merge progress)
+          const overallPercent = 95 + Math.floor(progress.percent * 0.03);
+
+          this.updateProgress(job.id, {
+            stage: 'merge',
+            overallPercent,
+            merging: progress,
+          });
+
+          this.addLog(
+            job.id,
+            'merge',
+            'info',
+            `Merging: ${progress.currentStep} (${progress.percent}%)`
+          );
+        }
+      );
+
+      // Update job with output file
+      await this.jobStore.update(job.id, { outputFile: finalOutputPath });
+
+      await this.addLog(job.id, 'merge', 'info', 'Merging completed successfully');
+      await this.updateProgress(job.id, { stage: 'merge', overallPercent: 98 });
+    } catch (error) {
+      throw new Error(`Merging failed: ${(error as Error).message}`);
+    }
   }
 
   // ============================================================================

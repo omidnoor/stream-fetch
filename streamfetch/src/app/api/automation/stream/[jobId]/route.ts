@@ -10,9 +10,9 @@ import type { PipelineProgress, LogEntry, JobError } from '@/services/automation
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { jobId: string } }
+  { params }: { params: Promise<{ jobId: string }> }
 ) {
-  const { jobId } = params;
+  const { jobId } = await params;
 
   if (!jobId) {
     return new Response('Job ID is required', { status: 400 });
