@@ -169,8 +169,8 @@ function PDFEditorContent({ projectId }: { projectId: string }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0a0a0a]">
-        <div className="text-gray-400">Loading PDF editor...</div>
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-muted-foreground">Loading PDF editor...</div>
       </div>
     );
   }
@@ -180,12 +180,12 @@ function PDFEditorContent({ projectId }: { projectId: string }) {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#0a0a0a]">
+    <div className="flex flex-col h-screen bg-background">
         {/* Toolbar */}
-        <div className="flex items-center justify-between border-b border-gray-800 bg-[#1a1a1a] px-6 py-3">
+        <div className="flex items-center justify-between border-b border-border bg-surface-2 px-6 py-3">
         <div className="flex items-center gap-4">
           <Link href="/pdf/projects">
-            <Button variant="outline" size="sm" className="border-gray-700">
+            <Button variant="outline" size="sm" className="border-border">
               <FileText className="h-4 w-4 mr-2" />
               Projects
             </Button>
@@ -195,7 +195,7 @@ function PDFEditorContent({ projectId }: { projectId: string }) {
 
           <div>
             <h1 className="text-lg font-semibold text-white">{project.name}</h1>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               {project.pageCount} pages • {project.annotationCount} annotations
             </p>
           </div>
@@ -212,7 +212,7 @@ function PDFEditorContent({ projectId }: { projectId: string }) {
           <Button
             variant="outline"
             size="sm"
-            className="border-gray-700"
+            className="border-border"
             onClick={handleSaveAnnotations}
             disabled={saving}
           >
@@ -229,9 +229,9 @@ function PDFEditorContent({ projectId }: { projectId: string }) {
       {/* Main Content Area */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar - Page Thumbnails */}
-        <div className="w-48 border-r border-gray-800 bg-[#0f0f0f] overflow-y-auto">
+        <div className="w-48 border-r border-border bg-surface-1 overflow-y-auto">
           <div className="p-3">
-            <h3 className="text-xs font-semibold text-gray-400 uppercase mb-3">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-3">
               Pages
             </h3>
             <div className="space-y-2">
@@ -249,9 +249,9 @@ function PDFEditorContent({ projectId }: { projectId: string }) {
                 Array.from({ length: project.pageCount }, (_, i) => (
                   <div
                     key={i}
-                    className="aspect-[8.5/11] bg-gray-900 border border-gray-800 rounded flex items-center justify-center"
+                    className="aspect-[8.5/11] bg-surface-1 border border-border rounded flex items-center justify-center"
                   >
-                    <span className="text-xs text-gray-600">{i + 1}</span>
+                    <span className="text-xs text-muted-foreground">{i + 1}</span>
                   </div>
                 ))}
             </div>
@@ -259,7 +259,7 @@ function PDFEditorContent({ projectId }: { projectId: string }) {
         </div>
 
         {/* Center - PDF Viewer */}
-        <div className="flex-1 bg-[#0a0a0a] overflow-hidden">
+        <div className="flex-1 bg-background overflow-hidden">
           {pdfFileUrl ? (
             <AnnotatablePDFViewer
               fileUrl={pdfFileUrl}
@@ -270,8 +270,8 @@ function PDFEditorContent({ projectId }: { projectId: string }) {
             />
           ) : (
             <div className="flex h-full items-center justify-center">
-              <div className="text-center text-gray-400">
-                <FileText className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+              <div className="text-center text-muted-foreground">
+                <FileText className="h-16 w-16 mx-auto mb-4 text-foreground" />
                 <p className="text-lg font-medium mb-2">No PDF Loaded</p>
                 <p className="text-sm">Upload a PDF to get started</p>
               </div>
@@ -280,7 +280,7 @@ function PDFEditorContent({ projectId }: { projectId: string }) {
         </div>
 
         {/* Right Sidebar - Tools & Properties */}
-        <div className="w-80 border-l border-gray-800 bg-[#0f0f0f] overflow-y-auto">
+        <div className="w-80 border-l border-border bg-surface-1 overflow-y-auto">
           <div className="p-4">
             <AnnotationToolbar />
 
@@ -292,8 +292,8 @@ function PDFEditorContent({ projectId }: { projectId: string }) {
       </div>
 
       {/* Status Bar */}
-      <div className="border-t border-gray-800 bg-[#1a1a1a] px-6 py-2">
-        <div className="flex items-center justify-between text-xs text-gray-500">
+      <div className="border-t border-border bg-surface-2 px-6 py-2">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div>
             Page {currentPage} of {pdfDoc?.numPages || project.pageCount}
           </div>
@@ -332,8 +332,8 @@ function PDFEditorPageInner() {
 export default function PDFEditorPage() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen bg-[#0a0a0a]">
-        <div className="text-gray-400">Loading PDF editor...</div>
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-muted-foreground">Loading PDF editor...</div>
       </div>
     }>
       <PDFEditorPageInner />

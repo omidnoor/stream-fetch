@@ -33,6 +33,7 @@ export class AnnotationManager {
   private activeTool: AnnotationType | null = null;
   private shapeStartPos: { x: number; y: number } | null = null;
   private isDrawingShape: boolean = false;
+  private tempShape: FabricObject | null = null; // Temporary shape during drawing
 
   /**
    * Initialize Fabric.js canvas
@@ -109,6 +110,22 @@ export class AnnotationManager {
       }
     });
 
+    // Path created (freehand drawing)
+    this.canvas.on('path:created', (e) => {
+      const path = e.path as any;
+      if (!path) return;
+
+      // Add annotation metadata to the path
+      const id = `drawing-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      path.annotationId = id;
+      path.annotationType = 'drawing' as AnnotationType.DRAWING;
+      path.pageNumber = this.currentPageNumber;
+
+      // Save annotations
+      this.saveCurrentPageAnnotations();
+      this.onAnnotationsChanged?.(this.getAllAnnotations());
+    });
+
     // Mouse down - start shape drawing or add text
     this.canvas.on('mouse:down', (e) => {
       if (!this.activeTool || !e.pointer) return;
@@ -133,31 +150,124 @@ export class AnnotationManager {
       if (this.activeTool === 'areaMarker' || this.activeTool === 'rectangle' || this.activeTool === 'circle') {
         this.isDrawingShape = true;
         this.shapeStartPos = { x, y };
+
+        // Create initial temp shape
+        if (this.activeTool === 'circle') {
+          this.tempShape = new Circle({
+            left: x - 1, // Center the circle at click point
+            top: y - 1,
+            radius: 1,
+            stroke: this.toolConfig.shapeStrokeColor,
+            strokeWidth: this.toolConfig.shapeStrokeWidth,
+            fill: this.toolConfig.shapeFillColor || '',
+            opacity: this.toolConfig.shapeFillOpacity,
+            selectable: false,
+            evented: false,
+          });
+        } else if (this.activeTool === 'rectangle') {
+          this.tempShape = new Rect({
+            left: x,
+            top: y,
+            width: 1,
+            height: 1,
+            stroke: this.toolConfig.shapeStrokeColor,
+            strokeWidth: this.toolConfig.shapeStrokeWidth,
+            fill: this.toolConfig.shapeFillColor || '',
+            opacity: this.toolConfig.shapeFillOpacity,
+            selectable: false,
+            evented: false,
+          });
+        } else if (this.activeTool === 'areaMarker') {
+          this.tempShape = new Rect({
+            left: x,
+            top: y,
+            width: 1,
+            height: 1,
+            fill: this.toolConfig.highlightColor,
+            opacity: this.toolConfig.highlightOpacity,
+            selectable: false,
+            evented: false,
+          });
+        }
+
+        if (this.tempShape && this.canvas) {
+          this.canvas.add(this.tempShape);
+          this.canvas.renderAll();
+        }
       }
     });
 
-    // Mouse up - finish shape drawing
-    this.canvas.on('mouse:up', (e) => {
-      if (!this.activeTool || !this.isDrawingShape || !this.shapeStartPos || !e.pointer) {
+    // Mouse move - update temp shape while dragging
+    this.canvas.on('mouse:move', (e) => {
+      if (!this.isDrawingShape || !this.shapeStartPos || !this.tempShape || !e.pointer || !this.canvas) {
         return;
       }
 
       const { x, y } = e.pointer;
-      const width = Math.abs(x - this.shapeStartPos.x);
-      const height = Math.abs(y - this.shapeStartPos.y);
-      const startX = Math.min(x, this.shapeStartPos.x);
-      const startY = Math.min(y, this.shapeStartPos.y);
 
-      // Only create if shape has meaningful size
-      if (width > 5 && height > 5) {
-        if (this.activeTool === 'areaMarker') {
-          // Area marker uses highlight styling
-          this.addHighlightAnnotation(startX, startY, width, height);
-        } else if (this.activeTool === 'rectangle') {
-          this.addRectangleAnnotation(startX, startY, width, height);
-        } else if (this.activeTool === 'circle') {
-          const radius = Math.min(width, height) / 2;
-          this.addCircleAnnotation(startX + width / 2, startY + height / 2, radius);
+      if (this.activeTool === 'circle') {
+        // Circle: update radius based on distance from start
+        const radius = Math.sqrt(
+          Math.pow(x - this.shapeStartPos.x, 2) + Math.pow(y - this.shapeStartPos.y, 2)
+        );
+        // Keep circle centered at start position by adjusting left/top
+        // Fabric.js left/top is the bounding box corner, not center
+        (this.tempShape as Circle).set({
+          radius,
+          left: this.shapeStartPos.x - radius,
+          top: this.shapeStartPos.y - radius,
+        });
+      } else {
+        // Rectangle and area marker: update dimensions
+        const width = Math.abs(x - this.shapeStartPos.x);
+        const height = Math.abs(y - this.shapeStartPos.y);
+        const left = Math.min(x, this.shapeStartPos.x);
+        const top = Math.min(y, this.shapeStartPos.y);
+        (this.tempShape as Rect).set({ left, top, width, height });
+      }
+
+      this.canvas.renderAll();
+    });
+
+    // Mouse up - finish shape drawing
+    this.canvas.on('mouse:up', (e) => {
+      if (!this.activeTool || !this.isDrawingShape || !this.shapeStartPos || !e.pointer || !this.canvas) {
+        return;
+      }
+
+      const { x, y } = e.pointer;
+
+      // Remove temporary shape
+      if (this.tempShape) {
+        this.canvas.remove(this.tempShape);
+        this.tempShape = null;
+      }
+
+      // Circle: use start position as center, distance as radius
+      if (this.activeTool === 'circle') {
+        const radius = Math.sqrt(
+          Math.pow(x - this.shapeStartPos.x, 2) + Math.pow(y - this.shapeStartPos.y, 2)
+        );
+
+        // Only create if circle has meaningful size
+        if (radius > 5) {
+          this.addCircleAnnotation(this.shapeStartPos.x, this.shapeStartPos.y, radius);
+        }
+      } else {
+        // Rectangle and area marker: use bounding box
+        const width = Math.abs(x - this.shapeStartPos.x);
+        const height = Math.abs(y - this.shapeStartPos.y);
+        const startX = Math.min(x, this.shapeStartPos.x);
+        const startY = Math.min(y, this.shapeStartPos.y);
+
+        // Only create if shape has meaningful size
+        if (width > 5 && height > 5) {
+          if (this.activeTool === 'areaMarker') {
+            // Area marker uses highlight styling
+            this.addHighlightAnnotation(startX, startY, width, height);
+          } else if (this.activeTool === 'rectangle') {
+            this.addRectangleAnnotation(startX, startY, width, height);
+          }
         }
       }
 
@@ -170,6 +280,15 @@ export class AnnotationManager {
    * Set the active annotation tool
    */
   setActiveTool(tool: AnnotationType | null): void {
+    // Clean up any temporary shapes when switching tools
+    if (this.tempShape && this.canvas) {
+      this.canvas.remove(this.tempShape);
+      this.tempShape = null;
+      this.canvas.renderAll();
+    }
+    this.isDrawingShape = false;
+    this.shapeStartPos = null;
+
     this.activeTool = tool;
 
     if (!this.canvas) return;

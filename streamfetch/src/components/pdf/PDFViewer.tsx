@@ -233,9 +233,9 @@ export function PDFViewer({
   // Error state - only case where we don't show canvas
   if (error) {
     return (
-      <div className="flex h-full items-center justify-center bg-zinc-900">
-        <div className="max-w-md rounded-lg border border-red-500/20 bg-red-500/10 p-6 text-center">
-          <p className="text-sm text-red-400">{error}</p>
+      <div className="flex h-full items-center justify-center bg-surface-1">
+        <div className="max-w-md rounded-lg border border-destructive/20 bg-destructive/10 p-6 text-center">
+          <p className="text-sm text-destructive">{error}</p>
         </div>
       </div>
     );
@@ -245,14 +245,14 @@ export function PDFViewer({
   return (
     <div
       ref={containerRef}
-      className={`relative flex h-full items-center justify-center overflow-auto bg-zinc-900 ${className}`}
+      className={`relative flex h-full items-center justify-center overflow-auto bg-surface-1 ${className}`}
     >
       {/* Loading overlay - shown on top of canvas */}
       {loading && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-zinc-900">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface-1">
           <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-            <p className="text-sm text-gray-400">Loading PDF...</p>
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Loading PDF...</p>
           </div>
         </div>
       )}

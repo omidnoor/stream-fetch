@@ -54,7 +54,7 @@ export function PDFZoomControls({
       <button
         onClick={handleZoomOut}
         disabled={scale <= PDFJS_OPTIONS.minScale}
-        className="rounded-lg bg-zinc-800 p-2 text-gray-300 transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-zinc-800"
+        className="rounded-lg bg-surface-2 p-2 text-foreground transition-colors hover:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-surface-2"
         aria-label="Zoom out"
         title="Zoom out"
       >
@@ -62,7 +62,7 @@ export function PDFZoomControls({
       </button>
 
       {/* Zoom percentage */}
-      <div className="min-w-[60px] text-center text-sm font-medium text-gray-300">
+      <div className="min-w-[60px] text-center text-sm font-medium text-foreground">
         {zoomPercentage}%
       </div>
 
@@ -70,7 +70,7 @@ export function PDFZoomControls({
       <button
         onClick={handleZoomIn}
         disabled={scale >= PDFJS_OPTIONS.maxScale}
-        className="rounded-lg bg-zinc-800 p-2 text-gray-300 transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-zinc-800"
+        className="rounded-lg bg-surface-2 p-2 text-foreground transition-colors hover:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-surface-2"
         aria-label="Zoom in"
         title="Zoom in"
       >
@@ -81,7 +81,7 @@ export function PDFZoomControls({
       {onFitToWidth && (
         <button
           onClick={onFitToWidth}
-          className="rounded-lg bg-zinc-800 p-2 text-gray-300 transition-colors hover:bg-zinc-700"
+          className="rounded-lg bg-surface-2 p-2 text-foreground transition-colors hover:bg-surface-3"
           aria-label="Fit to width"
           title="Fit to width"
         >

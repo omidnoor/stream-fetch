@@ -114,10 +114,10 @@ export default function PDFPage({
 
   if (error) {
     return (
-      <div className={`flex items-center justify-center p-8 bg-gray-900 ${className}`}>
+      <div className={`flex items-center justify-center p-8 bg-surface-1 ${className}`}>
         <div className="text-center">
-          <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-          <p className="text-xs text-gray-400">Failed to load page {pageNum}</p>
+          <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
+          <p className="text-xs text-muted-foreground">Failed to load page {pageNum}</p>
         </div>
       </div>
     );
@@ -131,8 +131,8 @@ export default function PDFPage({
         style={{ display: loading ? "none" : "block" }}
       />
       {loading && (
-        <div className="flex items-center justify-center p-8 bg-gray-900">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <div className="flex items-center justify-center p-8 bg-surface-1">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       )}
     </div>

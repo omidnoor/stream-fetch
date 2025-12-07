@@ -80,7 +80,7 @@ export function AnnotationToolbar() {
               className={`w-full justify-start ${
                 isActive
                   ? 'bg-primary text-white'
-                  : 'border-gray-700 hover:bg-gray-800 text-gray-300'
+                  : 'border-border hover:bg-surface-3 text-foreground'
               }`}
               onClick={() => {
                 setActiveTool(isActive ? null : tool.type);
@@ -95,10 +95,10 @@ export function AnnotationToolbar() {
       </div>
 
       {/* Action Buttons */}
-      <div className="pt-4 border-t border-gray-700">
+      <div className="pt-4 border-t border-border">
         <Button
           variant="outline"
-          className="w-full justify-start border-gray-700 hover:bg-red-900/20 hover:border-red-700 text-red-400"
+          className="w-full justify-start border-border hover:bg-destructive/20 hover:border-destructive text-destructive"
           onClick={deleteSelectedAnnotation}
           disabled={!selectedAnnotationId}
           title="Delete selected annotation"

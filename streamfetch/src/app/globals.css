@@ -76,11 +76,160 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
       'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
       sans-serif;
   }
+}
+
+/* ============================================
+   COMPONENT LAYER - Reusable Patterns
+   ============================================ */
+@layer components {
+  /* Progress Bars */
+  .progress-bar {
+    @apply relative h-2 w-full overflow-hidden rounded-full;
+    background: hsl(var(--surface-3));
+  }
+
+  .progress-fill {
+    @apply h-full rounded-full transition-all duration-300 ease-out;
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)));
+    width: var(--progress, 0%);
+  }
+
+  /* Input Fields */
+  .input-field {
+    @apply w-full rounded-md border border-border bg-surface-1 px-3 py-2;
+    @apply text-foreground placeholder:text-muted-foreground;
+    @apply focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary;
+    @apply transition-colors duration-200;
+  }
+
+  /* Card Patterns */
+  .card-base {
+    @apply rounded-lg border border-border bg-card p-4;
+  }
+
+  .card-hover {
+    @apply card-base transition-all duration-200;
+    @apply hover:border-muted-foreground hover:shadow-lg;
+  }
+
+  .card-elevated {
+    @apply card-base shadow-lg;
+    background: hsl(var(--surface-2));
+  }
+
+  /* Icon Box */
+  .icon-box {
+    @apply flex items-center justify-center rounded-lg p-2;
+  }
+
+  /* Button Ghost */
+  .btn-ghost {
+    @apply rounded-md px-3 py-2 transition-colors duration-200;
+    @apply hover:bg-surface-3;
+  }
+}
+
+/* ============================================
+   UTILITIES LAYER - Atomic Helpers
+   ============================================ */
+@layer utilities {
+  /* Pointer Events */
+  .interactive {
+    pointer-events: auto;
+  }
+
+  .non-interactive {
+    pointer-events: none;
+  }
+
+  /* Text Truncation */
+  .truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Scrollbar Styling */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--surface-3)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--surface-3));
+    border-radius: 3px;
+  }
+
+  /* Gradient Text */
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-mid)), hsl(var(--gradient-end)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Glass Effect */
+  .glass {
+    backdrop-filter: blur(12px);
+    background: hsl(var(--background) / 0.8);
+  }
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 /* PDF.js Text Layer Styles - Required for text selection */

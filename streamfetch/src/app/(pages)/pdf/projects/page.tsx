@@ -137,13 +137,13 @@ export default function PDFProjectsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] p-8">
+    <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">PDF Projects</h1>
-            <p className="text-gray-400">Manage your PDF editing projects</p>
+            <p className="text-muted-foreground">Manage your PDF editing projects</p>
           </div>
 
           {/* Upload Button */}
@@ -171,15 +171,15 @@ export default function PDFProjectsPage() {
         {/* Projects Grid */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="text-gray-400">Loading projects...</div>
+            <div className="text-muted-foreground">Loading projects...</div>
           </div>
         ) : projects.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-gray-800 rounded-lg">
-            <FileText className="h-16 w-16 text-gray-600 mb-4" />
-            <h2 className="text-xl font-semibold text-gray-300 mb-2">
+          <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-border rounded-lg">
+            <FileText className="h-16 w-16 text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold text-foreground mb-2">
               No PDF projects yet
             </h2>
-            <p className="text-gray-500 mb-6">
+            <p className="text-muted-foreground mb-6">
               Upload a PDF to get started with editing
             </p>
             <label htmlFor="pdf-upload-empty">
@@ -203,7 +203,7 @@ export default function PDFProjectsPage() {
             {projects.map((project) => (
               <div
                 key={project.id}
-                className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6 hover:border-gray-700 transition-colors"
+                className="bg-surface-2 border border-border rounded-lg p-6 hover:border-border transition-colors"
               >
                 {/* Project Icon */}
                 <div className="flex items-center justify-between mb-4">
@@ -218,7 +218,7 @@ export default function PDFProjectsPage() {
                         ? "bg-yellow-500/10 text-yellow-500"
                         : project.status === "failed"
                         ? "bg-red-500/10 text-red-500"
-                        : "bg-gray-500/10 text-gray-500"
+                        : "bg-gray-500/10 text-muted-foreground"
                     }`}
                   >
                     {project.status}
@@ -231,17 +231,17 @@ export default function PDFProjectsPage() {
                 </h3>
 
                 <div className="space-y-1 mb-4">
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-muted-foreground">
                     {project.pageCount} page{project.pageCount !== 1 ? "s" : ""}
                   </p>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-muted-foreground">
                     {formatFileSize(project.fileSize)}
                   </p>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-muted-foreground">
                     {project.annotationCount} annotation
                     {project.annotationCount !== 1 ? "s" : ""}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     {formatDate(project.updatedAt)}
                   </p>
                 </div>
@@ -260,7 +260,7 @@ export default function PDFProjectsPage() {
                     onClick={() => handleDelete(project.id)}
                     variant="outline"
                     size="sm"
-                    className="border-gray-700 hover:border-red-500 hover:text-red-500"
+                    className="border-border hover:border-red-500 hover:text-red-500"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

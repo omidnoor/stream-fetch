@@ -108,7 +108,7 @@ export default function PDFThumbnail({
         ${
           isActive
             ? "border-primary ring-2 ring-primary/50"
-            : "border-gray-800 hover:border-gray-600"
+            : "border-border hover:border-muted-foreground"
         }
         ${className}
       `}
@@ -117,22 +117,22 @@ export default function PDFThumbnail({
       {/* Canvas */}
       <canvas
         ref={canvasRef}
-        className={`w-full h-full object-contain bg-gray-900 ${
+        className={`w-full h-full object-contain bg-surface-1 ${
           loading ? "hidden" : "block"
         }`}
       />
 
       {/* Loading State */}
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
-          <Loader2 className="h-4 w-4 animate-spin text-gray-600" />
+        <div className="absolute inset-0 flex items-center justify-center bg-surface-1">
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
         </div>
       )}
 
       {/* Error State */}
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
-          <AlertCircle className="h-4 w-4 text-red-500" />
+        <div className="absolute inset-0 flex items-center justify-center bg-surface-1">
+          <AlertCircle className="h-4 w-4 text-destructive" />
         </div>
       )}
 
@@ -144,7 +144,7 @@ export default function PDFThumbnail({
           ${
             isActive
               ? "bg-primary text-white"
-              : "bg-black/70 text-gray-300"
+              : "bg-black/70 text-foreground"
           }
         `}
         >

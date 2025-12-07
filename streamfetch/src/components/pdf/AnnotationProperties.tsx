@@ -25,7 +25,7 @@ export function AnnotationProperties() {
 
   if (!activeTool) {
     return (
-      <div className="text-sm text-gray-400">
+      <div className="text-sm text-muted-foreground">
         <p className="mb-2">Select an annotation tool to configure properties</p>
       </div>
     );
@@ -39,7 +39,7 @@ export function AnnotationProperties() {
       {activeTool === AnnotationType.TEXT && (
         <div className="space-y-4">
           <div>
-            <Label htmlFor="font-size" className="text-gray-300 text-xs">
+            <Label htmlFor="font-size" className="text-foreground text-xs">
               Font Size
             </Label>
             <div className="flex items-center gap-2 mt-1">
@@ -52,21 +52,21 @@ export function AnnotationProperties() {
                 onValueChange={([value]) => updateToolConfig({ fontSize: value })}
                 className="flex-1"
               />
-              <span className="text-xs text-gray-400 w-10 text-right">
+              <span className="text-xs text-muted-foreground w-10 text-right">
                 {toolConfig.fontSize || 16}px
               </span>
             </div>
           </div>
 
           <div>
-            <Label htmlFor="font-family" className="text-gray-300 text-xs">
+            <Label htmlFor="font-family" className="text-foreground text-xs">
               Font Family
             </Label>
             <Select
               value={toolConfig.fontFamily || 'Arial'}
               onValueChange={(value) => updateToolConfig({ fontFamily: value })}
             >
-              <SelectTrigger className="mt-1 bg-gray-900 border-gray-700 text-gray-300">
+              <SelectTrigger className="mt-1 bg-input border-border text-foreground">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -80,7 +80,7 @@ export function AnnotationProperties() {
           </div>
 
           <div>
-            <Label htmlFor="font-weight" className="text-gray-300 text-xs">
+            <Label htmlFor="font-weight" className="text-foreground text-xs">
               Font Weight
             </Label>
             <Select
@@ -89,7 +89,7 @@ export function AnnotationProperties() {
                 updateToolConfig({ fontWeight: value })
               }
             >
-              <SelectTrigger className="mt-1 bg-gray-900 border-gray-700 text-gray-300">
+              <SelectTrigger className="mt-1 bg-input border-border text-foreground">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -100,7 +100,7 @@ export function AnnotationProperties() {
           </div>
 
           <div>
-            <Label htmlFor="text-color" className="text-gray-300 text-xs">
+            <Label htmlFor="text-color" className="text-foreground text-xs">
               Text Color
             </Label>
             <div className="flex items-center gap-2 mt-1">
@@ -109,13 +109,13 @@ export function AnnotationProperties() {
                 type="color"
                 value={toolConfig.textColor || '#000000'}
                 onChange={(e) => updateToolConfig({ textColor: e.target.value })}
-                className="w-12 h-8 p-1 bg-gray-900 border-gray-700"
+                className="w-12 h-8 p-1 bg-input border-border"
               />
               <Input
                 type="text"
                 value={toolConfig.textColor || '#000000'}
                 onChange={(e) => updateToolConfig({ textColor: e.target.value })}
-                className="flex-1 bg-gray-900 border-gray-700 text-gray-300"
+                className="flex-1 bg-input border-border text-foreground"
               />
             </div>
           </div>
@@ -126,7 +126,7 @@ export function AnnotationProperties() {
       {activeTool === AnnotationType.HIGHLIGHT && (
         <div className="space-y-4">
           <div>
-            <Label htmlFor="highlight-color" className="text-gray-300 text-xs">
+            <Label htmlFor="highlight-color" className="text-foreground text-xs">
               Highlight Color
             </Label>
             <div className="flex items-center gap-2 mt-1">
@@ -135,19 +135,19 @@ export function AnnotationProperties() {
                 type="color"
                 value={toolConfig.highlightColor || '#FFFF00'}
                 onChange={(e) => updateToolConfig({ highlightColor: e.target.value })}
-                className="w-12 h-8 p-1 bg-gray-900 border-gray-700"
+                className="w-12 h-8 p-1 bg-input border-border"
               />
               <Input
                 type="text"
                 value={toolConfig.highlightColor || '#FFFF00'}
                 onChange={(e) => updateToolConfig({ highlightColor: e.target.value })}
-                className="flex-1 bg-gray-900 border-gray-700 text-gray-300"
+                className="flex-1 bg-input border-border text-foreground"
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="highlight-opacity" className="text-gray-300 text-xs">
+            <Label htmlFor="highlight-opacity" className="text-foreground text-xs">
               Opacity
             </Label>
             <div className="flex items-center gap-2 mt-1">
@@ -160,7 +160,7 @@ export function AnnotationProperties() {
                 onValueChange={([value]) => updateToolConfig({ highlightOpacity: value })}
                 className="flex-1"
               />
-              <span className="text-xs text-gray-400 w-10 text-right">
+              <span className="text-xs text-muted-foreground w-10 text-right">
                 {Math.round((toolConfig.highlightOpacity || 0.3) * 100)}%
               </span>
             </div>
@@ -172,7 +172,7 @@ export function AnnotationProperties() {
       {activeTool === AnnotationType.DRAWING && (
         <div className="space-y-4">
           <div>
-            <Label htmlFor="stroke-width" className="text-gray-300 text-xs">
+            <Label htmlFor="stroke-width" className="text-foreground text-xs">
               Stroke Width
             </Label>
             <div className="flex items-center gap-2 mt-1">
@@ -185,14 +185,14 @@ export function AnnotationProperties() {
                 onValueChange={([value]) => updateToolConfig({ strokeWidth: value })}
                 className="flex-1"
               />
-              <span className="text-xs text-gray-400 w-10 text-right">
+              <span className="text-xs text-muted-foreground w-10 text-right">
                 {toolConfig.strokeWidth || 2}px
               </span>
             </div>
           </div>
 
           <div>
-            <Label htmlFor="stroke-color" className="text-gray-300 text-xs">
+            <Label htmlFor="stroke-color" className="text-foreground text-xs">
               Stroke Color
             </Label>
             <div className="flex items-center gap-2 mt-1">
@@ -201,13 +201,13 @@ export function AnnotationProperties() {
                 type="color"
                 value={toolConfig.strokeColor || '#FF0000'}
                 onChange={(e) => updateToolConfig({ strokeColor: e.target.value })}
-                className="w-12 h-8 p-1 bg-gray-900 border-gray-700"
+                className="w-12 h-8 p-1 bg-input border-border"
               />
               <Input
                 type="text"
                 value={toolConfig.strokeColor || '#FF0000'}
                 onChange={(e) => updateToolConfig({ strokeColor: e.target.value })}
-                className="flex-1 bg-gray-900 border-gray-700 text-gray-300"
+                className="flex-1 bg-input border-border text-foreground"
               />
             </div>
           </div>
@@ -218,7 +218,7 @@ export function AnnotationProperties() {
       {(activeTool === AnnotationType.RECTANGLE || activeTool === AnnotationType.CIRCLE) && (
         <div className="space-y-4">
           <div>
-            <Label htmlFor="shape-stroke-width" className="text-gray-300 text-xs">
+            <Label htmlFor="shape-stroke-width" className="text-foreground text-xs">
               Stroke Width
             </Label>
             <div className="flex items-center gap-2 mt-1">
@@ -231,14 +231,14 @@ export function AnnotationProperties() {
                 onValueChange={([value]) => updateToolConfig({ shapeStrokeWidth: value })}
                 className="flex-1"
               />
-              <span className="text-xs text-gray-400 w-10 text-right">
+              <span className="text-xs text-muted-foreground w-10 text-right">
                 {toolConfig.shapeStrokeWidth || 2}px
               </span>
             </div>
           </div>
 
           <div>
-            <Label htmlFor="shape-stroke-color" className="text-gray-300 text-xs">
+            <Label htmlFor="shape-stroke-color" className="text-foreground text-xs">
               Stroke Color
             </Label>
             <div className="flex items-center gap-2 mt-1">
@@ -247,19 +247,19 @@ export function AnnotationProperties() {
                 type="color"
                 value={toolConfig.shapeStrokeColor || '#0000FF'}
                 onChange={(e) => updateToolConfig({ shapeStrokeColor: e.target.value })}
-                className="w-12 h-8 p-1 bg-gray-900 border-gray-700"
+                className="w-12 h-8 p-1 bg-input border-border"
               />
               <Input
                 type="text"
                 value={toolConfig.shapeStrokeColor || '#0000FF'}
                 onChange={(e) => updateToolConfig({ shapeStrokeColor: e.target.value })}
-                className="flex-1 bg-gray-900 border-gray-700 text-gray-300"
+                className="flex-1 bg-input border-border text-foreground"
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="shape-fill-color" className="text-gray-300 text-xs">
+            <Label htmlFor="shape-fill-color" className="text-foreground text-xs">
               Fill Color
             </Label>
             <div className="flex items-center gap-2 mt-1">
@@ -268,19 +268,19 @@ export function AnnotationProperties() {
                 type="color"
                 value={toolConfig.shapeFillColor || '#0000FF'}
                 onChange={(e) => updateToolConfig({ shapeFillColor: e.target.value })}
-                className="w-12 h-8 p-1 bg-gray-900 border-gray-700"
+                className="w-12 h-8 p-1 bg-input border-border"
               />
               <Input
                 type="text"
                 value={toolConfig.shapeFillColor || '#0000FF'}
                 onChange={(e) => updateToolConfig({ shapeFillColor: e.target.value })}
-                className="flex-1 bg-gray-900 border-gray-700 text-gray-300"
+                className="flex-1 bg-input border-border text-foreground"
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="shape-fill-opacity" className="text-gray-300 text-xs">
+            <Label htmlFor="shape-fill-opacity" className="text-foreground text-xs">
               Fill Opacity
             </Label>
             <div className="flex items-center gap-2 mt-1">
@@ -293,7 +293,7 @@ export function AnnotationProperties() {
                 onValueChange={([value]) => updateToolConfig({ shapeFillOpacity: value })}
                 className="flex-1"
               />
-              <span className="text-xs text-gray-400 w-10 text-right">
+              <span className="text-xs text-muted-foreground w-10 text-right">
                 {Math.round((toolConfig.shapeFillOpacity || 0.1) * 100)}%
               </span>
             </div>

@@ -54,8 +54,8 @@ export default function PDFThumbnailSidebar({
     return (
       <div className={`flex items-center justify-center p-8 ${className}`}>
         <div className="text-center">
-          <FileText className="h-12 w-12 text-gray-600 mx-auto mb-2" />
-          <p className="text-xs text-gray-500">No PDF loaded</p>
+          <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+          <p className="text-xs text-muted-foreground">No PDF loaded</p>
         </div>
       </div>
     );
@@ -67,10 +67,10 @@ export default function PDFThumbnailSidebar({
   return (
     <div
       ref={sidebarRef}
-      className={`w-48 bg-[#0f0f0f] border-r border-gray-800 overflow-y-auto ${className}`}
+      className={`w-48 bg-surface-1 border-r border-border overflow-y-auto ${className}`}
     >
       <div className="p-3">
-        <h3 className="text-xs font-semibold text-gray-400 uppercase mb-3 sticky top-0 bg-[#0f0f0f] py-2 z-10">
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-3 sticky top-0 bg-surface-1 py-2 z-10">
           Pages ({totalPages})
         </h3>
 

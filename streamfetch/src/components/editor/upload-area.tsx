@@ -201,10 +201,10 @@ export function UploadArea({
                       <span>Uploading...</span>
                       <span>{uploadProgress}%</span>
                     </div>
-                    <div className="h-2 bg-surface-3 rounded-full overflow-hidden">
+                    <div className="progress-bar">
                       <div
-                        className="h-full bg-primary transition-all duration-300"
-                        style={{ width: `${uploadProgress}%` }}
+                        className="progress-fill"
+                        style={{ '--progress': `${uploadProgress}%` } as React.CSSProperties}
                       />
                     </div>
                   </div>

@@ -36,7 +36,8 @@
       "Bash(npm pkg set:*)",
       "Bash(taskkill:*)",
       "Bash(npm test:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []
