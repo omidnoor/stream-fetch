@@ -130,7 +130,7 @@ export default function HomePage() {
               Ready to Get Started?
             </h2>
             <p className="mb-8 text-lg text-muted-foreground">
-              Join thousands of creators using StreamFetch for their video workflow.
+              Start downloading, dubbing, and editing your videos today.
             </p>
             <div className="flex flex-col justify-center gap-3 sm:flex-row">
               <a

@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { StartPipelineRequest, StartPipelineResponse } from '@/services/automation';
 import { ErrorDisplay } from '@/components/automation/ErrorDisplay';
+import { EstimateCard } from '@/components/automation/EstimateCard';
+import type { VideoInfo } from '@/lib/types';
 
 export default function AutomationPage() {
   const router = useRouter();
@@ -13,7 +15,37 @@ export default function AutomationPage() {
   const [maxParallelJobs, setMaxParallelJobs] = useState(3);
   const [useWatermark, setUseWatermark] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingInfo, setIsFetchingInfo] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
+
+  const fetchVideoInfo = async () => {
+    if (!youtubeUrl.trim()) {
+      setError('Please enter a YouTube URL');
+      return;
+    }
+
+    setIsFetchingInfo(true);
+    setError(null);
+    setVideoInfo(null);
+
+    try {
+      const response = await fetch(`/api/video-info?url=${encodeURIComponent(youtubeUrl)}`);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch video info');
+      }
+
+      const data: VideoInfo = await response.json();
+      setVideoInfo(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch video info');
+      setVideoInfo(null);
+    } finally {
+      setIsFetchingInfo(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,15 +102,28 @@ export default function AutomationPage() {
             <label htmlFor="youtubeUrl" className="block text-sm font-medium text-gray-700 mb-2">
               YouTube URL
             </label>
-            <input
-              id="youtubeUrl"
-              type="url"
-              value={youtubeUrl}
-              onChange={(e) => setYoutubeUrl(e.target.value)}
-              placeholder="https://www.youtube.com/watch?v=..."
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+            <div className="flex gap-2">
+              <input
+                id="youtubeUrl"
+                type="url"
+                value={youtubeUrl}
+                onChange={(e) => {
+                  setYoutubeUrl(e.target.value);
+                  setVideoInfo(null); // Clear video info when URL changes
+                }}
+                placeholder="https://www.youtube.com/watch?v=..."
+                required
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <button
+                type="button"
+                onClick={fetchVideoInfo}
+                disabled={isFetchingInfo || !youtubeUrl.trim()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium whitespace-nowrap"
+              >
+                {isFetchingInfo ? 'Loading...' : 'Get Estimate'}
+              </button>
+            </div>
           </div>
 
           {/* Chunk Duration */}
@@ -164,13 +209,43 @@ export default function AutomationPage() {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !videoInfo}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
           >
             {isLoading ? 'Starting Pipeline...' : 'Start Dubbing Pipeline'}
           </button>
+
+          {!videoInfo && (
+            <p className="text-sm text-gray-500 text-center">
+              Click "Get Estimate" to preview the cost and time before starting
+            </p>
+          )}
         </form>
       </div>
+
+      {/* Estimate Card */}
+      {videoInfo && (
+        <div className="mt-6">
+          <EstimateCard
+            videoInfo={videoInfo}
+            config={{
+              chunkDuration,
+              targetLanguage,
+              maxParallelJobs,
+              videoQuality: '1080p',
+              outputFormat: 'mp4',
+              useWatermark,
+              keepIntermediateFiles: false,
+              chunkingStrategy: 'fixed',
+            }}
+          />
+          <div className="mt-3 text-center">
+            <p className="text-sm text-gray-600">
+              Estimates update automatically as you adjust settings above
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h2 className="font-semibold text-blue-900 mb-2">How it works:</h2>

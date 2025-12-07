@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Play, Download, Languages, Film } from "lucide-react";
+import { ArrowRight, Download, Languages, Film } from "lucide-react";
 
 export function Hero() {
   return (
@@ -36,36 +36,34 @@ export function Hero() {
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-col gap-4 sm:flex-row sm:gap-3">
               <Button size="lg" className="gap-2" asChild>
                 <Link href="/dashboard">
                   Get Started Free
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="gap-2">
-                <Play className="h-4 w-4" />
-                Watch Demo
+              <Button size="lg" variant="outline" className="gap-2" asChild>
+                <Link href="#features">
+                  Explore Features
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </Button>
             </div>
 
-            {/* Stats */}
-            <div className="flex flex-wrap gap-8 pt-4">
-              <div>
-                <div className="text-3xl font-bold">10K+</div>
-                <div className="text-sm text-muted-foreground">
-                  Videos Downloaded
-                </div>
+            {/* Feature Highlights */}
+            <div className="flex flex-wrap gap-6 pt-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+                <span>No registration required</span>
               </div>
-              <div>
-                <div className="text-3xl font-bold">50+</div>
-                <div className="text-sm text-muted-foreground">
-                  Languages Supported
-                </div>
+              <div className="flex items-center gap-2">
+                <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+                <span>Free to use</span>
               </div>
-              <div>
-                <div className="text-3xl font-bold">5K+</div>
-                <div className="text-sm text-muted-foreground">Active Users</div>
+              <div className="flex items-center gap-2">
+                <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+                <span>Multiple formats supported</span>
               </div>
             </div>
           </div>

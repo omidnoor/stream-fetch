@@ -284,11 +284,14 @@ async concatenate(listFile: string, output: string) {
   - [x] Language dropdown
   - [x] Advanced options toggle
 
-- [ ] Estimate display
-  - [ ] `estimate-card.tsx`
-  - [ ] Chunks count
-  - [ ] Time estimate
-  - [ ] Cost estimate
+- [x] Estimate display
+  - [x] `EstimateCard.tsx` component
+  - [x] Chunks count
+  - [x] Time estimate
+  - [x] Cost estimate
+  - [x] Video info preview
+  - [x] Real-time updates when config changes
+  - [x] "Get Estimate" button integration
 
 - [x] Progress components (integrated in progress page)
   - [x] Overall progress bar
@@ -486,14 +489,14 @@ function calculateOverallProgress(progress: PipelineProgress): number {
 
 ### Phase 4: UI Components ✅ COMPLETED
 - [x] Page layouts
-- [x] URL input
+- [x] URL input with "Get Estimate" button
 - [x] Config panel
-- [x] Estimate card (EstimateCard.tsx)
+- [x] Estimate card (EstimateCard.tsx with real-time updates)
 - [x] Progress components (basic)
 - [x] Log viewer
 - [x] Error display component (ErrorDisplay.tsx)
 - [x] Result components (CompletionCard.tsx)
-- [x] History list
+- [x] History list with delete functionality
 
 ### Phase 5: Real-Time Progress ✅ COMPLETED
 - [x] SSE endpoint
