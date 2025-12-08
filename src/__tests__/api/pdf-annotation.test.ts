@@ -1,4 +1,3 @@
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 /**
  * PDF Annotation API Tests
  *
@@ -8,27 +7,42 @@ import { jest, describe, it, expect, beforeEach } from '@jest/globals';
  * - DELETE /api/pdf/annotation/[id] - Delete annotation
  */
 
-import { POST } from '@/app/api/pdf/annotation/route';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
 import { createMockRequest, parseJsonResponse } from '../utils/test-helpers';
 
-// Mock the PDF service
-jest.mock('@/services/pdf', () => ({
-  getPDFService: jest.fn(() => ({
-    addAnnotation: jest.fn(),
-    updateAnnotation: jest.fn(),
-    deleteAnnotation: jest.fn(),
-    getProject: jest.fn(),
-  })),
-  mapToAnnotationDto: jest.fn((annotation) => annotation),
+// Create mock functions first (before any imports)
+const mockAddAnnotation = jest.fn();
+const mockUpdateAnnotation = jest.fn();
+const mockDeleteAnnotation = jest.fn();
+const mockGetProject = jest.fn();
+const mockMapToAnnotationDto = jest.fn((annotation: unknown) => annotation);
+
+// Use unstable_mockModule for ESM compatibility
+jest.unstable_mockModule('@/services/pdf', () => ({
+  getPDFService: () => ({
+    addAnnotation: mockAddAnnotation,
+    updateAnnotation: mockUpdateAnnotation,
+    deleteAnnotation: mockDeleteAnnotation,
+    getProject: mockGetProject,
+  }),
+  mapToAnnotationDto: mockMapToAnnotationDto,
 }));
 
-import { getPDFService, mapToAnnotationDto } from '@/services/pdf';
+// Dynamic import for the routes (must be after mock setup)
+let POST: typeof import('@/app/api/pdf/annotation/route').POST;
+
+beforeAll(async () => {
+  const routeModule = await import('@/app/api/pdf/annotation/route');
+  POST = routeModule.POST;
+});
 
 describe('PDF Annotation API', () => {
-  const mockPDFService = getPDFService() as jest.Mocked<ReturnType<typeof getPDFService>>;
-
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAddAnnotation.mockReset();
+    mockMapToAnnotationDto.mockReset();
+    // Reset to default pass-through behavior
+    mockMapToAnnotationDto.mockImplementation((annotation: unknown) => annotation);
   });
 
   describe('POST /api/pdf/annotation', () => {
@@ -74,8 +88,7 @@ describe('PDF Annotation API', () => {
         createdAt: new Date().toISOString(),
       };
 
-      mockPDFService.addAnnotation.mockResolvedValue(mockAnnotation);
-      (mapToAnnotationDto as jest.Mock).mockReturnValue(mockAnnotation);
+      mockAddAnnotation.mockResolvedValue(mockAnnotation);
 
       const request = createMockRequest('/api/pdf/annotation', {
         method: 'POST',
@@ -108,8 +121,7 @@ describe('PDF Annotation API', () => {
         createdAt: new Date().toISOString(),
       };
 
-      mockPDFService.addAnnotation.mockResolvedValue(mockAnnotation);
-      (mapToAnnotationDto as jest.Mock).mockReturnValue(mockAnnotation);
+      mockAddAnnotation.mockResolvedValue(mockAnnotation);
 
       const request = createMockRequest('/api/pdf/annotation', {
         method: 'POST',
@@ -141,8 +153,7 @@ describe('PDF Annotation API', () => {
         strokeWidth: 2,
       };
 
-      mockPDFService.addAnnotation.mockResolvedValue(mockAnnotation);
-      (mapToAnnotationDto as jest.Mock).mockReturnValue(mockAnnotation);
+      mockAddAnnotation.mockResolvedValue(mockAnnotation);
 
       const request = createMockRequest('/api/pdf/annotation', {
         method: 'POST',
@@ -165,7 +176,7 @@ describe('PDF Annotation API', () => {
     });
 
     it('should handle service errors', async () => {
-      mockPDFService.addAnnotation.mockRejectedValue(new Error('Project not found'));
+      mockAddAnnotation.mockRejectedValue(new Error('Project not found'));
 
       const request = createMockRequest('/api/pdf/annotation', {
         method: 'POST',

@@ -1,42 +1,60 @@
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 /**
  * PDF Project API Tests
  *
  * Tests for:
  * - GET /api/pdf/project - List all PDF projects
  * - POST /api/pdf/project - Create new PDF project
- * - GET /api/pdf/project/[id] - Get specific project
- * - PUT /api/pdf/project/[id] - Update project
- * - DELETE /api/pdf/project/[id] - Delete project
- * - POST /api/pdf/upload - Upload PDF file
- * - POST /api/pdf/export - Export PDF with annotations
  */
 
-import { GET, POST } from '@/app/api/pdf/project/route';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
 import { createMockRequest, parseJsonResponse } from '../utils/test-helpers';
 
-// Mock the PDF service
-jest.mock('@/services/pdf', () => ({
-  getPDFService: jest.fn(() => ({
-    createProject: jest.fn(),
-    listProjects: jest.fn(),
-    getProject: jest.fn(),
-    updateProject: jest.fn(),
-    deleteProject: jest.fn(),
-    addAnnotation: jest.fn(),
-    exportPdf: jest.fn(),
-  })),
-  mapToProjectDto: jest.fn((project) => project),
-  mapToProjectDtos: jest.fn((projects) => projects),
+// Create mock functions first (before any imports)
+const mockCreateProject = jest.fn();
+const mockListProjects = jest.fn();
+const mockGetProject = jest.fn();
+const mockUpdateProject = jest.fn();
+const mockDeleteProject = jest.fn();
+const mockAddAnnotation = jest.fn();
+const mockExportPdf = jest.fn();
+const mockMapToProjectDto = jest.fn((project: unknown) => project);
+const mockMapToProjectDtos = jest.fn((projects: unknown) => projects);
+
+// Use unstable_mockModule for ESM compatibility
+jest.unstable_mockModule('@/services/pdf', () => ({
+  getPDFService: () => ({
+    createProject: mockCreateProject,
+    listProjects: mockListProjects,
+    getProject: mockGetProject,
+    updateProject: mockUpdateProject,
+    deleteProject: mockDeleteProject,
+    addAnnotation: mockAddAnnotation,
+    exportPdf: mockExportPdf,
+  }),
+  mapToProjectDto: mockMapToProjectDto,
+  mapToProjectDtos: mockMapToProjectDtos,
 }));
 
-import { getPDFService, mapToProjectDto, mapToProjectDtos } from '@/services/pdf';
+// Dynamic import for the routes (must be after mock setup)
+let GET: typeof import('@/app/api/pdf/project/route').GET;
+let POST: typeof import('@/app/api/pdf/project/route').POST;
+
+beforeAll(async () => {
+  const routeModule = await import('@/app/api/pdf/project/route');
+  GET = routeModule.GET;
+  POST = routeModule.POST;
+});
 
 describe('PDF Project API', () => {
-  const mockPDFService = getPDFService() as jest.Mocked<ReturnType<typeof getPDFService>>;
-
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCreateProject.mockReset();
+    mockListProjects.mockReset();
+    mockMapToProjectDto.mockReset();
+    mockMapToProjectDtos.mockReset();
+    // Reset to default pass-through behavior
+    mockMapToProjectDto.mockImplementation((project: unknown) => project);
+    mockMapToProjectDtos.mockImplementation((projects: unknown) => projects);
   });
 
   describe('GET /api/pdf/project', () => {
@@ -46,8 +64,7 @@ describe('PDF Project API', () => {
         { id: 'pdf-2', name: 'Document 2', status: 'completed' },
       ];
 
-      mockPDFService.listProjects.mockResolvedValue(mockProjects);
-      (mapToProjectDtos as jest.Mock).mockReturnValue(mockProjects);
+      mockListProjects.mockResolvedValue(mockProjects);
 
       const request = createMockRequest('/api/pdf/project');
       const response = await GET(request);
@@ -65,16 +82,16 @@ describe('PDF Project API', () => {
         { id: 'pdf-2', name: 'Report Q1', status: 'draft' },
       ];
 
-      mockPDFService.listProjects.mockResolvedValue(mockProjects);
-      (mapToProjectDtos as jest.Mock).mockImplementation((projects) =>
-        projects.filter((p: any) => p.name.toLowerCase().includes('invoice'))
-      );
+      mockListProjects.mockResolvedValue(mockProjects);
 
       const request = createMockRequest('/api/pdf/project?search=invoice');
       const response = await GET(request);
       const data = await parseJsonResponse(response);
 
       expect(data.success).toBe(true);
+      // Route filters by search, so only Invoice 2024 should be returned
+      expect(data.data).toHaveLength(1);
+      expect(data.data[0].name).toBe('Invoice 2024');
     });
 
     it('should filter projects by status', async () => {
@@ -83,21 +100,20 @@ describe('PDF Project API', () => {
         { id: 'pdf-2', name: 'Doc 2', status: 'completed' },
       ];
 
-      mockPDFService.listProjects.mockResolvedValue(mockProjects);
-      (mapToProjectDtos as jest.Mock).mockReturnValue(
-        mockProjects.filter((p) => p.status === 'completed')
-      );
+      mockListProjects.mockResolvedValue(mockProjects);
 
       const request = createMockRequest('/api/pdf/project?status=completed');
       const response = await GET(request);
       const data = await parseJsonResponse(response);
 
       expect(data.success).toBe(true);
+      // Route filters by status
+      expect(data.data).toHaveLength(1);
+      expect(data.data[0].status).toBe('completed');
     });
 
     it('should return empty array when no projects match', async () => {
-      mockPDFService.listProjects.mockResolvedValue([]);
-      (mapToProjectDtos as jest.Mock).mockReturnValue([]);
+      mockListProjects.mockResolvedValue([]);
 
       const request = createMockRequest('/api/pdf/project?search=nonexistent');
       const response = await GET(request);
@@ -135,8 +151,7 @@ describe('PDF Project API', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      mockPDFService.createProject.mockResolvedValue(mockProject);
-      (mapToProjectDto as jest.Mock).mockReturnValue(mockProject);
+      mockCreateProject.mockResolvedValue(mockProject);
 
       const request = createMockRequest('/api/pdf/project', {
         method: 'POST',
@@ -161,8 +176,7 @@ describe('PDF Project API', () => {
         settings: { pageSize: 'A4', orientation: 'portrait' },
       };
 
-      mockPDFService.createProject.mockResolvedValue(mockProject);
-      (mapToProjectDto as jest.Mock).mockReturnValue(mockProject);
+      mockCreateProject.mockResolvedValue(mockProject);
 
       const request = createMockRequest('/api/pdf/project', {
         method: 'POST',
@@ -175,7 +189,7 @@ describe('PDF Project API', () => {
       const data = await parseJsonResponse(response);
 
       expect(data.success).toBe(true);
-      expect(mockPDFService.createProject).toHaveBeenCalledWith(
+      expect(mockCreateProject).toHaveBeenCalledWith(
         expect.objectContaining({
           settings: { pageSize: 'A4', orientation: 'portrait' },
         })
@@ -183,7 +197,7 @@ describe('PDF Project API', () => {
     });
 
     it('should handle service errors', async () => {
-      mockPDFService.createProject.mockRejectedValue(new Error('Database error'));
+      mockCreateProject.mockRejectedValue(new Error('Database error'));
 
       const request = createMockRequest('/api/pdf/project', {
         method: 'POST',

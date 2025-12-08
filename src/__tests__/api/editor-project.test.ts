@@ -4,23 +4,50 @@
  * Tests for:
  * - GET /api/editor/project - List all projects
  * - POST /api/editor/project - Create new project
- * - GET /api/editor/project/[id] - Get specific project
- * - PUT /api/editor/project/[id] - Update project
- * - DELETE /api/editor/project/[id] - Delete project
  */
 
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { GET, POST } from '@/app/api/editor/project/route';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
 import { createMockRequest, parseJsonResponse } from '../utils/test-helpers';
 
-// Reset global projects before each test
-beforeEach(() => {
-  (global as any).projects = [];
+// Create mock functions first (before any imports)
+const mockListProjects = jest.fn();
+const mockCreateProject = jest.fn();
+const mockGetProject = jest.fn();
+const mockUpdateProject = jest.fn();
+const mockDeleteProject = jest.fn();
+
+// Use unstable_mockModule for ESM compatibility
+jest.unstable_mockModule('@/services/editor', () => ({
+  getEditorService: () => ({
+    listProjects: mockListProjects,
+    createProject: mockCreateProject,
+    getProject: mockGetProject,
+    updateProject: mockUpdateProject,
+    deleteProject: mockDeleteProject,
+  }),
+}));
+
+// Dynamic import for the routes (must be after mock setup)
+let GET: typeof import('@/app/api/editor/project/route').GET;
+let POST: typeof import('@/app/api/editor/project/route').POST;
+
+beforeAll(async () => {
+  const routeModule = await import('@/app/api/editor/project/route');
+  GET = routeModule.GET;
+  POST = routeModule.POST;
 });
 
 describe('Editor Project API', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockListProjects.mockReset();
+    mockCreateProject.mockReset();
+  });
+
   describe('GET /api/editor/project', () => {
     it('should return empty array when no projects exist', async () => {
+      mockListProjects.mockResolvedValue([]);
+
       const request = createMockRequest('/api/editor/project');
       const response = await GET(request);
       const data = await parseJsonResponse(response);
@@ -31,11 +58,11 @@ describe('Editor Project API', () => {
     });
 
     it('should return all projects', async () => {
-      // Setup: Create some projects first
-      (global as any).projects = [
-        { id: 'project-1', name: 'Project 1' },
-        { id: 'project-2', name: 'Project 2' },
+      const mockProjects = [
+        { id: 'project-1', name: 'Project 1', status: 'draft' },
+        { id: 'project-2', name: 'Project 2', status: 'draft' },
       ];
+      mockListProjects.mockResolvedValue(mockProjects);
 
       const request = createMockRequest('/api/editor/project');
       const response = await GET(request);
@@ -46,10 +73,32 @@ describe('Editor Project API', () => {
       expect(data.data).toHaveLength(2);
       expect(data.data[0].name).toBe('Project 1');
     });
+
+    it('should handle service errors', async () => {
+      mockListProjects.mockRejectedValue(new Error('Database error'));
+
+      const request = createMockRequest('/api/editor/project');
+      const response = await GET(request);
+      const data = await parseJsonResponse(response);
+
+      expect(response.status).toBe(500);
+      expect(data.success).toBe(false);
+    });
   });
 
   describe('POST /api/editor/project', () => {
     it('should create project with provided name', async () => {
+      const mockProject = {
+        id: 'project-123',
+        name: 'My New Project',
+        description: 'A test project',
+        status: 'draft',
+        duration: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      mockCreateProject.mockResolvedValue(mockProject);
+
       const request = createMockRequest('/api/editor/project', {
         method: 'POST',
         body: {
@@ -64,11 +113,26 @@ describe('Editor Project API', () => {
       expect(data.success).toBe(true);
       expect(data.data.name).toBe('My New Project');
       expect(data.data.description).toBe('A test project');
-      expect(data.data.id).toMatch(/^project-/);
-      expect(data.data.status).toBe('draft');
+      expect(mockCreateProject).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'My New Project',
+          description: 'A test project',
+        })
+      );
     });
 
     it('should use default name when not provided', async () => {
+      const mockProject = {
+        id: 'project-456',
+        name: 'Untitled Project',
+        description: '',
+        status: 'draft',
+        duration: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      mockCreateProject.mockResolvedValue(mockProject);
+
       const request = createMockRequest('/api/editor/project', {
         method: 'POST',
         body: {},
@@ -77,9 +141,26 @@ describe('Editor Project API', () => {
       const data = await parseJsonResponse(response);
 
       expect(data.data.name).toBe('Untitled Project');
+      expect(mockCreateProject).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Untitled Project',
+          description: '',
+        })
+      );
     });
 
     it('should set initial duration to 0', async () => {
+      const mockProject = {
+        id: 'project-789',
+        name: 'Test',
+        description: '',
+        status: 'draft',
+        duration: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      mockCreateProject.mockResolvedValue(mockProject);
+
       const request = createMockRequest('/api/editor/project', {
         method: 'POST',
         body: { name: 'Test' },
@@ -91,6 +172,18 @@ describe('Editor Project API', () => {
     });
 
     it('should set timestamps on creation', async () => {
+      const now = new Date().toISOString();
+      const mockProject = {
+        id: 'project-101',
+        name: 'Test',
+        description: '',
+        status: 'draft',
+        duration: 0,
+        createdAt: now,
+        updatedAt: now,
+      };
+      mockCreateProject.mockResolvedValue(mockProject);
+
       const request = createMockRequest('/api/editor/project', {
         method: 'POST',
         body: { name: 'Test' },
@@ -103,32 +196,57 @@ describe('Editor Project API', () => {
       expect(new Date(data.data.createdAt)).toBeInstanceOf(Date);
     });
 
-    it('should accept thumbnail parameter', async () => {
+    it('should accept sourceVideoUrl parameter', async () => {
+      const mockProject = {
+        id: 'project-202',
+        name: 'Test',
+        description: '',
+        status: 'draft',
+        duration: 0,
+        sourceVideoUrl: 'https://youtube.com/watch?v=abc123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      mockCreateProject.mockResolvedValue(mockProject);
+
       const request = createMockRequest('/api/editor/project', {
         method: 'POST',
         body: {
           name: 'Test',
-          thumbnail: 'https://example.com/thumb.jpg',
+          sourceVideoUrl: 'https://youtube.com/watch?v=abc123',
         },
       });
       const response = await POST(request);
       const data = await parseJsonResponse(response);
 
-      expect(data.data.thumbnail).toBe('https://example.com/thumb.jpg');
-    });
-
-    it('should add project to global store', async () => {
-      const request = createMockRequest('/api/editor/project', {
-        method: 'POST',
-        body: { name: 'Stored Project' },
-      });
-      await POST(request);
-
-      expect((global as any).projects).toHaveLength(1);
-      expect((global as any).projects[0].name).toBe('Stored Project');
+      expect(mockCreateProject).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sourceVideoUrl: 'https://youtube.com/watch?v=abc123',
+        })
+      );
     });
 
     it('should generate unique IDs for multiple projects', async () => {
+      mockCreateProject
+        .mockResolvedValueOnce({
+          id: 'project-aaa',
+          name: 'Project 1',
+          description: '',
+          status: 'draft',
+          duration: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        })
+        .mockResolvedValueOnce({
+          id: 'project-bbb',
+          name: 'Project 2',
+          description: '',
+          status: 'draft',
+          duration: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+
       const request1 = createMockRequest('/api/editor/project', {
         method: 'POST',
         body: { name: 'Project 1' },
@@ -146,43 +264,19 @@ describe('Editor Project API', () => {
 
       expect(data1.data.id).not.toBe(data2.data.id);
     });
-  });
-});
 
-describe('Editor Project [id] API', () => {
-  // Note: These tests require importing the [id] route handlers
-  // which would need separate imports
+    it('should handle service errors', async () => {
+      mockCreateProject.mockRejectedValue(new Error('Database error'));
 
-  beforeEach(() => {
-    (global as any).projects = [
-      {
-        id: 'project-123',
-        name: 'Test Project',
-        description: 'Test',
-        status: 'draft',
-        duration: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        thumbnail: null,
-      },
-    ];
-  });
-
-  describe('Integration Tests', () => {
-    it('should maintain project list across operations', async () => {
-      // Create a project
-      const createRequest = createMockRequest('/api/editor/project', {
+      const request = createMockRequest('/api/editor/project', {
         method: 'POST',
-        body: { name: 'Integration Test Project' },
+        body: { name: 'Test Project' },
       });
-      await POST(createRequest);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
 
-      // List should now have 2 projects (1 from beforeEach + 1 new)
-      const listRequest = createMockRequest('/api/editor/project');
-      const listResponse = await GET(listRequest);
-      const listData = await parseJsonResponse(listResponse);
-
-      expect(listData.data).toHaveLength(2);
+      expect(response.status).toBe(500);
+      expect(data.success).toBe(false);
     });
   });
 });

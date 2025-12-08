@@ -1,4 +1,3 @@
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 /**
  * Dubbing API Tests
  *
@@ -8,27 +7,46 @@ import { jest, describe, it, expect, beforeEach } from '@jest/globals';
  * - GET /api/dubbing/download
  */
 
-import { POST as createDubbing } from '@/app/api/dubbing/create/route';
-import { GET as getStatus } from '@/app/api/dubbing/status/route';
-import { GET as downloadDubbing } from '@/app/api/dubbing/download/route';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
 import { createMockRequest, parseJsonResponse } from '../utils/test-helpers';
 
-// Mock the Dubbing service
-jest.mock('@/services/dubbing', () => ({
-  getDubbingService: jest.fn(() => ({
-    createDubbingJob: jest.fn(),
-    getJobStatus: jest.fn(),
-    downloadDubbedAudio: jest.fn(),
-  })),
+// Create mock functions first (before any imports)
+const mockCreateDubbingJob = jest.fn();
+const mockGetDubbingStatus = jest.fn();
+const mockDownloadDubbedAudio = jest.fn();
+
+// Use unstable_mockModule for ESM compatibility
+jest.unstable_mockModule('@/services/dubbing', () => ({
+  getDubbingService: () => ({
+    createDubbingJob: mockCreateDubbingJob,
+    getDubbingStatus: mockGetDubbingStatus,
+    downloadDubbedAudio: mockDownloadDubbedAudio,
+  }),
 }));
 
-import { getDubbingService } from '@/services/dubbing';
+// Dynamic import for the routes (must be after mock setup)
+let createDubbing: typeof import('@/app/api/dubbing/create/route').POST;
+let getStatus: typeof import('@/app/api/dubbing/status/route').GET;
+let downloadDubbing: typeof import('@/app/api/dubbing/download/route').GET;
+
+beforeAll(async () => {
+  // Import sequentially to avoid ESM module caching issues
+  const createModule = await import('@/app/api/dubbing/create/route');
+  createDubbing = createModule.POST;
+
+  const statusModule = await import('@/app/api/dubbing/status/route');
+  getStatus = statusModule.GET;
+
+  const downloadModule = await import('@/app/api/dubbing/download/route');
+  downloadDubbing = downloadModule.GET;
+});
 
 describe('Dubbing API', () => {
-  const mockDubbingService = getDubbingService() as jest.Mocked<ReturnType<typeof getDubbingService>>;
-
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCreateDubbingJob.mockReset();
+    mockGetDubbingStatus.mockReset();
+    mockDownloadDubbedAudio.mockReset();
   });
 
   describe('POST /api/dubbing/create', () => {
@@ -72,7 +90,7 @@ describe('Dubbing API', () => {
           progress: 0,
         };
 
-        mockDubbingService.createDubbingJob.mockResolvedValue(mockJob);
+        mockCreateDubbingJob.mockResolvedValue(mockJob);
 
         const request = createMockRequest('/api/dubbing/create', {
           method: 'POST',
@@ -94,7 +112,7 @@ describe('Dubbing API', () => {
 
       it('should use default watermark value when not provided', async () => {
         const mockJob = { dubbingId: 'dub-789' };
-        mockDubbingService.createDubbingJob.mockResolvedValue(mockJob);
+        mockCreateDubbingJob.mockResolvedValue(mockJob);
 
         const request = createMockRequest('/api/dubbing/create', {
           method: 'POST',
@@ -105,7 +123,7 @@ describe('Dubbing API', () => {
         });
         await createDubbing(request);
 
-        expect(mockDubbingService.createDubbingJob).toHaveBeenCalledWith(
+        expect(mockCreateDubbingJob).toHaveBeenCalledWith(
           expect.objectContaining({ watermark: true })
         );
       });
@@ -113,7 +131,7 @@ describe('Dubbing API', () => {
 
     describe('Error Handling', () => {
       it('should handle service errors', async () => {
-        mockDubbingService.createDubbingJob.mockRejectedValue(new Error('ElevenLabs API error'));
+        mockCreateDubbingJob.mockRejectedValue(new Error('ElevenLabs API error'));
 
         const request = createMockRequest('/api/dubbing/create', {
           method: 'POST',
@@ -151,7 +169,7 @@ describe('Dubbing API', () => {
           progress: 45,
         };
 
-        mockDubbingService.getJobStatus.mockResolvedValue(mockStatus);
+        mockGetDubbingStatus.mockResolvedValue(mockStatus);
 
         const request = createMockRequest('/api/dubbing/status?dubbingId=dub-123');
         const response = await getStatus(request);
@@ -169,7 +187,7 @@ describe('Dubbing API', () => {
           progress: 100,
         };
 
-        mockDubbingService.getJobStatus.mockResolvedValue(mockStatus);
+        mockGetDubbingStatus.mockResolvedValue(mockStatus);
 
         const request = createMockRequest('/api/dubbing/status?dubbingId=dub-123');
         const response = await getStatus(request);
@@ -204,16 +222,14 @@ describe('Dubbing API', () => {
 
     describe('Successful Downloads', () => {
       it('should stream audio for completed job', async () => {
-        const mockStream = new ReadableStream({
-          start(controller) {
-            controller.enqueue(new Uint8Array([1, 2, 3]));
-            controller.close();
-          },
-        });
+        const mockAudioBuffer = Buffer.from([1, 2, 3, 4, 5]);
 
-        mockDubbingService.downloadDubbedAudio.mockResolvedValue({
-          stream: mockStream,
-          contentType: 'audio/mpeg',
+        mockDownloadDubbedAudio.mockResolvedValue({
+          dubbingId: 'dub-123',
+          targetLanguage: 'es',
+          audioBuffer: mockAudioBuffer,
+          filename: 'dubbed-audio-es.mp3',
+          mimeType: 'audio/mpeg',
         });
 
         const request = createMockRequest('/api/dubbing/download?dubbingId=dub-123&targetLanguage=es');
@@ -221,6 +237,8 @@ describe('Dubbing API', () => {
 
         expect(response.status).toBe(200);
         expect(response.headers.get('Content-Type')).toBe('audio/mpeg');
+        expect(response.headers.get('Content-Disposition')).toContain('dubbed-audio-es.mp3');
+        expect(mockDownloadDubbedAudio).toHaveBeenCalledWith('dub-123', 'es');
       });
     });
   });

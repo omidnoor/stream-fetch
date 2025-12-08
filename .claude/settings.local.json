@@ -52,7 +52,9 @@
       "Bash(move video-info-card.tsx youtube/)",
       "Bash(move dubbing-card.tsx dubbing/)",
       "Bash(if exist \".next\" rmdir /S /Q .next)",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(npx tsx:*)",
+      "Bash(if exist \".next\\dev\\lock\" del \".next\\dev\\lock\")"
     ],
     "deny": [],
     "ask": []

@@ -4,24 +4,32 @@
  * Tests for GET /api/video-info
  */
 
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { GET } from '@/app/api/video-info/route';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
 import { createMockRequest, parseJsonResponse } from '../utils/test-helpers';
+import type { VideoInfoDto } from '@/services/youtube';
 
-// Mock the YouTube service
-jest.mock('@/services/youtube', () => ({
-  getYouTubeService: jest.fn(() => ({
-    getVideoInfo: jest.fn(),
-  })),
+// Create mock functions first (before any imports)
+const mockGetVideoInfo = jest.fn<(url: string) => Promise<VideoInfoDto>>();
+
+// Use unstable_mockModule for ESM compatibility
+jest.unstable_mockModule('@/services/youtube', () => ({
+  getYouTubeService: () => ({
+    getVideoInfo: mockGetVideoInfo,
+  }),
 }));
 
-import { getYouTubeService } from '@/services/youtube';
+// Dynamic import for the route (must be after mock setup)
+let GET: typeof import('@/app/api/video-info/route').GET;
+
+beforeAll(async () => {
+  const routeModule = await import('@/app/api/video-info/route');
+  GET = routeModule.GET;
+});
 
 describe('GET /api/video-info', () => {
-  const mockYouTubeService = getYouTubeService() as jest.Mocked<ReturnType<typeof getYouTubeService>>;
-
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetVideoInfo.mockReset();
   });
 
   describe('Parameter Validation', () => {
@@ -48,20 +56,21 @@ describe('GET /api/video-info', () => {
 
   describe('Successful Requests', () => {
     it('should return video info for valid YouTube URL', async () => {
-      const mockVideoInfo = {
+      const mockVideoInfo: VideoInfoDto = {
         video: {
           title: 'Test Video',
           duration: 120,
           thumbnail: 'https://i.ytimg.com/vi/abc123/maxresdefault.jpg',
-          channel: 'Test Channel',
+          author: 'Test Channel',
+          viewCount: '1000',
         },
         formats: [
-          { itag: 18, quality: '360p', mimeType: 'video/mp4' },
-          { itag: 22, quality: '720p', mimeType: 'video/mp4' },
+          { itag: 18, quality: '360p', container: 'mp4', hasAudio: true, hasVideo: true, filesize: 1024000, fps: 30, codec: 'avc1' },
+          { itag: 22, quality: '720p', container: 'mp4', hasAudio: true, hasVideo: true, filesize: 2048000, fps: 30, codec: 'avc1' },
         ],
       };
 
-      mockYouTubeService.getVideoInfo.mockResolvedValue(mockVideoInfo);
+      mockGetVideoInfo.mockResolvedValue(mockVideoInfo);
 
       const request = createMockRequest('/api/video-info?url=https://youtube.com/watch?v=abc123');
       const response = await GET(request);
@@ -75,12 +84,18 @@ describe('GET /api/video-info', () => {
     });
 
     it('should handle short YouTube URLs', async () => {
-      const mockVideoInfo = {
-        video: { title: 'Short URL Video', duration: 60 },
+      const mockVideoInfo: VideoInfoDto = {
+        video: {
+          title: 'Short URL Video',
+          duration: 60,
+          thumbnail: 'https://i.ytimg.com/vi/abc123/default.jpg',
+          author: 'Test Channel',
+          viewCount: '500',
+        },
         formats: [],
       };
 
-      mockYouTubeService.getVideoInfo.mockResolvedValue(mockVideoInfo);
+      mockGetVideoInfo.mockResolvedValue(mockVideoInfo);
 
       const request = createMockRequest('/api/video-info?url=https://youtu.be/abc123');
       const response = await GET(request);
@@ -88,13 +103,13 @@ describe('GET /api/video-info', () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(mockYouTubeService.getVideoInfo).toHaveBeenCalledWith('https://youtu.be/abc123');
+      expect(mockGetVideoInfo).toHaveBeenCalledWith('https://youtu.be/abc123');
     });
   });
 
   describe('Error Handling', () => {
     it('should handle service errors gracefully', async () => {
-      mockYouTubeService.getVideoInfo.mockRejectedValue(new Error('Video not found'));
+      mockGetVideoInfo.mockRejectedValue(new Error('Video not found'));
 
       const request = createMockRequest('/api/video-info?url=https://youtube.com/watch?v=invalid');
       const response = await GET(request);
@@ -105,7 +120,7 @@ describe('GET /api/video-info', () => {
     });
 
     it('should handle network timeouts', async () => {
-      mockYouTubeService.getVideoInfo.mockRejectedValue(new Error('Request timeout'));
+      mockGetVideoInfo.mockRejectedValue(new Error('Request timeout'));
 
       const request = createMockRequest('/api/video-info?url=https://youtube.com/watch?v=abc123');
       const response = await GET(request);

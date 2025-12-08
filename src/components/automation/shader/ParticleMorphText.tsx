@@ -3,13 +3,33 @@
 import React, { useEffect, useRef } from 'react';
 
 type Props = {
-  text: string;
+  text?: string;
+  /**
+   * Array of texts to cycle through automatically (for testing only).
+   * In production, text should come from API/props.
+   */
+  testTexts?: string[];
+  /**
+   * How long to display each text before morphing to next (seconds).
+   * Only used in test mode when testTexts array is provided.
+   */
+  testDuration?: number;
   /**
    * Should be a perfect square ideally (e.g., 65536, 131072).
    * We will round up to the nearest square grid internally.
    */
   particleCount?: number;
   pointSize?: number;
+  /**
+   * Scale factor for text size (0.5 = half screen, 1.0 = full width, 1.5 = 1.5x width)
+   * Larger text uses more particles from the particle pool.
+   */
+  scale?: number;
+  /**
+   * Font family for the text. Can use system fonts or web fonts.
+   * Examples: 'Arial', 'monospace', 'Courier New', 'Impact', etc.
+   */
+  fontFamily?: string;
   background?: [number, number, number, number];
   /**
    * How long until it's mostly formed (seconds).
@@ -20,9 +40,13 @@ type Props = {
 };
 
 export function ParticleMorphText({
-  text,
+  text = 'LOADING...',
+  testTexts,
+  testDuration = 4,
   particleCount = 65536, // 256 * 256
   pointSize = 1.8,
+  scale = 2.0,
+  fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   background = [0.02, 0.02, 0.035, 1.0],
   settleTime = 3,
   className = '',
@@ -30,6 +54,14 @@ export function ParticleMorphText({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const textRef = useRef<string>(text);
+  const fontFamilyRef = useRef<string>(fontFamily);
+  const textIndexRef = useRef<number>(0);
+  const lastTextChangeRef = useRef<number>(0);
+
+  // Update fontFamily ref whenever prop changes (outside the main effect)
+  useEffect(() => {
+    fontFamilyRef.current = fontFamily;
+  }, [fontFamily]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -169,12 +201,13 @@ export function ParticleMorphText({
 
     // ---------- Initial state ----------
     // State RGBA: pos.xy, vel.xy
+    // Particles spread across ~90% of window at highest entropy
     const stateInit = new Float32Array(actualCount * 4);
     for (let i = 0; i < actualCount; i++) {
-      const px = (Math.random() * 2 - 1) * 1.2;
-      const py = (Math.random() * 2 - 1) * 1.2;
-      const vx = (Math.random() * 2 - 1) * 0.03;
-      const vy = (Math.random() * 2 - 1) * 0.03;
+      const px = (Math.random() * 2 - 1) * 1.8;
+      const py = (Math.random() * 2 - 1) * 1.8;
+      const vx = (Math.random() * 2 - 1) * 0.04;
+      const vy = (Math.random() * 2 - 1) * 0.04;
       stateInit[i * 4 + 0] = px;
       stateInit[i * 4 + 1] = py;
       stateInit[i * 4 + 2] = vx;
@@ -223,6 +256,7 @@ export function ParticleMorphText({
       uniform float uDamping;
       uniform float uFlowStrength;
       uniform float uNoiseStrength;
+      uniform vec2 uAspect;
 
       in vec2 vUv;
       out vec4 outState;
@@ -267,6 +301,8 @@ export function ParticleMorphText({
         vec2 vel = s.zw;
 
         vec2 target = texture(uTargetPos, vUv).xy;
+        // Apply same aspect correction to target as we do in rendering
+        target.x *= uAspect.y;
 
         float cool = 1.0 - uTemperature;
         float attract = mix(uAttractBase, uAttractMax, smoothstep(0.0, 1.0, cool));
@@ -283,7 +319,7 @@ export function ParticleMorphText({
         vel *= uDamping;
         pos += vel * uDT;
 
-        float bound = 1.2;
+        float bound = 2.0;
         if (abs(pos.x) > bound) { vel.x *= -0.6; pos.x = clamp(pos.x, -bound, bound); }
         if (abs(pos.y) > bound) { vel.y *= -0.6; pos.y = clamp(pos.y, -bound, bound); }
 
@@ -319,8 +355,10 @@ export function ParticleMorphText({
 
         vCol = texture(uTargetCol, uv).rgb;
 
+        // Apply aspect ratio correction to maintain text proportions
+        // Compress X to compensate for wider display canvas
         vec2 p = pos;
-        p.y *= uAspect.y;
+        p.x *= uAspect.y;
 
         gl_Position = vec4(p, 0.0, 1.0);
         gl_PointSize = uPointSize;
@@ -372,6 +410,7 @@ export function ParticleMorphText({
       uDamping: gl.getUniformLocation(simProgram, 'uDamping'),
       uFlowStrength: gl.getUniformLocation(simProgram, 'uFlowStrength'),
       uNoiseStrength: gl.getUniformLocation(simProgram, 'uNoiseStrength'),
+      uAspect: gl.getUniformLocation(simProgram, 'uAspect'),
     };
 
     const renderLoc = {
@@ -387,16 +426,19 @@ export function ParticleMorphText({
       const oc = document.createElement('canvas');
       const ctx = oc.getContext('2d', { willReadFrequently: true })!;
 
-      oc.width = 800;
-      oc.height = 200;
+      // Use square canvas to avoid aspect ratio issues
+      // Text will occupy ~1/3 of window width naturally
+      const canvasSize = 600;
+      oc.width = canvasSize;
+      oc.height = canvasSize;
 
       ctx.clearRect(0, 0, oc.width, oc.height);
       ctx.fillStyle = '#ffffff';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      const maxFontSize = Math.min(oc.width / textContent.length * 1.8, oc.height * 0.6);
-      ctx.font = `bold ${maxFontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+      const maxFontSize = Math.min(oc.width / textContent.length * 1.5, oc.height * 0.25);
+      ctx.font = `bold ${maxFontSize}px ${fontFamilyRef.current}`;
 
       ctx.fillText(textContent, oc.width / 2, oc.height / 2);
 
@@ -408,8 +450,9 @@ export function ParticleMorphText({
         r: number; g: number; b: number;
       }> = [];
 
-      for (let y = 0; y < oc.height; y += 2) {
-        for (let x = 0; x < oc.width; x += 2) {
+      // Sample every pixel for complete coverage
+      for (let y = 0; y < oc.height; y++) {
+        for (let x = 0; x < oc.width; x++) {
           const idx = (y * oc.width + x) * 4;
           const a = d[idx + 3] / 255;
 
@@ -433,8 +476,8 @@ export function ParticleMorphText({
 
       const cx = oc.width * 0.5;
       const cy = oc.height * 0.5;
-      const longest = Math.max(oc.width, oc.height);
-      const scaleToClip = 2.0 / longest;
+      // Scale to clip space with user-defined scale factor
+      const scaleToClip = (2.0 / oc.width) * scale;
 
       for (let i = 0; i < actualCount; i++) {
         const c = candidates[i % candidates.length];
@@ -483,8 +526,14 @@ export function ParticleMorphText({
 
     let targetsReady = false;
     let startTime = performance.now();
+    let lastKnownFont = fontFamilyRef.current;
 
-    buildTargetsFromText(text);
+    // Initialize with first text
+    const initialText = testTexts && testTexts.length > 0 ? testTexts[0] : text;
+    textRef.current = initialText;
+    lastTextChangeRef.current = startTime;
+
+    buildTargetsFromText(initialText);
     targetsReady = true;
 
     // ---------- Ping-pong ----------
@@ -519,12 +568,37 @@ export function ParticleMorphText({
       const tSec = (now - startTime) / 1000;
       const temperature = temperatureFromT(tSec);
 
-      // Check if text changed
-      if (textRef.current !== text) {
-        textRef.current = text;
-        buildTargetsFromText(text);
-        startTime = now; // Reset entropy
+      // Check for font changes and rebuild targets if needed
+      if (fontFamilyRef.current !== lastKnownFont) {
+        lastKnownFont = fontFamilyRef.current;
+        buildTargetsFromText(textRef.current);
+        startTime = now; // Reset entropy for smooth transition
       }
+
+      // Test mode: cycle through texts automatically
+      if (testTexts && testTexts.length > 1) {
+        const timeSinceLastChange = (now - lastTextChangeRef.current) / 1000;
+        if (timeSinceLastChange >= testDuration + settleTime) {
+          // Cycle to next text
+          textIndexRef.current = (textIndexRef.current + 1) % testTexts.length;
+          const newText = testTexts[textIndexRef.current];
+          textRef.current = newText;
+          buildTargetsFromText(newText);
+          startTime = now; // Reset entropy
+          lastTextChangeRef.current = now;
+        }
+      } else {
+        // Production mode: use text prop (updated from API)
+        const currentText = testTexts && testTexts.length > 0 ? testTexts[0] : text;
+        if (textRef.current !== currentText) {
+          textRef.current = currentText;
+          buildTargetsFromText(currentText);
+          startTime = now; // Reset entropy
+        }
+      }
+
+      // Calculate aspect ratio once for both passes
+      const aspectY = canvas.height / Math.max(1, canvas.width);
 
       // 1) SIM PASS
       gl.useProgram(simProgram);
@@ -548,6 +622,7 @@ export function ParticleMorphText({
       gl.uniform1f(simLoc.uDamping, 0.968);
       gl.uniform1f(simLoc.uFlowStrength, 0.9);
       gl.uniform1f(simLoc.uNoiseStrength, 0.45);
+      if (simLoc.uAspect) gl.uniform2f(simLoc.uAspect, 1.0, aspectY);
 
       gl.drawArrays(gl.TRIANGLES, 0, 3);
 
@@ -577,7 +652,6 @@ export function ParticleMorphText({
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       gl.uniform1f(renderLoc.uPointSize, pointSize * dpr);
 
-      const aspectY = canvas.height / Math.max(1, canvas.width);
       gl.uniform2f(renderLoc.uAspect, 1.0, aspectY);
 
       gl.drawArrays(gl.POINTS, 0, actualCount);
@@ -612,7 +686,8 @@ export function ParticleMorphText({
       const loseContext = gl.getExtension('WEBGL_lose_context');
       if (loseContext) loseContext.loseContext();
     };
-  }, [text, particleCount, pointSize, background, settleTime]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text, testTexts, testDuration, particleCount, pointSize, scale, background, settleTime]);
 
   return (
     <div className={`relative w-full h-full ${className}`}>

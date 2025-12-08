@@ -4,27 +4,36 @@
  * Tests for GET /api/download
  */
 
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { GET } from '@/app/api/download/route';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
 import { createMockRequest, parseJsonResponse } from '../utils/test-helpers';
 
-// Mock the YouTube service
-jest.mock('@/services/youtube', () => ({
-  getYouTubeService: jest.fn(() => ({
-    getDownloadFormat: jest.fn(),
-  })),
-}));
+// Create mock functions first (before any imports)
+const mockGetDownloadFormat = jest.fn();
 
 // Mock global fetch
-global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
+const mockFetch = jest.fn<typeof fetch>();
+global.fetch = mockFetch;
 
-import { getYouTubeService } from '@/services/youtube';
+// Use unstable_mockModule for ESM compatibility
+jest.unstable_mockModule('@/services/youtube', () => ({
+  getYouTubeService: () => ({
+    getDownloadFormat: mockGetDownloadFormat,
+  }),
+}));
+
+// Dynamic import for the route (must be after mock setup)
+let GET: typeof import('@/app/api/download/route').GET;
+
+beforeAll(async () => {
+  const routeModule = await import('@/app/api/download/route');
+  GET = routeModule.GET;
+});
 
 describe('GET /api/download', () => {
-  const mockYouTubeService = getYouTubeService() as jest.Mocked<ReturnType<typeof getYouTubeService>>;
-
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetDownloadFormat.mockReset();
+    mockFetch.mockReset();
   });
 
   describe('Parameter Validation', () => {
@@ -40,7 +49,7 @@ describe('GET /api/download', () => {
 
     it('should work when itag parameter is missing (uses default format)', async () => {
       // Mock the download format
-      mockYouTubeService.getDownloadFormat.mockResolvedValue({
+      mockGetDownloadFormat.mockResolvedValue({
         itag: 18,
         quality: '360p',
         url: 'https://example.com/video.mp4',
@@ -57,7 +66,7 @@ describe('GET /api/download', () => {
         },
       });
 
-      (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue({
+      mockFetch.mockResolvedValue({
         ok: true,
         body: mockStream,
         status: 200,
@@ -68,7 +77,7 @@ describe('GET /api/download', () => {
       const response = await GET(request);
 
       expect(response.status).toBe(200);
-      expect(mockYouTubeService.getDownloadFormat).toHaveBeenCalledWith('https://youtube.com/watch?v=abc123', undefined);
+      expect(mockGetDownloadFormat).toHaveBeenCalledWith('https://youtube.com/watch?v=abc123', undefined);
     }, 15000);
 
     it('should return 400 when both parameters are missing', async () => {
@@ -84,7 +93,7 @@ describe('GET /api/download', () => {
   describe('Successful Downloads', () => {
     it('should return stream response for valid parameters', async () => {
       // Mock the download format
-      mockYouTubeService.getDownloadFormat.mockResolvedValue({
+      mockGetDownloadFormat.mockResolvedValue({
         itag: 18,
         quality: '360p',
         url: 'https://example.com/video.mp4',
@@ -101,7 +110,7 @@ describe('GET /api/download', () => {
         },
       });
 
-      (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue({
+      mockFetch.mockResolvedValue({
         ok: true,
         body: mockStream,
         status: 200,
@@ -114,12 +123,12 @@ describe('GET /api/download', () => {
       expect(response.status).toBe(200);
       expect(response.headers.get('Content-Type')).toBe('video/mp4');
       expect(response.headers.get('Content-Disposition')).toContain('test-video.mp4');
-      expect(mockYouTubeService.getDownloadFormat).toHaveBeenCalledWith('https://youtube.com/watch?v=abc123', 18);
+      expect(mockGetDownloadFormat).toHaveBeenCalledWith('https://youtube.com/watch?v=abc123', 18);
     }, 15000);
 
     it('should handle different itag formats', async () => {
       // Mock the download format
-      mockYouTubeService.getDownloadFormat.mockResolvedValue({
+      mockGetDownloadFormat.mockResolvedValue({
         itag: 243,
         quality: '480p',
         url: 'https://example.com/video.webm',
@@ -135,7 +144,7 @@ describe('GET /api/download', () => {
         },
       });
 
-      (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue({
+      mockFetch.mockResolvedValue({
         ok: true,
         body: mockStream,
         status: 200,
@@ -147,13 +156,13 @@ describe('GET /api/download', () => {
 
       expect(response.status).toBe(200);
       expect(response.headers.get('Content-Type')).toBe('video/webm');
-      expect(mockYouTubeService.getDownloadFormat).toHaveBeenCalledWith('https://youtube.com/watch?v=abc123', 243);
+      expect(mockGetDownloadFormat).toHaveBeenCalledWith('https://youtube.com/watch?v=abc123', 243);
     }, 15000);
   });
 
   describe('Error Handling', () => {
     it('should handle download format errors gracefully', async () => {
-      mockYouTubeService.getDownloadFormat.mockRejectedValue(new Error('No streaming data available'));
+      mockGetDownloadFormat.mockRejectedValue(new Error('No streaming data available'));
 
       const request = createMockRequest('/api/download?url=https://youtube.com/watch?v=abc123&itag=18');
       const response = await GET(request);
@@ -165,7 +174,7 @@ describe('GET /api/download', () => {
 
     it('should handle fetch errors', async () => {
       // Mock the download format succeeds
-      mockYouTubeService.getDownloadFormat.mockResolvedValue({
+      mockGetDownloadFormat.mockResolvedValue({
         itag: 18,
         quality: '360p',
         url: 'https://example.com/video.mp4',
@@ -175,7 +184,7 @@ describe('GET /api/download', () => {
       });
 
       // Mock fetch fails
-      (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue({
+      mockFetch.mockResolvedValue({
         ok: false,
         status: 403,
         statusText: 'Forbidden',

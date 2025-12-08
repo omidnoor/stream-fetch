@@ -17,9 +17,10 @@ export default function ShaderTestPage() {
   const [activity, setActivity] = useState(1.0);
   const [particleText, setParticleText] = useState('DOWNLOADING...');
   const [inputText, setInputText] = useState('DOWNLOADING...');
+  const [fontFamily, setFontFamily] = useState('-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif');
 
   const shaderOptions: { id: ShaderType; name: string; description: string }[] = [
-    { id: 'particleMorph', name: '🌟 Entropy Morph', description: 'Chaos to order - particles morph into text' },
+    { id: 'particleMorph', name: '🌟 Entropy Morph', description: 'Test mode - auto-cycles status messages (production uses API text)' },
     { id: 'particleText', name: '⭐ Particle Text', description: 'Colorful particles forming kinetic typography' },
     { id: 'grid', name: 'Holographic Grid', description: 'Animated perspective grid with glow' },
     { id: 'dataStream', name: 'Data Stream', description: 'Matrix-style vertical data flow' },
@@ -33,6 +34,18 @@ export default function ShaderTestPage() {
     'CHUNKING: 8/12',
     'DUBBING CHUNK 3',
     'MERGING FILES',
+    'FINALIZING',
+    'COMPLETE!',
+  ];
+
+  // Test mode: cycle through status messages for better visualization
+  const testStatusCycle = [
+    'INITIALIZING...',
+    'DOWNLOADING',
+    'PROCESSING',
+    'CHUNKING',
+    'DUBBING',
+    'MERGING',
     'FINALIZING',
     'COMPLETE!',
   ];
@@ -102,8 +115,31 @@ export default function ShaderTestPage() {
               </div>
               <p className="text-xs text-muted-foreground">
                 {activeShader === 'particleMorph'
-                  ? 'Watch chaos transform into order - entropy decreases as particles settle'
+                  ? 'Test mode: auto-cycles for visualization. In production, text comes from API.'
                   : 'Type text and click Update to see particles rearrange'}
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-sm font-medium">Font Family</label>
+              <select
+                value={fontFamily}
+                onChange={(e) => setFontFamily(e.target.value)}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value='-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'>System Default</option>
+                <option value='Arial, sans-serif'>Arial</option>
+                <option value='Impact, fantasy'>Impact</option>
+                <option value='"Courier New", monospace'>Courier New</option>
+                <option value='Georgia, serif'>Georgia</option>
+                <option value='"Times New Roman", serif'>Times New Roman</option>
+                <option value='monospace'>Monospace</option>
+                <option value='"Comic Sans MS", cursive'>Comic Sans MS</option>
+                <option value='Verdana, sans-serif'>Verdana</option>
+                <option value='Tahoma, sans-serif'>Tahoma</option>
+              </select>
+              <p className="text-xs text-muted-foreground">
+                Change the font family of the particle text
               </p>
             </div>
 
@@ -178,9 +214,12 @@ export default function ShaderTestPage() {
         {activeShader === 'particleMorph' ? (
           <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-surface-1">
             <ParticleMorphText
-              text={particleText}
+              testTexts={testStatusCycle}
+              testDuration={4}
               particleCount={65536}
               pointSize={1.8}
+              scale={2.0}
+              fontFamily={fontFamily}
               settleTime={3}
               background={[0.02, 0.02, 0.035, 1.0]}
             />
@@ -217,7 +256,10 @@ export default function ShaderTestPage() {
               <li className="text-primary">• 65,536 particles with curl noise flow fields</li>
               <li className="text-primary">• Entropy cooling: chaos → order over 3 seconds</li>
               <li className="text-primary">• GPGPU simulation using WebGL2 float textures</li>
-              <li className="text-primary">• When text changes, entropy resets and particles morph</li>
+              <li className="text-primary">• Test mode: auto-cycles every 4s (production uses API text)</li>
+              <li className="text-primary">• Particles spread across 90% of window at highest entropy</li>
+              <li className="text-primary">• Text scale: 2.0 (200% of window width - full screen), adjustable via scale prop</li>
+              <li className="text-primary">• Square text canvas eliminates aspect ratio distortion</li>
             </>
           )}
           {activeShader === 'particleText' && (
