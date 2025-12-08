@@ -1,0 +1,729 @@
+
+> streamfetch@1.0.0 test
+> node --experimental-vm-modules node_modules/jest/bin/jest.js --verbose
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: [ 'title', 'lengthSeconds', 'author', 'viewCount' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'video_details', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: [ 'title', 'lengthSeconds', 'author', 'viewCount' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: []
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: [ 'author' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: [ 'author' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] Found thumbnails in basic_info.thumbnail
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:43:15)
+
+  console.log
+    [YouTubeMapper] Thumbnails array length: 2
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:73:15)
+
+  console.log
+    [YouTubeMapper] First thumbnail (highest quality): { url: 'https://i.ytimg.com/vi/abc/maxresdefault.jpg' }
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:74:15)
+
+  console.log
+    [YouTubeMapper] Last thumbnail: { url: 'https://i.ytimg.com/vi/abc/sddefault.jpg' }
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:75:15)
+
+  console.log
+    [YouTubeMapper] Found thumbnails in videoDetails.thumbnail.thumbnails
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:46:15)
+
+  console.log
+    [YouTubeMapper] Thumbnails array length: 2
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:73:15)
+
+  console.log
+    [YouTubeMapper] First thumbnail (highest quality): { url: 'https://i.ytimg.com/vi/def/maxresdefault.jpg' }
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:74:15)
+
+  console.log
+    [YouTubeMapper] Last thumbnail: { url: 'https://i.ytimg.com/vi/def/sddefault.jpg' }
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:75:15)
+
+  console.log
+    [YouTubeMapper] Found thumbnails in videoDetails.thumbnail
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:49:15)
+
+  console.log
+    [YouTubeMapper] Thumbnails array length: 2
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:73:15)
+
+  console.log
+    [YouTubeMapper] First thumbnail (highest quality): { url: 'https://i.ytimg.com/vi/ghi/maxresdefault.jpg' }
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:74:15)
+
+  console.log
+    [YouTubeMapper] Last thumbnail: { url: 'https://i.ytimg.com/vi/ghi/sddefault.jpg' }
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:75:15)
+
+  console.log
+    [YouTubeMapper] Found thumbnails in video_details.thumbnail
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:58:15)
+
+  console.log
+    [YouTubeMapper] Thumbnails array length: 1
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:73:15)
+
+  console.log
+    [YouTubeMapper] First thumbnail (highest quality): { url: 'https://i.ytimg.com/vi/jkl/maxresdefault.jpg' }
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:74:15)
+
+  console.log
+    [YouTubeMapper] Last thumbnail: { url: 'https://i.ytimg.com/vi/jkl/maxresdefault.jpg' }
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:75:15)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: []
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] Found thumbnails in basic_info.thumbnail
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:43:15)
+
+  console.log
+    [YouTubeMapper] Thumbnails array length: 3
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:73:15)
+
+  console.log
+    [YouTubeMapper] First thumbnail (highest quality): { url: 'https://i.ytimg.com/vi/xyz/maxresdefault.jpg', width: 1280 }
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:74:15)
+
+  console.log
+    [YouTubeMapper] Last thumbnail: { url: 'https://i.ytimg.com/vi/xyz/default.jpg', width: 120 }
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:75:15)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: []
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streamingData' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: []
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: []
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: []
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: []
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: []
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: []
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: []
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: []
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: []
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: []
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: []
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: []
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: [ 'title' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [EditorFactory] Created new EditorService instance
+
+      at getEditorService (src/services/editor/editor.factory.ts:63:13)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: [ 'title' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: []
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [YouTubeMapper] No thumbnails found in any location
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:64:15)
+
+  console.log
+    [YouTubeMapper] Available keys in rawInfo: [ 'videoDetails', 'streaming_data', 'session' ]
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:65:15)
+
+  console.log
+    [EditorRepository] Listing projects
+
+      at EditorRepository.listProjects (src/services/editor/editor.repository.ts:90:13)
+
+  console.log
+    [YouTubeMapper] Available keys in videoDetails: []
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:68:17)
+
+  console.log
+    [YouTubeMapper] Returning empty thumbnail URL
+
+      at YouTubeMapper.extractThumbnail (src/services/youtube/youtube.mapper.ts:83:13)
+
+  console.log
+    [EditorRepository] Listing projects
+
+      at EditorRepository.listProjects (src/services/editor/editor.repository.ts:90:13)
+
+  console.log
+    [EditorRepository] Saving project: 09546899-981f-4f27-ae4b-40bfdbc10f96
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:52:15)
+
+  console.log
+    [EditorRepository] Project saved successfully
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:60:15)
+
+  console.log
+    [EditorService] Project created: 09546899-981f-4f27-ae4b-40bfdbc10f96
+
+      at EditorService.createProject (src/services/editor/editor.service.ts:137:13)
+
+  console.log
+    [EditorRepository] Saving project: c02bc33b-aa7d-400b-a342-28ae3f7ecfc9
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:52:15)
+
+  console.log
+    [EditorRepository] Project saved successfully
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:60:15)
+
+  console.log
+    [EditorService] Project created: c02bc33b-aa7d-400b-a342-28ae3f7ecfc9
+
+      at EditorService.createProject (src/services/editor/editor.service.ts:137:13)
+
+  console.log
+    [EditorRepository] Saving project: c3c752e0-8fd6-407c-af6a-effcbd1ffc1a
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:52:15)
+
+  console.log
+    [EditorRepository] Project saved successfully
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:60:15)
+
+  console.log
+    [EditorService] Project created: c3c752e0-8fd6-407c-af6a-effcbd1ffc1a
+
+      at EditorService.createProject (src/services/editor/editor.service.ts:137:13)
+
+  console.log
+    [EditorRepository] Saving project: fce8b8d5-a22d-4154-a1b0-2d3dfa51f4de
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:52:15)
+
+  console.log
+    [EditorRepository] Project saved successfully
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:60:15)
+
+  console.log
+    [EditorService] Project created: fce8b8d5-a22d-4154-a1b0-2d3dfa51f4de
+
+      at EditorService.createProject (src/services/editor/editor.service.ts:137:13)
+
+  console.log
+    [EditorRepository] Saving project: 27b1747f-7c79-483d-b7d5-f1c5449d7a4b
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:52:15)
+
+  console.log
+    [EditorRepository] Project saved successfully
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:60:15)
+
+  console.log
+    [EditorService] Project created: 27b1747f-7c79-483d-b7d5-f1c5449d7a4b
+
+      at EditorService.createProject (src/services/editor/editor.service.ts:137:13)
+
+  console.log
+    [EditorRepository] Saving project: 543c7878-4bdb-4030-9b0c-2c12d1230aab
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:52:15)
+
+  console.log
+    [EditorRepository] Project saved successfully
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:60:15)
+
+  console.log
+    [EditorService] Project created: 543c7878-4bdb-4030-9b0c-2c12d1230aab
+
+      at EditorService.createProject (src/services/editor/editor.service.ts:137:13)
+
+  console.log
+    [EditorRepository] Saving project: 81813142-7d07-461e-afc2-58c83e713630
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:52:15)
+
+  console.log
+    [EditorRepository] Project saved successfully
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:60:15)
+
+  console.log
+    [EditorService] Project created: 81813142-7d07-461e-afc2-58c83e713630
+
+      at EditorService.createProject (src/services/editor/editor.service.ts:137:13)
+
+  console.log
+    [EditorRepository] Saving project: 56c13510-ddd2-460c-a7df-262f3b03c41c
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:52:15)
+
+  console.log
+    [EditorRepository] Project saved successfully
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:60:15)
+
+  console.log
+    [EditorService] Project created: 56c13510-ddd2-460c-a7df-262f3b03c41c
+
+      at EditorService.createProject (src/services/editor/editor.service.ts:137:13)
+
+  console.log
+    [EditorRepository] Saving project: 5f5c224a-f665-42bd-ae9f-da6490dba2c3
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:52:15)
+
+  console.log
+    [EditorRepository] Project saved successfully
+
+      at EditorRepository.saveProject (src/services/editor/editor.repository.ts:60:15)
+
+  console.log
+    [EditorService] Project created: 5f5c224a-f665-42bd-ae9f-da6490dba2c3
+
+      at EditorService.createProject (src/services/editor/editor.service.ts:137:13)
+
+  console.log
+    [EditorRepository] Listing projects
+
+      at EditorRepository.listProjects (src/services/editor/editor.repository.ts:90:13)
+
+  console.log
+    [YouTubeRepository] Trying ANDROID client for video: abc123
+
+      at YouTubeRepository.fetchVideoInfo (src/services/youtube/youtube.repository.ts:33:17)
+
+  console.log
+    [DubbingFactory] Created new DubbingService instance
+
+      at getDubbingService (src/services/dubbing/dubbing.factory.ts:56:13)
+
