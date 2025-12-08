@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Download, Settings, Film, Mic2, FileText } from "lucide-react"
+import { LayoutDashboard, Download, Settings, Film, Mic2, FileText, Zap } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navigation = [
@@ -10,6 +10,7 @@ const navigation = [
   { name: "YouTube", href: "/youtube", icon: Download },
   { name: "Dubbing", href: "/dubbing", icon: Mic2 },
   { name: "Studio", href: "/studio", icon: Film },
+  { name: "Automation", href: "/automation", icon: Zap },
   { name: "PDF Editor", href: "/pdf", icon: FileText },
   { name: "Settings", href: "/settings", icon: Settings },
 ]
