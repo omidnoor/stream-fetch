@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { PARTICLE_VERTEX_SHADER, PARTICLE_FRAGMENT_SHADER } from '@/components/automation/shader/particleShader';
-import { textToParticles, ParticleData } from '@/components/automation/shader/particleText';
+import { textToParticles, ParticleData } from '@/components/automation/shader/particleUtils';
 
 interface UseParticleTextOptions {
   text: string;
