@@ -3,6 +3,8 @@
  *
  * Data access layer for video editor projects.
  * Handles all data persistence operations.
+ *
+ * MIGRATED TO MONGODB - Projects now stored in database instead of in-memory Map
  */
 
 import { promises as fs } from "fs";
@@ -12,16 +14,12 @@ import {
   StorageError,
 } from "@/lib/errors/editor.errors";
 import type { VideoProject } from "./editor.types";
-
-/**
- * In-memory storage for projects (temporary solution)
- * TODO: Replace with database in production
- */
-const projectsStore = new Map<string, VideoProject>();
+import { getVideoProjectRepository } from "@/lib/database/repositories/video-project.repository";
 
 export class EditorRepository {
   private tempDir: string;
   private outputDir: string;
+  private dbRepository = getVideoProjectRepository();
 
   constructor(tempDir?: string, outputDir?: string) {
     this.tempDir = tempDir || path.join(process.cwd(), ".cache", "editor", "temp");
@@ -51,14 +49,11 @@ export class EditorRepository {
     try {
       console.log("[EditorRepository] Saving project:", project.id);
 
-      // Update timestamp
-      project.updatedAt = new Date();
-
-      // Store in memory
-      projectsStore.set(project.id, { ...project });
+      // Save to MongoDB
+      const savedProject = await this.dbRepository.saveProject(project);
 
       console.log("[EditorRepository] Project saved successfully");
-      return project;
+      return savedProject;
     } catch (error) {
       throw new StorageError(
         "save",
@@ -73,14 +68,14 @@ export class EditorRepository {
   async getProject(projectId: string): Promise<VideoProject> {
     console.log("[EditorRepository] Fetching project:", projectId);
 
-    const project = projectsStore.get(projectId);
+    const project = await this.dbRepository.getProject(projectId);
 
     if (!project) {
       throw new ProjectNotFoundError(projectId);
     }
 
     console.log("[EditorRepository] Project found:", project.name);
-    return { ...project };
+    return project;
   }
 
   /**
@@ -89,13 +84,7 @@ export class EditorRepository {
   async listProjects(userId?: string): Promise<VideoProject[]> {
     console.log("[EditorRepository] Listing projects", userId ? `for user ${userId}` : "");
 
-    const allProjects = Array.from(projectsStore.values());
-
-    if (userId) {
-      return allProjects.filter((p) => p.userId === userId);
-    }
-
-    return allProjects;
+    return await this.dbRepository.listProjects(userId);
   }
 
   /**
@@ -104,23 +93,19 @@ export class EditorRepository {
   async deleteProject(projectId: string): Promise<void> {
     console.log("[EditorRepository] Deleting project:", projectId);
 
-    const project = projectsStore.get(projectId);
-
-    if (!project) {
+    try {
+      await this.dbRepository.deleteProject(projectId);
+      console.log("[EditorRepository] Project deleted successfully");
+    } catch (error) {
       throw new ProjectNotFoundError(projectId);
     }
-
-    // Remove from storage
-    projectsStore.delete(projectId);
-
-    console.log("[EditorRepository] Project deleted successfully");
   }
 
   /**
    * Check if a project exists
    */
   async projectExists(projectId: string): Promise<boolean> {
-    return projectsStore.has(projectId);
+    return await this.dbRepository.projectExists(projectId);
   }
 
   /**
@@ -132,20 +117,7 @@ export class EditorRepository {
     progress?: number,
     error?: string
   ): Promise<VideoProject> {
-    const project = await this.getProject(projectId);
-
-    project.status = status;
-    project.updatedAt = new Date();
-
-    if (progress !== undefined) {
-      project.progress = progress;
-    }
-
-    if (error !== undefined) {
-      project.error = error;
-    }
-
-    return this.saveProject(project);
+    return await this.dbRepository.updateProjectStatus(projectId, status, progress, error);
   }
 
   /**
@@ -289,6 +261,6 @@ export class EditorRepository {
    */
   async clearAll(): Promise<void> {
     console.log("[EditorRepository] Clearing all projects");
-    projectsStore.clear();
+    await this.dbRepository.clearAll();
   }
 }

@@ -4,8 +4,7 @@
  * Handles storage and retrieval of PDF projects and annotations.
  * Following the existing repository pattern used in dubbing and editor services.
  *
- * Phase 1: In-memory storage
- * Phase 2+: Database integration (planned)
+ * MIGRATED TO MONGODB - Projects and annotations now stored in database
  */
 
 import type { PDFProject, Annotation, ProjectStatus } from './pdf.types';
@@ -14,22 +13,23 @@ import {
   AnnotationNotFoundError,
   PDFStorageError,
 } from '@/lib/errors/pdf.errors';
+import { getPDFProjectRepository } from '@/lib/database/repositories/pdf-project.repository';
+import { getAnnotationRepository } from '@/lib/database/repositories/annotation.repository';
 
 /**
  * PDF Repository Class
  */
 export class PDFRepository {
-  // In-memory storage (Phase 1)
-  private projects: Map<string, PDFProject> = new Map();
-  private annotations: Map<string, Annotation> = new Map();
+  // MongoDB repositories
+  private projectsRepo = getPDFProjectRepository();
+  private annotationsRepo = getAnnotationRepository();
 
   /**
    * Save project to storage
    */
   async saveProject(project: PDFProject): Promise<PDFProject> {
     try {
-      this.projects.set(project.id, { ...project });
-      return project;
+      return await this.projectsRepo.saveProject(project);
     } catch (error) {
       throw new PDFStorageError('Failed to save project', {
         projectId: project.id,
@@ -42,47 +42,38 @@ export class PDFRepository {
    * Get project by ID
    */
   async getProject(projectId: string): Promise<PDFProject> {
-    const project = this.projects.get(projectId);
+    const project = await this.projectsRepo.getProject(projectId);
 
     if (!project) {
       throw new PDFProjectNotFoundError(projectId);
     }
 
-    return { ...project };
+    return project;
   }
 
   /**
    * List all projects
    */
   async listProjects(): Promise<PDFProject[]> {
-    return Array.from(this.projects.values()).map((project) => ({ ...project }));
+    return await this.projectsRepo.listProjects();
   }
 
   /**
    * Delete project
    */
   async deleteProject(projectId: string): Promise<void> {
-    const project = await this.getProject(projectId);
-
     // Delete all annotations associated with this project
-    for (const annotationId of project.annotations.map((a) => a.id)) {
-      this.annotations.delete(annotationId);
-    }
+    await this.annotationsRepo.deleteProjectAnnotations(projectId);
 
     // Delete project
-    if (!this.projects.delete(projectId)) {
-      throw new PDFStorageError('Failed to delete project', { projectId });
-    }
+    await this.projectsRepo.deleteProject(projectId);
   }
 
   /**
    * Update project status
    */
   async updateProjectStatus(projectId: string, status: ProjectStatus): Promise<PDFProject> {
-    const project = await this.getProject(projectId);
-    project.status = status;
-    project.updatedAt = new Date();
-    return this.saveProject(project);
+    return await this.projectsRepo.updateProjectStatus(projectId, status);
   }
 
   /**
@@ -92,16 +83,7 @@ export class PDFRepository {
     projectId: string,
     updates: Partial<PDFProject>
   ): Promise<PDFProject> {
-    const project = await this.getProject(projectId);
-
-    const updatedProject: PDFProject = {
-      ...project,
-      ...updates,
-      id: project.id, // Ensure ID doesn't change
-      updatedAt: new Date(),
-    };
-
-    return this.saveProject(updatedProject);
+    return await this.projectsRepo.updateProject(projectId, updates);
   }
 
   /**
@@ -109,8 +91,7 @@ export class PDFRepository {
    */
   async saveAnnotation(annotation: Annotation): Promise<Annotation> {
     try {
-      this.annotations.set(annotation.id, { ...annotation });
-      return annotation;
+      return await this.annotationsRepo.saveAnnotation(annotation);
     } catch (error) {
       throw new PDFStorageError('Failed to save annotation', {
         annotationId: annotation.id,
@@ -123,41 +104,36 @@ export class PDFRepository {
    * Get annotation by ID
    */
   async getAnnotation(annotationId: string): Promise<Annotation> {
-    const annotation = this.annotations.get(annotationId);
+    const annotation = await this.annotationsRepo.getAnnotation(annotationId);
 
     if (!annotation) {
       throw new AnnotationNotFoundError(annotationId);
     }
 
-    return { ...annotation };
+    return annotation;
   }
 
   /**
    * Get all annotations for a project
    */
   async getProjectAnnotations(projectId: string): Promise<Annotation[]> {
-    const project = await this.getProject(projectId);
-    return project.annotations.map((a) => ({ ...a }));
+    return await this.annotationsRepo.getProjectAnnotations(projectId);
   }
 
   /**
    * Get annotations for a specific page
    */
   async getPageAnnotations(projectId: string, pageNumber: number): Promise<Annotation[]> {
-    const annotations = await this.getProjectAnnotations(projectId);
-    return annotations.filter((a) => a.pageNumber === pageNumber);
+    return await this.annotationsRepo.getPageAnnotations(projectId, pageNumber);
   }
 
   /**
    * Delete annotation
    */
   async deleteAnnotation(projectId: string, annotationId: string): Promise<void> {
-    // Remove from annotations map
-    if (!this.annotations.delete(annotationId)) {
-      throw new AnnotationNotFoundError(annotationId);
-    }
+    await this.annotationsRepo.deleteAnnotation(annotationId);
 
-    // Remove from project's annotations array
+    // Update project's annotations array
     const project = await this.getProject(projectId);
     project.annotations = project.annotations.filter((a) => a.id !== annotationId);
     project.updatedAt = new Date();
@@ -171,66 +147,56 @@ export class PDFRepository {
     annotationId: string,
     updates: Partial<Annotation>
   ): Promise<Annotation> {
-    const annotation = await this.getAnnotation(annotationId);
-
-    const updatedAnnotation: Annotation = {
-      ...annotation,
-      ...updates,
-      id: annotation.id, // Ensure ID doesn't change
-      type: annotation.type, // Ensure type doesn't change
-      updatedAt: new Date(),
-    } as Annotation;
-
-    return this.saveAnnotation(updatedAnnotation);
+    return await this.annotationsRepo.updateAnnotation(annotationId, updates);
   }
 
   /**
    * Check if project exists
    */
   async projectExists(projectId: string): Promise<boolean> {
-    return this.projects.has(projectId);
+    return await this.projectsRepo.projectExists(projectId);
   }
 
   /**
    * Get project count
    */
   async getProjectCount(): Promise<number> {
-    return this.projects.size;
+    return await this.projectsRepo.getProjectCount();
   }
 
   /**
    * Get total annotations count
    */
   async getTotalAnnotationsCount(): Promise<number> {
-    return this.annotations.size;
+    // Get count from all projects
+    const projects = await this.listProjects();
+    let total = 0;
+    for (const project of projects) {
+      total += await this.annotationsRepo.getProjectAnnotationCount(project.id);
+    }
+    return total;
   }
 
   /**
    * Search projects by name
    */
   async searchProjects(query: string): Promise<PDFProject[]> {
-    const allProjects = await this.listProjects();
-    const lowerQuery = query.toLowerCase();
-
-    return allProjects.filter((project) =>
-      project.name.toLowerCase().includes(lowerQuery)
-    );
+    return await this.projectsRepo.searchProjects(query);
   }
 
   /**
    * Get projects by status
    */
   async getProjectsByStatus(status: ProjectStatus): Promise<PDFProject[]> {
-    const allProjects = await this.listProjects();
-    return allProjects.filter((project) => project.status === status);
+    return await this.projectsRepo.getProjectsByStatus(status);
   }
 
   /**
    * Clear all data (useful for testing)
    */
   async clearAll(): Promise<void> {
-    this.projects.clear();
-    this.annotations.clear();
+    await this.projectsRepo.clearAll();
+    await this.annotationsRepo.clearAll();
   }
 
   /**
@@ -241,13 +207,7 @@ export class PDFRepository {
     annotationCount: number;
     totalFileSize: number;
   }> {
-    const projects = await this.listProjects();
-
-    return {
-      projectCount: projects.length,
-      annotationCount: this.annotations.size,
-      totalFileSize: projects.reduce((sum, p) => sum + p.metadata.fileSize, 0),
-    };
+    return await this.projectsRepo.getStorageStats();
   }
 }
 
