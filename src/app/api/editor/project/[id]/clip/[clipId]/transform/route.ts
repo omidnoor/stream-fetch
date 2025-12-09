@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getEditorService } from "@/services/editor";
 import { errorHandler } from "@/middleware/error-handler";
+import type { Transform as ServiceTransform } from "@/services/editor/editor.types";
 import type { UpdateTransformDto } from "@/lib/editor/types";
 import { validateTransform, clampScale, normalizeRotation, clampCrop } from "@/lib/editor/utils";
 
@@ -53,23 +54,19 @@ export async function PUT(
     };
 
     // Build updated transform
-    const updatedTransform = {
+    const updatedTransform: ServiceTransform = {
       ...currentTransform,
-      ...(body.scale !== undefined && { scale: clampScale(body.scale) }),
-      ...(body.rotation !== undefined && { rotation: normalizeRotation(body.rotation) }),
-      ...(body.position && {
-        position: { ...currentTransform.position, ...body.position },
-      }),
-      ...(body.crop && {
-        crop: clampCrop(
-          { ...currentTransform.crop, ...body.crop },
-          clip.metadata?.width || 1920,
-          clip.metadata?.height || 1080
-        ),
-      }),
-      ...(body.flipH !== undefined && { flipH: body.flipH }),
-      ...(body.flipV !== undefined && { flipV: body.flipV }),
-      ...(body.lockAspectRatio !== undefined && { lockAspectRatio: body.lockAspectRatio }),
+      scale: body.scale !== undefined ? clampScale(body.scale) : currentTransform.scale,
+      rotation: body.rotation !== undefined ? normalizeRotation(body.rotation) : currentTransform.rotation,
+      position: body.position ? { ...currentTransform.position, ...body.position } : currentTransform.position,
+      crop: body.crop ? clampCrop(
+        { ...currentTransform.crop, ...body.crop },
+        clip.metadata?.width || 1920,
+        clip.metadata?.height || 1080
+      ) : currentTransform.crop,
+      flipH: body.flipH !== undefined ? body.flipH : currentTransform.flipH,
+      flipV: body.flipV !== undefined ? body.flipV : currentTransform.flipV,
+      lockAspectRatio: body.lockAspectRatio !== undefined ? body.lockAspectRatio : currentTransform.lockAspectRatio,
     };
 
     // Validate transform

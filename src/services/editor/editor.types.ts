@@ -10,6 +10,19 @@
 export type ProjectStatus = "draft" | "processing" | "completed" | "failed";
 
 /**
+ * Transform configuration for video clips
+ */
+export interface Transform {
+  scale: number;
+  rotation: number;
+  position: { x: number; y: number };
+  crop: { top: number; right: number; bottom: number; left: number };
+  flipH: boolean;
+  flipV: boolean;
+  lockAspectRatio: boolean;
+}
+
+/**
  * Video clip type
  */
 export interface VideoClip {
@@ -23,7 +36,7 @@ export interface VideoClip {
   volume: number; // 0-1
   muted: boolean;
   effects: Effect[];
-  transform?: any; // Transform configuration
+  transform?: Transform; // Transform configuration
   metadata?: { width?: number; height?: number }; // Video dimensions
 }
 

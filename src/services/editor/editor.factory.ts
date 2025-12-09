@@ -11,6 +11,7 @@ import { EditorRepository } from "./editor.repository";
 import { EditorMapper } from "./editor.mapper";
 import { FFmpegService } from "../ffmpeg/ffmpeg.service";
 import { getCacheService } from "@/lib/cache/cache.factory";
+import type { CacheService } from "@/lib/cache/cache.interface";
 import type { EditorServiceOptions } from "./editor.types";
 
 /**
@@ -147,7 +148,7 @@ export function createEditorService(
   repository: EditorRepository,
   mapper: EditorMapper,
   ffmpegService: FFmpegService,
-  cache?: any
+  cache?: CacheService
 ): EditorService {
   return new EditorService(
     validator,

@@ -2205,9 +2205,9 @@ export function calculateTotalAudioDuration(clips: AudioClip[]): number {
 /**
  * Create default transform for a clip
  */
-export function createDefaultTransform(clipId: string): Transform {
+export function createDefaultTransform(clipId?: string): Transform {
   return {
-    clipId,
+    ...(clipId && { clipId }),
     scale: 1.0,
     rotation: 0,
     position: { x: 0, y: 0 },

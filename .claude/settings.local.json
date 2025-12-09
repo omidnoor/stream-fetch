@@ -55,7 +55,10 @@
       "Bash(xargs:*)",
       "Bash(npx tsx:*)",
       "Bash(if exist \".next\\dev\\lock\" del \".next\\dev\\lock\")",
-      "Bash(if exist \"C:\\files\\Code\\Projects\\Streaming\\.next\\dev\\lock\" del \"C:\\files\\Code\\Projects\\Streaming\\.next\\dev\\lock\")"
+      "Bash(if exist \"C:\\files\\Code\\Projects\\Streaming\\.next\\dev\\lock\" del \"C:\\files\\Code\\Projects\\Streaming\\.next\\dev\\lock\")",
+      "Bash(if not exist \"c:\\files\\Code\\Projects\\Streaming\\src\\components\\editor\\text\" mkdir \"c:\\files\\Code\\Projects\\Streaming\\src\\components\\editor\\text\")",
+      "Bash(if not exist \"c:\\files\\Code\\Projects\\Streaming\\src\\app\\api\\editor\\project\\[id]\\transition\" mkdir \"c:\\files\\Code\\Projects\\Streaming\\src\\app\\api\\editor\\project\\[id]\\transition\")",
+      "Bash(npm run lint)"
     ],
     "deny": [],
     "ask": []

@@ -1306,8 +1306,8 @@ export interface PositionConfig {
  * Transform configuration for a clip
  */
 export interface Transform {
-  /** Clip ID */
-  clipId: string;
+  /** Clip ID (optional - redundant when stored in VideoClip) */
+  clipId?: string;
   /** Scale factor (0.1 - 3.0) */
   scale: number;
   /** Rotation in degrees (0-360) */
