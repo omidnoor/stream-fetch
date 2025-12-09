@@ -5,7 +5,7 @@
  * Optimized for Next.js serverless environment.
  */
 
-import { MongoClient, Db, Collection } from 'mongodb';
+import { MongoClient, Db, Collection, Document } from 'mongodb';
 
 // Global connection cache for serverless environments
 // This prevents creating new connections on every request
@@ -90,7 +90,7 @@ export async function getDatabase(): Promise<Db> {
  * @param collectionName Name of the collection
  * @returns MongoDB collection
  */
-export async function getCollection<T = any>(collectionName: string): Promise<Collection<T>> {
+export async function getCollection<T extends Document = Document>(collectionName: string): Promise<Collection<T>> {
   const db = await getDatabase();
   return db.collection<T>(collectionName);
 }

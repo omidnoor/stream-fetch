@@ -6,9 +6,10 @@
 
 import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
 import { createMockRequest, parseJsonResponse } from '../utils/test-helpers';
+import type { DownloadFormatDto } from '@/services/youtube/youtube.types';
 
 // Create mock functions first (before any imports)
-const mockGetDownloadFormat = jest.fn();
+const mockGetDownloadFormat = jest.fn<(url: string, itag?: number) => Promise<DownloadFormatDto>>();
 
 // Mock global fetch
 const mockFetch = jest.fn<typeof fetch>();

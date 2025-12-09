@@ -589,7 +589,7 @@ describe('YouTubeMapper', () => {
         quality_label: '360p',
         has_video: true,
         has_audio: true,
-        decipher: jest.fn(async () => 'https://deciphered.example.com/video.mp4'),
+        decipher: jest.fn(async (_player: unknown) => 'https://deciphered.example.com/video.mp4'),
       };
 
       const rawInfo = {

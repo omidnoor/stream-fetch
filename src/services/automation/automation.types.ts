@@ -168,6 +168,7 @@ export interface JobError {
   recoverable: boolean;
   failedChunks?: number[];
   details?: Record<string, unknown>;
+  stack?: string;
 }
 
 export interface LogEntry {

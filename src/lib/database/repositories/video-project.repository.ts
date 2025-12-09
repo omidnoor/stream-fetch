@@ -5,7 +5,7 @@
  * Replaces the in-memory Map storage in EditorRepository.
  */
 
-import { Collection } from 'mongodb';
+import { Collection, Filter, Document } from 'mongodb';
 import { getCollection, Collections } from '../mongodb';
 import { VideoProject, ProjectStatus } from '@/services/editor/editor.types';
 
@@ -26,8 +26,8 @@ export class VideoProjectRepository {
 
       // Upsert: update if exists, insert if not
       await collection.updateOne(
-        { id: project.id } as any,
-        { $set: project as any },
+        { id: project.id } as Filter<Document>,
+        { $set: project as Filter<Document> },
         { upsert: true }
       );
 
@@ -46,7 +46,7 @@ export class VideoProjectRepository {
     const collection = await this.getCollection();
 
     try {
-      const project = await collection.findOne({ id: projectId } as any);
+      const project = await collection.findOne({ id: projectId } as Filter<Document>);
       return project as VideoProject | null;
     } catch (error) {
       console.error('[VideoProjectRepository] Get failed:', error);
@@ -82,7 +82,7 @@ export class VideoProjectRepository {
     const collection = await this.getCollection();
 
     try {
-      const result = await collection.deleteOne({ id: projectId } as any);
+      const result = await collection.deleteOne({ id: projectId } as Filter<Document>);
 
       if (result.deletedCount === 0) {
         throw new Error(`Project ${projectId} not found`);
@@ -102,7 +102,7 @@ export class VideoProjectRepository {
     const collection = await this.getCollection();
 
     try {
-      const count = await collection.countDocuments({ id: projectId } as any);
+      const count = await collection.countDocuments({ id: projectId } as Filter<Document>);
       return count > 0;
     } catch (error) {
       console.error('[VideoProjectRepository] Exists check failed:', error);
@@ -136,7 +136,7 @@ export class VideoProjectRepository {
       }
 
       const result = await collection.findOneAndUpdate(
-        { id: projectId } as any,
+        { id: projectId } as Filter<Document>,
         { $set: updates },
         { returnDocument: 'after' }
       );
@@ -225,7 +225,7 @@ export class VideoProjectRepository {
 
     try {
       const result = await collection.findOneAndUpdate(
-        { id: projectId } as any,
+        { id: projectId } as Filter<Document>,
         {
           $set: {
             ...updates,

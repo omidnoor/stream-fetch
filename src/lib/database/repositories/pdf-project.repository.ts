@@ -5,7 +5,7 @@
  * Replaces the in-memory Map storage in PDFRepository.
  */
 
-import { Collection } from 'mongodb';
+import { Collection, Filter, Document } from 'mongodb';
 import { getCollection, Collections } from '../mongodb';
 import { PDFProject, ProjectStatus } from '@/services/pdf/pdf.types';
 
@@ -26,8 +26,8 @@ export class PDFProjectRepository {
 
       // Upsert: update if exists, insert if not
       await collection.updateOne(
-        { id: project.id } as any,
-        { $set: project as any },
+        { id: project.id } as Filter<Document>,
+        { $set: project as Filter<Document> },
         { upsert: true }
       );
 
@@ -46,7 +46,7 @@ export class PDFProjectRepository {
     const collection = await this.getCollection();
 
     try {
-      const project = await collection.findOne({ id: projectId } as any);
+      const project = await collection.findOne({ id: projectId } as Filter<Document>);
       return project as PDFProject | null;
     } catch (error) {
       console.error('[PDFProjectRepository] Get failed:', error);
@@ -77,7 +77,7 @@ export class PDFProjectRepository {
     const collection = await this.getCollection();
 
     try {
-      const result = await collection.deleteOne({ id: projectId } as any);
+      const result = await collection.deleteOne({ id: projectId } as Filter<Document>);
 
       if (result.deletedCount === 0) {
         throw new Error(`Project ${projectId} not found`);
@@ -98,7 +98,7 @@ export class PDFProjectRepository {
 
     try {
       const result = await collection.findOneAndUpdate(
-        { id: projectId } as any,
+        { id: projectId } as Filter<Document>,
         {
           $set: {
             status,
@@ -131,7 +131,7 @@ export class PDFProjectRepository {
 
     try {
       const result = await collection.findOneAndUpdate(
-        { id: projectId } as any,
+        { id: projectId } as Filter<Document>,
         {
           $set: {
             ...updates,
@@ -160,7 +160,7 @@ export class PDFProjectRepository {
     const collection = await this.getCollection();
 
     try {
-      const count = await collection.countDocuments({ id: projectId } as any);
+      const count = await collection.countDocuments({ id: projectId } as Filter<Document>);
       return count > 0;
     } catch (error) {
       console.error('[PDFProjectRepository] Exists check failed:', error);
@@ -193,7 +193,7 @@ export class PDFProjectRepository {
         name: { $regex: query, $options: 'i' }, // Case-insensitive search
       };
 
-      const cursor = collection.find(filter as any).sort({ createdAt: -1 });
+      const cursor = collection.find(filter as Filter<Document>).sort({ createdAt: -1 });
       const projects = await cursor.toArray();
       return projects as PDFProject[];
     } catch (error) {
@@ -209,7 +209,7 @@ export class PDFProjectRepository {
     const collection = await this.getCollection();
 
     try {
-      const cursor = collection.find({ status } as any).sort({ createdAt: -1 });
+      const cursor = collection.find({ status } as Filter<Document>).sort({ createdAt: -1 });
       const projects = await cursor.toArray();
       return projects as PDFProject[];
     } catch (error) {
@@ -223,6 +223,7 @@ export class PDFProjectRepository {
    */
   async getStorageStats(): Promise<{
     projectCount: number;
+    annotationCount: number;
     totalFileSize: number;
   }> {
     const collection = await this.getCollection();
@@ -232,6 +233,7 @@ export class PDFProjectRepository {
 
       return {
         projectCount: projects.length,
+        annotationCount: projects.reduce((sum, p) => sum + (p.annotations?.length || 0), 0),
         totalFileSize: projects.reduce((sum, p) => sum + (p.metadata?.fileSize || 0), 0),
       };
     } catch (error) {

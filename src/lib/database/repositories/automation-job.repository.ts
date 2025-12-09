@@ -5,7 +5,7 @@
  * Replaces the file-based JobStore implementation.
  */
 
-import { Collection } from 'mongodb';
+import { Collection, Filter, Document } from 'mongodb';
 import { getCollection, Collections } from '../mongodb';
 import {
   AutomationJob,
@@ -26,7 +26,7 @@ export class AutomationJobRepository {
     const collection = await this.getCollection();
 
     try {
-      await collection.insertOne(job as any);
+      await collection.insertOne(job);
       console.log(`[AutomationJobRepository] Created job: ${job.id}`);
     } catch (error) {
       console.error('[AutomationJobRepository] Create failed:', error);
@@ -41,7 +41,7 @@ export class AutomationJobRepository {
     const collection = await this.getCollection();
 
     try {
-      const job = await collection.findOne({ id: jobId } as any);
+      const job = await collection.findOne({ id: jobId } as Filter<Document>);
       return job as AutomationJob | null;
     } catch (error) {
       console.error('[AutomationJobRepository] Get failed:', error);
@@ -57,7 +57,7 @@ export class AutomationJobRepository {
 
     try {
       const result = await collection.updateOne(
-        { id: jobId } as any,
+        { id: jobId } as Filter<Document>,
         {
           $set: {
             ...updates,
@@ -84,7 +84,7 @@ export class AutomationJobRepository {
     const collection = await this.getCollection();
 
     try {
-      const result = await collection.deleteOne({ id: jobId } as any);
+      const result = await collection.deleteOne({ id: jobId } as Filter<Document>);
 
       if (result.deletedCount === 0) {
         console.warn(`[AutomationJobRepository] Job ${jobId} not found for deletion`);
@@ -108,13 +108,13 @@ export class AutomationJobRepository {
     const collection = await this.getCollection();
 
     try {
-      const query: any = {};
+      const query: Filter<Document> = {};
       if (filter?.status) {
         query.status = filter.status;
       }
 
       const cursor = collection
-        .find(query)
+        .find(query as Filter<Document>)
         .sort({ createdAt: -1 })
         .skip(filter?.offset || 0)
         .limit(filter?.limit || 10);
@@ -134,12 +134,12 @@ export class AutomationJobRepository {
     const collection = await this.getCollection();
 
     try {
-      const query: any = {};
+      const query: Filter<Document> = {};
       if (filter?.status) {
         query.status = filter.status;
       }
 
-      return await collection.countDocuments(query);
+      return await collection.countDocuments(query as Filter<Document>);
     } catch (error) {
       console.error('[AutomationJobRepository] Count failed:', error);
       throw new Error(`Failed to count jobs: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -154,7 +154,7 @@ export class AutomationJobRepository {
 
     try {
       const result = await collection.updateOne(
-        { id: jobId } as any,
+        { id: jobId } as Filter<Document>,
         {
           $set: {
             progress,
@@ -183,14 +183,14 @@ export class AutomationJobRepository {
 
     try {
       const result = await collection.updateOne(
-        { id: jobId } as any,
+        { id: jobId } as Filter<Document>,
         {
           $push: {
             'progress.logs': {
               $each: [log],
               $slice: -1000, // Keep only last 1000 logs
             },
-          } as any,
+          } as Filter<Document>,
           $set: {
             updatedAt: new Date(),
           },
@@ -213,7 +213,7 @@ export class AutomationJobRepository {
     const collection = await this.getCollection();
 
     try {
-      const count = await collection.countDocuments({ id: jobId } as any);
+      const count = await collection.countDocuments({ id: jobId } as Filter<Document>);
       return count > 0;
     } catch (error) {
       console.error('[AutomationJobRepository] Exists check failed:', error);
@@ -262,7 +262,7 @@ export class AutomationJobRepository {
       const result = await collection.deleteMany({
         status: { $in: ['complete', 'failed', 'cancelled'] },
         updatedAt: { $lt: cutoffDate },
-      } as any);
+      } as Filter<Document>);
 
       console.log(`[AutomationJobRepository] Deleted ${result.deletedCount} old jobs`);
       return result.deletedCount;

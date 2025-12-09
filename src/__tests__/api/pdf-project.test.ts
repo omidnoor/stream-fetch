@@ -10,13 +10,14 @@ import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals
 import { createMockRequest, parseJsonResponse } from '../utils/test-helpers';
 
 // Create mock functions first (before any imports)
-const mockCreateProject = jest.fn();
-const mockListProjects = jest.fn();
-const mockGetProject = jest.fn();
-const mockUpdateProject = jest.fn();
-const mockDeleteProject = jest.fn();
-const mockAddAnnotation = jest.fn();
-const mockExportPdf = jest.fn();
+// Using generic mock types for flexibility in test data
+const mockCreateProject = jest.fn<(...args: unknown[]) => Promise<Record<string, unknown>>>();
+const mockListProjects = jest.fn<(...args: unknown[]) => Promise<Record<string, unknown>[]>>();
+const mockGetProject = jest.fn<(...args: unknown[]) => Promise<Record<string, unknown> | null>>();
+const mockUpdateProject = jest.fn<(...args: unknown[]) => Promise<Record<string, unknown>>>();
+const mockDeleteProject = jest.fn<(...args: unknown[]) => Promise<void>>();
+const mockAddAnnotation = jest.fn<(...args: unknown[]) => Promise<Record<string, unknown>>>();
+const mockExportPdf = jest.fn<(...args: unknown[]) => Promise<Buffer>>();
 const mockMapToProjectDto = jest.fn((project: unknown) => project);
 const mockMapToProjectDtos = jest.fn((projects: unknown) => projects);
 

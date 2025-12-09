@@ -2,6 +2,58 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## AI Agent Implementation Guidelines
+
+These reminders ensure scalable, maintainable, professional code.
+
+### Architecture
+- Follow existing patterns in codebase
+- Don't reinvent - reuse existing utils/components
+- Separation of concerns (UI / logic / data)
+- Single responsibility per file/function
+
+### Code Quality
+- Types for everything - no `any`
+- Error handling at boundaries
+- Validate inputs early
+- No hardcoded values - use constants/config
+
+### Consistency
+- Match existing naming conventions
+- Same file structure as similar features
+- Consistent API response shapes
+- Reuse existing UI components (shadcn)
+
+### Don't Overengineer
+- Minimum viable first, iterate
+- No premature abstraction
+- No unused parameters "for future"
+- Delete dead code, don't comment out
+
+### Testing & Safety
+- Consider edge cases before implementing
+- Handle loading/error/empty states
+- Don't break existing functionality
+- Validate FFmpeg commands before run
+
+### Performance
+- Debounce frequent operations
+- Don't fetch in loops
+- Memoize expensive computations
+- Stream large files, don't buffer
+
+### Dependencies
+- Check what phase/feature depends on
+- Build foundation before features
+- Don't skip shared utils
+
+### Editor Implementation Plan
+- See `.claude/docs/editor-plan/` for detailed implementation phases
+- Phase 1 (Timeline Engine) is prerequisite for all other features
+- Each phase doc contains: Types → Backend → API → Frontend → Hooks
+
+---
+
 ## Project Overview
 
 StreamFetch is a YouTube downloader built with Next.js 16 (App Router). The project demonstrates CORS bypass patterns, streaming data handling, and modern web development practices.

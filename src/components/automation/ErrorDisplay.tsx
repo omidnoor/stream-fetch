@@ -20,8 +20,12 @@ export function ErrorDisplay({
 
   if (!error) return null;
 
-  const errorObj = typeof error === 'string' ? { message: error } : error;
-  const hasDetails = errorObj.code || errorObj.details || errorObj.stack;
+  const isJobError = typeof error !== 'string';
+  const errorMessage = isJobError ? error.message : error;
+  const errorCode = isJobError ? error.code : undefined;
+  const errorDetails = isJobError ? error.details : undefined;
+  const errorStack = isJobError ? error.stack : undefined;
+  const hasDetails = errorCode || errorDetails || errorStack;
 
   return (
     <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -44,10 +48,10 @@ export function ErrorDisplay({
             <h3 className="font-semibold text-red-900">{title}</h3>
           </div>
 
-          <p className="text-red-700 mb-2">{errorObj.message}</p>
+          <p className="text-red-700 mb-2">{errorMessage}</p>
 
-          {errorObj.code && (
-            <p className="text-sm text-red-600 mb-2">Error Code: {errorObj.code}</p>
+          {errorCode && (
+            <p className="text-sm text-red-600 mb-2">Error Code: {errorCode}</p>
           )}
 
           {hasDetails && showDetails && (
@@ -61,16 +65,16 @@ export function ErrorDisplay({
 
           {expanded && (
             <div className="mt-2 p-3 bg-red-100 rounded text-xs font-mono text-red-800 overflow-x-auto">
-              {errorObj.details && (
+              {errorDetails && (
                 <div className="mb-2">
                   <strong>Details:</strong>
-                  <pre className="mt-1 whitespace-pre-wrap">{errorObj.details}</pre>
+                  <pre className="mt-1 whitespace-pre-wrap">{JSON.stringify(errorDetails, null, 2)}</pre>
                 </div>
               )}
-              {errorObj.stack && process.env.NODE_ENV === 'development' && (
+              {errorStack && process.env.NODE_ENV === 'development' && (
                 <div>
                   <strong>Stack Trace:</strong>
-                  <pre className="mt-1 whitespace-pre-wrap">{errorObj.stack}</pre>
+                  <pre className="mt-1 whitespace-pre-wrap">{errorStack}</pre>
                 </div>
               )}
             </div>
@@ -105,10 +109,10 @@ export function ErrorDisplay({
         </div>
       )}
 
-      {getErrorSuggestion(errorObj.message) && (
+      {getErrorSuggestion(errorMessage) && (
         <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
           <p className="text-sm text-blue-800">
-            <strong>Suggestion:</strong> {getErrorSuggestion(errorObj.message)}
+            <strong>Suggestion:</strong> {getErrorSuggestion(errorMessage)}
           </p>
         </div>
       )}

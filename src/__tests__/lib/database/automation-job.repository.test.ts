@@ -234,14 +234,14 @@ describe('AutomationJobRepository', () => {
       const newProgress = {
         ...job.progress,
         overallPercent: 50,
-        stage: 'dubbing' as const,
+        stage: 'dub' as const,
       };
 
       await repository.updateProgress(job.id, newProgress);
 
       const updated = await repository.get(job.id);
       expect(updated?.progress.overallPercent).toBe(50);
-      expect(updated?.progress.stage).toBe('dubbing');
+      expect(updated?.progress.stage).toBe('dub');
     });
   });
 

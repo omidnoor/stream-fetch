@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
+import { UserMenu } from "@/components/auth/user-menu";
 
 interface NavbarProps {
   variant?: "landing" | "app";
@@ -70,12 +71,7 @@ export function Navbar({ variant = "landing" }: NavbarProps) {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex md:items-center md:space-x-3">
-            <Button variant="outline" asChild>
-              <Link href="/dashboard">Sign In</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/dashboard">Get Started</Link>
-            </Button>
+            <UserMenu />
           </div>
 
           {/* Mobile Menu Button */}
@@ -125,10 +121,10 @@ export function Navbar({ variant = "landing" }: NavbarProps) {
               </Link>
               <div className="space-y-2 pt-4">
                 <Button variant="outline" className="w-full" asChild>
-                  <Link href="/dashboard">Sign In</Link>
+                  <Link href="/auth/signin">Sign In</Link>
                 </Button>
                 <Button className="w-full" asChild>
-                  <Link href="/dashboard">Get Started</Link>
+                  <Link href="/auth/signup">Get Started</Link>
                 </Button>
               </div>
             </div>
@@ -141,38 +137,10 @@ export function Navbar({ variant = "landing" }: NavbarProps) {
   // App variant
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-14 items-center justify-between px-4 md:px-6">
-        {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-gradient-start to-gradient-end">
-            <span className="text-sm font-bold text-white">S</span>
-          </div>
-          <span className="text-lg font-bold">StreamFetch</span>
-        </Link>
-
-        {/* Breadcrumbs */}
-        <div className="hidden md:flex md:items-center md:space-x-2 md:text-sm">
-          <span className="text-muted-foreground">/</span>
-          <span className="font-medium capitalize">
-            {pathname.split("/")[1] || "Dashboard"}
-          </span>
-          {pathname.split("/")[2] && (
-            <>
-              <span className="text-muted-foreground">/</span>
-              <span className="font-medium capitalize">
-                {pathname.split("/")[2]}
-              </span>
-            </>
-          )}
-        </div>
-
+      <div className="flex h-14 items-center justify-end px-4 md:px-6">
         {/* User Menu */}
         <div className="flex items-center space-x-3">
-          <Button variant="ghost" size="sm">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-              JD
-            </div>
-          </Button>
+          <UserMenu />
         </div>
       </div>
     </nav>

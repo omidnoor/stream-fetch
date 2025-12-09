@@ -54,7 +54,8 @@
       "Bash(if exist \".next\" rmdir /S /Q .next)",
       "Bash(xargs:*)",
       "Bash(npx tsx:*)",
-      "Bash(if exist \".next\\dev\\lock\" del \".next\\dev\\lock\")"
+      "Bash(if exist \".next\\dev\\lock\" del \".next\\dev\\lock\")",
+      "Bash(if exist \"C:\\files\\Code\\Projects\\Streaming\\.next\\dev\\lock\" del \"C:\\files\\Code\\Projects\\Streaming\\.next\\dev\\lock\")"
     ],
     "deny": [],
     "ask": []

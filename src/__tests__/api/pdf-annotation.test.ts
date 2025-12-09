@@ -11,10 +11,11 @@ import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals
 import { createMockRequest, parseJsonResponse } from '../utils/test-helpers';
 
 // Create mock functions first (before any imports)
-const mockAddAnnotation = jest.fn();
-const mockUpdateAnnotation = jest.fn();
-const mockDeleteAnnotation = jest.fn();
-const mockGetProject = jest.fn();
+// Using generic mock types for flexibility in test data
+const mockAddAnnotation = jest.fn<() => Promise<Record<string, unknown>>>();
+const mockUpdateAnnotation = jest.fn<() => Promise<Record<string, unknown>>>();
+const mockDeleteAnnotation = jest.fn<() => Promise<void>>();
+const mockGetProject = jest.fn<() => Promise<Record<string, unknown> | null>>();
 const mockMapToAnnotationDto = jest.fn((annotation: unknown) => annotation);
 
 // Use unstable_mockModule for ESM compatibility

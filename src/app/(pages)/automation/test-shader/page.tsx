@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input';
 import { ShaderCanvas } from '@/components/automation/shader/ShaderCanvas';
 import { ParticleText } from '@/components/automation/shader/ParticleText';
 import { ParticleMorphText } from '@/components/automation/shader/ParticleMorphText';
+import { Particle3DIcon } from '@/components/automation/shader/Particle3DIcon';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
-type ShaderType = 'grid' | 'dataStream' | 'energyFlow' | 'scanLine' | 'perlinNoise' | 'particleText' | 'particleMorph';
+type ShaderType = 'grid' | 'dataStream' | 'energyFlow' | 'scanLine' | 'perlinNoise' | 'particleText' | 'particleMorph' | 'particle3DIcon';
 
 export default function ShaderTestPage() {
   const [activeShader, setActiveShader] = useState<ShaderType>('particleMorph');
@@ -18,15 +19,37 @@ export default function ShaderTestPage() {
   const [particleText, setParticleText] = useState('DOWNLOADING...');
   const [inputText, setInputText] = useState('DOWNLOADING...');
   const [fontFamily, setFontFamily] = useState('-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif');
+  const [selectedIcon, setSelectedIcon] = useState('⚡');
+  const [iconDepth, setIconDepth] = useState(0.4);
+  const [parallaxIntensity, setParallaxIntensity] = useState(0.3);
+  const [enableParallax, setEnableParallax] = useState(true);
 
   const shaderOptions: { id: ShaderType; name: string; description: string }[] = [
     { id: 'particleMorph', name: '🌟 Entropy Morph', description: 'Test mode - auto-cycles status messages (production uses API text)' },
+    { id: 'particle3DIcon', name: '🎲 3D Icon', description: 'Mouse-responsive 3D particle icons with parallax' },
     { id: 'particleText', name: '⭐ Particle Text', description: 'Colorful particles forming kinetic typography' },
     { id: 'grid', name: 'Holographic Grid', description: 'Animated perspective grid with glow' },
     { id: 'dataStream', name: 'Data Stream', description: 'Matrix-style vertical data flow' },
     { id: 'energyFlow', name: 'Energy Flow', description: 'Flowing particle progress bar' },
     { id: 'scanLine', name: 'Scan Line', description: 'CRT monitor scan effect' },
     { id: 'perlinNoise', name: 'Perlin Noise', description: 'Animated depth background' },
+  ];
+
+  const testIconsCycle = ['⚡', '🔥', '💎', '🚀', '⭐', '🎯', '💜', '🌟'];
+
+  const iconOptions = [
+    { emoji: '⚡', label: 'Lightning' },
+    { emoji: '🔥', label: 'Fire' },
+    { emoji: '💎', label: 'Diamond' },
+    { emoji: '🚀', label: 'Rocket' },
+    { emoji: '⭐', label: 'Star' },
+    { emoji: '🎯', label: 'Target' },
+    { emoji: '💜', label: 'Heart' },
+    { emoji: '🌟', label: 'Sparkle' },
+    { emoji: '🎮', label: 'Gaming' },
+    { emoji: '🎵', label: 'Music' },
+    { emoji: '📦', label: 'Package' },
+    { emoji: '⚙️', label: 'Settings' },
   ];
 
   const statusMessages = [
@@ -96,7 +119,84 @@ export default function ShaderTestPage() {
       <div className="rounded-lg border bg-card p-6 space-y-4">
         <h2 className="text-xl font-semibold">Shader Controls</h2>
 
-        {activeShader === 'particleText' || activeShader === 'particleMorph' ? (
+        {activeShader === 'particle3DIcon' ? (
+          <>
+            {/* 3D Icon Controls */}
+            <div className="space-y-3">
+              <label className="text-sm font-medium">Select Icon</label>
+              <div className="grid grid-cols-6 gap-2">
+                {iconOptions.map((opt) => (
+                  <button
+                    key={opt.emoji}
+                    onClick={() => setSelectedIcon(opt.emoji)}
+                    className={`
+                      p-3 text-2xl rounded-lg border transition-all
+                      ${selectedIcon === opt.emoji
+                        ? 'border-primary bg-primary/20 scale-110'
+                        : 'border-border bg-surface-2 hover:border-muted-foreground'
+                      }
+                    `}
+                    title={opt.label}
+                  >
+                    {opt.emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">3D Depth</label>
+                <span className="text-sm font-semibold text-primary">{iconDepth.toFixed(2)}</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={iconDepth}
+                onChange={(e) => setIconDepth(parseFloat(e.target.value))}
+                className="w-full accent-primary"
+              />
+              <p className="text-xs text-muted-foreground">
+                0 = flat, 1 = maximum depth extrusion
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Parallax Intensity</label>
+                <span className="text-sm font-semibold text-primary">{parallaxIntensity.toFixed(2)}</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={parallaxIntensity}
+                onChange={(e) => setParallaxIntensity(parseFloat(e.target.value))}
+                className="w-full accent-primary"
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="enableParallax"
+                checked={enableParallax}
+                onChange={(e) => setEnableParallax(e.target.checked)}
+                className="h-4 w-4 accent-primary"
+              />
+              <label htmlFor="enableParallax" className="text-sm font-medium">
+                Enable Mouse Parallax
+              </label>
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              Move your mouse over the icon to see the 3D parallax effect
+            </p>
+          </>
+        ) : activeShader === 'particleText' || activeShader === 'particleMorph' ? (
           <>
             {/* Particle Text Controls */}
             <div className="space-y-3">
@@ -211,7 +311,22 @@ export default function ShaderTestPage() {
         </div>
 
         {/* Canvas Container */}
-        {activeShader === 'particleMorph' ? (
+        {activeShader === 'particle3DIcon' ? (
+          <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-surface-1">
+            <Particle3DIcon
+              testIcons={testIconsCycle}
+              testDuration={3}
+              particleCount={65536}
+              pointSize={2.0}
+              scale={1.5}
+              depth={iconDepth}
+              enableParallax={enableParallax}
+              parallaxIntensity={parallaxIntensity}
+              settleTime={2.5}
+              background={[0.02, 0.02, 0.035, 1.0]}
+            />
+          </div>
+        ) : activeShader === 'particleMorph' ? (
           <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-surface-1">
             <ParticleMorphText
               testTexts={testStatusCycle}
@@ -251,6 +366,16 @@ export default function ShaderTestPage() {
           <li>• requestAnimationFrame is properly cleaned up on unmount</li>
           <li>• WebGL context is disposed when component unmounts</li>
           <li>• Shaders are compiled once and cached</li>
+          {activeShader === 'particle3DIcon' && (
+            <>
+              <li className="text-primary">• 65,536 particles with 3D curl noise flow fields</li>
+              <li className="text-primary">• Mouse-responsive parallax creates 3D illusion</li>
+              <li className="text-primary">• Perspective projection with depth-based point sizing</li>
+              <li className="text-primary">• Real-time lighting with diffuse, specular, and rim light</li>
+              <li className="text-primary">• Depth extrusion based on brightness and distance from center</li>
+              <li className="text-primary">• Auto-cycles through icons every 3s in test mode</li>
+            </>
+          )}
           {activeShader === 'particleMorph' && (
             <>
               <li className="text-primary">• 65,536 particles with curl noise flow fields</li>

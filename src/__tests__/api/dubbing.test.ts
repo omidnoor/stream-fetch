@@ -11,9 +11,10 @@ import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals
 import { createMockRequest, parseJsonResponse } from '../utils/test-helpers';
 
 // Create mock functions first (before any imports)
-const mockCreateDubbingJob = jest.fn();
-const mockGetDubbingStatus = jest.fn();
-const mockDownloadDubbedAudio = jest.fn();
+// Using generic mock types for flexibility in test data
+const mockCreateDubbingJob = jest.fn<(...args: unknown[]) => Promise<Record<string, unknown>>>();
+const mockGetDubbingStatus = jest.fn<(...args: unknown[]) => Promise<Record<string, unknown>>>();
+const mockDownloadDubbedAudio = jest.fn<(...args: unknown[]) => Promise<Record<string, unknown>>>();
 
 // Use unstable_mockModule for ESM compatibility
 jest.unstable_mockModule('@/services/dubbing', () => ({

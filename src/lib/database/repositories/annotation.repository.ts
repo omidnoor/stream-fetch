@@ -5,7 +5,7 @@
  * Stored in a separate collection for better query performance.
  */
 
-import { Collection } from 'mongodb';
+import { Collection, Filter, Document, AnyBulkWriteOperation } from 'mongodb';
 import { getCollection, Collections } from '../mongodb';
 import { Annotation } from '@/services/pdf/pdf.types';
 
@@ -26,8 +26,8 @@ export class AnnotationRepository {
 
       // Upsert: update if exists, insert if not
       await collection.updateOne(
-        { id: annotation.id } as any,
-        { $set: annotation as any },
+        { id: annotation.id } as Filter<Document>,
+        { $set: annotation } as Filter<Document>,
         { upsert: true }
       );
 
@@ -46,7 +46,7 @@ export class AnnotationRepository {
     const collection = await this.getCollection();
 
     try {
-      const annotation = await collection.findOne({ id: annotationId } as any);
+      const annotation = await collection.findOne({ id: annotationId } as Filter<Document>);
       return annotation as Annotation | null;
     } catch (error) {
       console.error('[AnnotationRepository] Get failed:', error);
@@ -62,7 +62,7 @@ export class AnnotationRepository {
 
     try {
       const cursor = collection
-        .find({ projectId } as any)
+        .find({ projectId } as Filter<Document>)
         .sort({ createdAt: 1 }); // Oldest first
 
       const annotations = await cursor.toArray();
@@ -81,7 +81,7 @@ export class AnnotationRepository {
 
     try {
       const cursor = collection
-        .find({ projectId, pageNumber } as any)
+        .find({ projectId, pageNumber } as Filter<Document>)
         .sort({ createdAt: 1 });
 
       const annotations = await cursor.toArray();
@@ -99,7 +99,7 @@ export class AnnotationRepository {
     const collection = await this.getCollection();
 
     try {
-      const result = await collection.deleteOne({ id: annotationId } as any);
+      const result = await collection.deleteOne({ id: annotationId } as Filter<Document>);
 
       if (result.deletedCount === 0) {
         throw new Error(`Annotation ${annotationId} not found`);
@@ -119,7 +119,7 @@ export class AnnotationRepository {
     const collection = await this.getCollection();
 
     try {
-      const result = await collection.deleteMany({ projectId } as any);
+      const result = await collection.deleteMany({ projectId } as Filter<Document>);
       console.log(`[AnnotationRepository] Deleted ${result.deletedCount} annotations for project: ${projectId}`);
       return result.deletedCount;
     } catch (error) {
@@ -139,7 +139,7 @@ export class AnnotationRepository {
 
     try {
       const result = await collection.findOneAndUpdate(
-        { id: annotationId } as any,
+        { id: annotationId } as Filter<Document>,
         {
           $set: {
             ...updates,
@@ -168,7 +168,7 @@ export class AnnotationRepository {
     const collection = await this.getCollection();
 
     try {
-      const count = await collection.countDocuments({ id: annotationId } as any);
+      const count = await collection.countDocuments({ id: annotationId } as Filter<Document>);
       return count > 0;
     } catch (error) {
       console.error('[AnnotationRepository] Exists check failed:', error);
@@ -183,7 +183,7 @@ export class AnnotationRepository {
     const collection = await this.getCollection();
 
     try {
-      return await collection.countDocuments({ projectId } as any);
+      return await collection.countDocuments({ projectId } as Filter<Document>);
     } catch (error) {
       console.error('[AnnotationRepository] Count failed:', error);
       throw new Error(`Failed to count annotations: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -201,7 +201,7 @@ export class AnnotationRepository {
 
     try {
       const cursor = collection
-        .find({ projectId, type } as any)
+        .find({ projectId, type } as Filter<Document>)
         .sort({ createdAt: 1 });
 
       const annotations = await cursor.toArray();
@@ -228,7 +228,7 @@ export class AnnotationRepository {
       }));
 
       if (operations.length > 0) {
-        await collection.bulkWrite(operations as any);
+        await collection.bulkWrite(operations as unknown as AnyBulkWriteOperation<Annotation>[]);
         console.log(`[AnnotationRepository] Batch saved ${annotations.length} annotations`);
       }
     } catch (error) {
