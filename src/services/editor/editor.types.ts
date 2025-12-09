@@ -23,6 +23,8 @@ export interface VideoClip {
   volume: number; // 0-1
   muted: boolean;
   effects: Effect[];
+  transform?: any; // Transform configuration
+  metadata?: { width?: number; height?: number }; // Video dimensions
 }
 
 /**

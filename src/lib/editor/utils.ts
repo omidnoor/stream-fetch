@@ -26,6 +26,9 @@ import type {
   AudioConfig,
   WaveformData,
   AudioMixerTrack,
+  Transform,
+  CropConfig,
+  PositionConfig,
 } from "./types";
 
 /**
@@ -2194,3 +2197,310 @@ export function calculateTotalAudioDuration(clips: AudioClip[]): number {
   if (clips.length === 0) return 0;
   return Math.max(...clips.map((clip) => clip.startTime + clip.duration));
 }
+
+// ============================================================================
+// Transform Utilities
+// ============================================================================
+
+/**
+ * Create default transform for a clip
+ */
+export function createDefaultTransform(clipId: string): Transform {
+  return {
+    clipId,
+    scale: 1.0,
+    rotation: 0,
+    position: { x: 0, y: 0 },
+    crop: { top: 0, right: 0, bottom: 0, left: 0 },
+    flipH: false,
+    flipV: false,
+    lockAspectRatio: true,
+  };
+}
+
+/**
+ * Clamp scale to valid range (0.1 - 3.0)
+ */
+export function clampScale(scale: number): number {
+  return Math.max(0.1, Math.min(3.0, scale));
+}
+
+/**
+ * Normalize rotation to 0-360 degrees
+ */
+export function normalizeRotation(rotation: number): number {
+  const normalized = rotation % 360;
+  return normalized < 0 ? normalized + 360 : normalized;
+}
+
+/**
+ * Clamp crop values to valid range
+ */
+export function clampCrop(crop: CropConfig, width: number, height: number): CropConfig {
+  const maxHorizontal = width - 10; // Leave at least 10px
+  const maxVertical = height - 10;
+
+  return {
+    top: Math.max(0, Math.min(crop.top, maxVertical - crop.bottom)),
+    right: Math.max(0, Math.min(crop.right, maxHorizontal - crop.left)),
+    bottom: Math.max(0, Math.min(crop.bottom, maxVertical - crop.top)),
+    left: Math.max(0, Math.min(crop.left, maxHorizontal - crop.right)),
+  };
+}
+
+/**
+ * Generate FFmpeg scale filter
+ */
+export function generateScaleFilter(
+  scale: number,
+  width?: number,
+  height?: number
+): string {
+  if (scale === 1 && !width && !height) return "";
+
+  if (width && height) {
+    const scaledWidth = Math.round(width * scale);
+    const scaledHeight = Math.round(height * scale);
+    return `scale=${scaledWidth}:${scaledHeight}`;
+  }
+
+  return `scale=iw*${scale}:ih*${scale}`;
+}
+
+/**
+ * Generate FFmpeg crop filter
+ */
+export function generateCropFilter(crop: CropConfig, width: number, height: number): string {
+  const { top, right, bottom, left } = crop;
+
+  // Check if there's any cropping
+  if (top === 0 && right === 0 && bottom === 0 && left === 0) return "";
+
+  const cropWidth = width - left - right;
+  const cropHeight = height - top - bottom;
+
+  return `crop=${cropWidth}:${cropHeight}:${left}:${top}`;
+}
+
+/**
+ * Generate FFmpeg rotate filter
+ */
+export function generateRotateFilter(rotation: number): string {
+  if (rotation === 0) return "";
+
+  // Convert degrees to radians
+  const radians = (rotation * Math.PI) / 180;
+
+  return `rotate=${radians}:c=none:ow=rotw(${radians}):oh=roth(${radians})`;
+}
+
+/**
+ * Generate FFmpeg flip filters
+ */
+export function generateFlipFilters(flipH: boolean, flipV: boolean): string {
+  const filters: string[] = [];
+
+  if (flipH) filters.push("hflip");
+  if (flipV) filters.push("vflip");
+
+  return filters.join(",");
+}
+
+/**
+ * Generate FFmpeg overlay filter for positioning
+ */
+export function generateOverlayFilter(position: PositionConfig): string {
+  if (position.x === 0 && position.y === 0) return "";
+
+  return `overlay=x=${position.x}:y=${position.y}`;
+}
+
+/**
+ * Generate complete transform filter chain
+ */
+export function generateTransformFilterChain(
+  transform: Transform,
+  videoWidth?: number,
+  videoHeight?: number
+): string {
+  const filters: string[] = [];
+
+  // Crop (apply first)
+  if (videoWidth && videoHeight) {
+    const cropFilter = generateCropFilter(transform.crop, videoWidth, videoHeight);
+    if (cropFilter) filters.push(cropFilter);
+  }
+
+  // Flip
+  const flipFilters = generateFlipFilters(transform.flipH, transform.flipV);
+  if (flipFilters) filters.push(flipFilters);
+
+  // Rotate
+  const rotateFilter = generateRotateFilter(transform.rotation);
+  if (rotateFilter) filters.push(rotateFilter);
+
+  // Scale
+  const scaleFilter = generateScaleFilter(transform.scale, videoWidth, videoHeight);
+  if (scaleFilter) filters.push(scaleFilter);
+
+  return filters.join(",");
+}
+
+/**
+ * Calculate bounding box after rotation
+ */
+export function calculateRotatedBounds(
+  width: number,
+  height: number,
+  rotation: number
+): { width: number; height: number } {
+  const radians = (rotation * Math.PI) / 180;
+  const cos = Math.abs(Math.cos(radians));
+  const sin = Math.abs(Math.sin(radians));
+
+  const newWidth = width * cos + height * sin;
+  const newHeight = width * sin + height * cos;
+
+  return {
+    width: Math.round(newWidth),
+    height: Math.round(newHeight),
+  };
+}
+
+/**
+ * Calculate actual dimensions after transform
+ */
+export function calculateTransformedDimensions(
+  originalWidth: number,
+  originalHeight: number,
+  transform: Transform
+): { width: number; height: number } {
+  // Apply crop
+  const croppedWidth = originalWidth - transform.crop.left - transform.crop.right;
+  const croppedHeight = originalHeight - transform.crop.top - transform.crop.bottom;
+
+  // Apply scale
+  let width = croppedWidth * transform.scale;
+  let height = croppedHeight * transform.scale;
+
+  // Apply rotation
+  if (transform.rotation !== 0) {
+    const rotated = calculateRotatedBounds(width, height, transform.rotation);
+    width = rotated.width;
+    height = rotated.height;
+  }
+
+  return { width: Math.round(width), height: Math.round(height) };
+}
+
+/**
+ * Validate transform configuration
+ */
+export function validateTransform(
+  transform: Transform,
+  videoWidth?: number,
+  videoHeight?: number
+): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  // Validate scale
+  if (transform.scale < 0.1 || transform.scale > 3.0) {
+    errors.push("Scale must be between 0.1 and 3.0");
+  }
+
+  // Validate crop
+  if (videoWidth && videoHeight) {
+    const { top, right, bottom, left } = transform.crop;
+
+    if (top < 0 || right < 0 || bottom < 0 || left < 0) {
+      errors.push("Crop values cannot be negative");
+    }
+
+    if (left + right >= videoWidth) {
+      errors.push("Horizontal crop exceeds video width");
+    }
+
+    if (top + bottom >= videoHeight) {
+      errors.push("Vertical crop exceeds video height");
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
+/**
+ * Calculate scale needed to fit within bounds
+ */
+export function calculateFitScale(
+  sourceWidth: number,
+  sourceHeight: number,
+  targetWidth: number,
+  targetHeight: number,
+  contain: boolean = true
+): number {
+  const widthRatio = targetWidth / sourceWidth;
+  const heightRatio = targetHeight / sourceHeight;
+
+  return contain
+    ? Math.min(widthRatio, heightRatio)
+    : Math.max(widthRatio, heightRatio);
+}
+
+/**
+ * Apply transform preset
+ */
+export function applyTransformPreset(
+  current: Transform,
+  preset: Partial<Transform>
+): Transform {
+  return {
+    ...current,
+    ...preset,
+    crop: preset.crop ? { ...current.crop, ...preset.crop } : current.crop,
+    position: preset.position
+      ? { ...current.position, ...preset.position }
+      : current.position,
+  };
+}
+
+/**
+ * Common transform presets
+ */
+export const TRANSFORM_PRESETS = {
+  fitToCanvas: (canvasWidth: number, canvasHeight: number, videoWidth: number, videoHeight: number): Partial<Transform> => ({
+    scale: calculateFitScale(videoWidth, videoHeight, canvasWidth, canvasHeight),
+    position: { x: 0, y: 0 },
+    rotation: 0,
+    crop: { top: 0, right: 0, bottom: 0, left: 0 },
+  }),
+  centerCrop: (targetRatio: number, videoWidth: number, videoHeight: number): Partial<Transform> => {
+    const videoRatio = videoWidth / videoHeight;
+    let crop: CropConfig;
+
+    if (videoRatio > targetRatio) {
+      // Video is wider - crop sides
+      const targetWidth = videoHeight * targetRatio;
+      const cropAmount = (videoWidth - targetWidth) / 2;
+      crop = { top: 0, right: cropAmount, bottom: 0, left: cropAmount };
+    } else {
+      // Video is taller - crop top/bottom
+      const targetHeight = videoWidth / targetRatio;
+      const cropAmount = (videoHeight - targetHeight) / 2;
+      crop = { top: cropAmount, right: 0, bottom: cropAmount, left: 0 };
+    }
+
+    return { crop };
+  },
+  pictureInPicture: (size: number = 0.25): Partial<Transform> => ({
+    scale: size,
+    position: { x: -10, y: -10 }, // Bottom-right corner
+  }),
+  rotate90: (): Partial<Transform> => ({ rotation: 90 }),
+  rotate180: (): Partial<Transform> => ({ rotation: 180 }),
+  rotate270: (): Partial<Transform> => ({ rotation: 270 }),
+  flipHorizontal: (): Partial<Transform> => ({ flipH: true }),
+  flipVertical: (): Partial<Transform> => ({ flipV: true }),
+};

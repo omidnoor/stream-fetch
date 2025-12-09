@@ -1273,3 +1273,209 @@ export interface FadeHandleProps {
   onChange: (duration: number) => void;
   className?: string;
 }
+
+// ============================================================================
+// Transform Types
+// ============================================================================
+
+/**
+ * Crop configuration
+ */
+export interface CropConfig {
+  /** Top crop in pixels */
+  top: number;
+  /** Right crop in pixels */
+  right: number;
+  /** Bottom crop in pixels */
+  bottom: number;
+  /** Left crop in pixels */
+  left: number;
+}
+
+/**
+ * Position configuration
+ */
+export interface PositionConfig {
+  /** X position */
+  x: number;
+  /** Y position */
+  y: number;
+}
+
+/**
+ * Transform configuration for a clip
+ */
+export interface Transform {
+  /** Clip ID */
+  clipId: string;
+  /** Scale factor (0.1 - 3.0) */
+  scale: number;
+  /** Rotation in degrees (0-360) */
+  rotation: number;
+  /** Position on canvas */
+  position: PositionConfig;
+  /** Crop values */
+  crop: CropConfig;
+  /** Flip horizontally */
+  flipH: boolean;
+  /** Flip vertically */
+  flipV: boolean;
+  /** Maintain aspect ratio during scale */
+  lockAspectRatio: boolean;
+}
+
+/**
+ * Input for updating transform
+ */
+export interface UpdateTransformDto {
+  scale?: number;
+  rotation?: number;
+  position?: Partial<PositionConfig>;
+  crop?: Partial<CropConfig>;
+  flipH?: boolean;
+  flipV?: boolean;
+  lockAspectRatio?: boolean;
+}
+
+/**
+ * Transform state for the editor
+ */
+export interface TransformState {
+  /** Current transform */
+  transform: Transform;
+  /** Whether transform is being edited */
+  isEditing: boolean;
+  /** Which handle is being dragged */
+  activeHandle: TransformHandle | null;
+  /** Original transform before edit */
+  originalTransform: Transform | null;
+  /** Loading state */
+  loading: boolean;
+  /** Error message */
+  error: string | null;
+}
+
+/**
+ * Transform handle types
+ */
+export type TransformHandle =
+  | "move"
+  | "scale-tl"
+  | "scale-tr"
+  | "scale-bl"
+  | "scale-br"
+  | "scale-t"
+  | "scale-r"
+  | "scale-b"
+  | "scale-l"
+  | "crop-t"
+  | "crop-r"
+  | "crop-b"
+  | "crop-l"
+  | "rotate";
+
+/**
+ * Transform actions for state management
+ */
+export type TransformAction =
+  | { type: "SET_TRANSFORM"; payload: Transform }
+  | { type: "SET_SCALE"; payload: number }
+  | { type: "SET_ROTATION"; payload: number }
+  | { type: "SET_POSITION"; payload: PositionConfig }
+  | { type: "SET_CROP"; payload: CropConfig }
+  | { type: "TOGGLE_FLIP_H" }
+  | { type: "TOGGLE_FLIP_V" }
+  | { type: "TOGGLE_ASPECT_LOCK" }
+  | { type: "START_EDIT"; payload: { handle: TransformHandle; original: Transform } }
+  | { type: "END_EDIT" }
+  | { type: "CANCEL_EDIT" }
+  | { type: "RESET_TRANSFORM" }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null };
+
+/**
+ * Props for TransformPanel component
+ */
+export interface TransformPanelProps {
+  /** Clip ID */
+  clipId: string;
+  /** Project ID */
+  projectId: string;
+  /** Current transform */
+  transform: Transform;
+  /** Called when transform changes */
+  onChange: (transform: Transform) => void;
+  /** Video dimensions */
+  videoDimensions?: { width: number; height: number };
+  className?: string;
+}
+
+/**
+ * Props for TransformCanvas component
+ */
+export interface TransformCanvasProps {
+  /** Clip ID */
+  clipId: string;
+  /** Current transform */
+  transform: Transform;
+  /** Canvas dimensions */
+  width: number;
+  height: number;
+  /** Video dimensions */
+  videoWidth: number;
+  videoHeight: number;
+  /** Called when transform changes */
+  onChange: (transform: Partial<Transform>) => void;
+  /** Whether to show handles */
+  showHandles?: boolean;
+  className?: string;
+}
+
+/**
+ * Props for CropHandles component
+ */
+export interface CropHandlesProps {
+  /** Current crop */
+  crop: CropConfig;
+  /** Clip dimensions */
+  width: number;
+  height: number;
+  /** Called when crop changes */
+  onChange: (crop: CropConfig) => void;
+  /** Whether handles are visible */
+  visible?: boolean;
+  className?: string;
+}
+
+/**
+ * Props for RotateHandle component
+ */
+export interface RotateHandleProps {
+  /** Current rotation in degrees */
+  rotation: number;
+  /** Center point */
+  centerX: number;
+  centerY: number;
+  /** Radius from center */
+  radius: number;
+  /** Called when rotation changes */
+  onChange: (rotation: number) => void;
+  /** Whether handle is visible */
+  visible?: boolean;
+  className?: string;
+}
+
+/**
+ * Props for TransformPreset component
+ */
+export interface TransformPresetProps {
+  /** Preset transforms */
+  presets: Array<{
+    id: string;
+    name: string;
+    transform: Partial<Transform>;
+  }>;
+  /** Called when preset is selected */
+  onSelect: (transform: Partial<Transform>) => void;
+  className?: string;
+}
