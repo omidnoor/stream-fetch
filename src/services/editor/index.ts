@@ -16,6 +16,12 @@ export {
   initializeEditorService,
 } from "./editor.factory";
 
+export {
+  MediaService,
+  getMediaService,
+  resetMediaService,
+} from "./media.service";
+
 export type {
   VideoProject,
   ProjectDto,

@@ -229,3 +229,152 @@ export interface TimeRulerProps {
   onSeek?: (time: number) => void;
   className?: string;
 }
+
+// ============================================================================
+// Media Library Types
+// ============================================================================
+
+/**
+ * Media asset types
+ */
+export type MediaAssetType = "video" | "audio" | "image";
+
+/**
+ * Media asset metadata
+ */
+export interface MediaAssetMetadata {
+  /** Duration in seconds (video/audio) */
+  duration?: number;
+  /** Width in pixels (video/image) */
+  width?: number;
+  /** Height in pixels (video/image) */
+  height?: number;
+  /** Frame rate (video) */
+  frameRate?: number;
+  /** Bitrate in kbps */
+  bitrate?: number;
+  /** Codec name */
+  codec?: string;
+  /** Sample rate in Hz (audio) */
+  sampleRate?: number;
+  /** Number of audio channels */
+  channels?: number;
+}
+
+/**
+ * A media asset in the library
+ */
+export interface MediaAsset {
+  id: string;
+  projectId: string;
+  type: MediaAssetType;
+  filename: string;
+  originalFilename: string;
+  path: string;
+  size: number;
+  mimeType: string;
+  thumbnail?: string;
+  metadata: MediaAssetMetadata;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Input for uploading a media asset
+ */
+export interface UploadMediaDto {
+  projectId: string;
+  file: File;
+}
+
+/**
+ * Response after uploading a media asset
+ */
+export interface MediaAssetDto {
+  id: string;
+  type: MediaAssetType;
+  filename: string;
+  thumbnail?: string;
+  duration?: number;
+  size: number;
+  createdAt: Date;
+}
+
+/**
+ * Media library state
+ */
+export interface MediaLibraryState {
+  assets: MediaAsset[];
+  loading: boolean;
+  error: string | null;
+  filter: MediaAssetType | "all";
+  searchQuery: string;
+  viewMode: "grid" | "list";
+  selectedAssetIds: string[];
+}
+
+/**
+ * Media library actions
+ */
+export type MediaLibraryAction =
+  | { type: "SET_ASSETS"; payload: MediaAsset[] }
+  | { type: "ADD_ASSET"; payload: MediaAsset }
+  | { type: "REMOVE_ASSET"; payload: string }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null }
+  | { type: "SET_FILTER"; payload: MediaAssetType | "all" }
+  | { type: "SET_SEARCH"; payload: string }
+  | { type: "SET_VIEW_MODE"; payload: "grid" | "list" }
+  | { type: "SELECT_ASSET"; payload: string }
+  | { type: "DESELECT_ASSET"; payload: string }
+  | { type: "CLEAR_SELECTION" };
+
+/**
+ * Props for MediaLibrary component
+ */
+export interface MediaLibraryProps {
+  projectId: string;
+  onAssetSelect?: (asset: MediaAsset) => void;
+  onAssetDragStart?: (asset: MediaAsset) => void;
+  className?: string;
+}
+
+/**
+ * Props for MediaItem component
+ */
+export interface MediaItemProps {
+  asset: MediaAsset;
+  isSelected: boolean;
+  viewMode: "grid" | "list";
+  onSelect: () => void;
+  onDoubleClick?: () => void;
+  onDragStart?: () => void;
+  onDelete?: () => void;
+  className?: string;
+}
+
+/**
+ * Props for MediaGrid component
+ */
+export interface MediaGridProps {
+  assets: MediaAsset[];
+  selectedIds: string[];
+  viewMode: "grid" | "list";
+  onAssetSelect: (assetId: string) => void;
+  onAssetDoubleClick?: (asset: MediaAsset) => void;
+  onAssetDragStart?: (asset: MediaAsset) => void;
+  onAssetDelete?: (assetId: string) => void;
+  className?: string;
+}
+
+/**
+ * Props for MediaUploader component
+ */
+export interface MediaUploaderProps {
+  projectId: string;
+  onUploadComplete?: (asset: MediaAsset) => void;
+  onUploadError?: (error: string) => void;
+  accept?: string;
+  maxSizeMB?: number;
+  className?: string;
+}
