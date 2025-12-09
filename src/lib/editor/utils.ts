@@ -14,6 +14,10 @@ import type {
   TextAnimation,
   TextPreset,
   TextPresetType,
+  EffectType,
+  EffectConfig,
+  ClipEffect,
+  EffectPreset,
 } from "./types";
 
 /**
@@ -900,3 +904,510 @@ export const COLOR_PRESETS = [
   "#808080", // Gray
   "#C0C0C0", // Silver
 ];
+
+// ============================================================================
+// Effects & Filters Utilities
+// ============================================================================
+
+/**
+ * Generate a unique effect ID
+ */
+export function generateEffectId(): string {
+  return `effect-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+/**
+ * Effect configurations with parameters and FFmpeg mappings
+ */
+export const EFFECT_CONFIGS: Record<EffectType, EffectConfig> = {
+  brightness: {
+    type: "brightness",
+    name: "Brightness",
+    description: "Adjust image brightness",
+    params: [
+      { key: "value", label: "Brightness", min: -100, max: 100, step: 1, default: 0, unit: "%" },
+    ],
+    cssFilter: "brightness",
+    ffmpegFilter: "eq=brightness={value}",
+  },
+  contrast: {
+    type: "contrast",
+    name: "Contrast",
+    description: "Adjust image contrast",
+    params: [
+      { key: "value", label: "Contrast", min: -100, max: 100, step: 1, default: 0, unit: "%" },
+    ],
+    cssFilter: "contrast",
+    ffmpegFilter: "eq=contrast={value}",
+  },
+  saturation: {
+    type: "saturation",
+    name: "Saturation",
+    description: "Adjust color saturation",
+    params: [
+      { key: "value", label: "Saturation", min: -100, max: 100, step: 1, default: 0, unit: "%" },
+    ],
+    cssFilter: "saturate",
+    ffmpegFilter: "eq=saturation={value}",
+  },
+  blur: {
+    type: "blur",
+    name: "Blur",
+    description: "Apply gaussian blur",
+    params: [
+      { key: "radius", label: "Radius", min: 0, max: 20, step: 0.5, default: 0, unit: "px" },
+    ],
+    cssFilter: "blur",
+    ffmpegFilter: "boxblur={radius}:1",
+  },
+  sharpen: {
+    type: "sharpen",
+    name: "Sharpen",
+    description: "Sharpen image details",
+    params: [
+      { key: "amount", label: "Amount", min: 0, max: 100, step: 1, default: 0, unit: "%" },
+    ],
+    ffmpegFilter: "unsharp=5:5:{amount}:5:5:0",
+  },
+  grayscale: {
+    type: "grayscale",
+    name: "Grayscale",
+    description: "Convert to black and white",
+    params: [
+      { key: "amount", label: "Amount", min: 0, max: 100, step: 1, default: 100, unit: "%" },
+    ],
+    cssFilter: "grayscale",
+    ffmpegFilter: "colorchannelmixer=.3:.4:.3:0:.3:.4:.3:0:.3:.4:.3",
+  },
+  sepia: {
+    type: "sepia",
+    name: "Sepia",
+    description: "Apply sepia tone",
+    params: [
+      { key: "amount", label: "Amount", min: 0, max: 100, step: 1, default: 100, unit: "%" },
+    ],
+    cssFilter: "sepia",
+    ffmpegFilter: "colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131",
+  },
+  vignette: {
+    type: "vignette",
+    name: "Vignette",
+    description: "Darken edges",
+    params: [
+      { key: "intensity", label: "Intensity", min: 0, max: 100, step: 1, default: 50, unit: "%" },
+      { key: "radius", label: "Radius", min: 0, max: 100, step: 1, default: 50, unit: "%" },
+    ],
+    ffmpegFilter: "vignette=angle={intensity}*PI/180",
+  },
+  hue: {
+    type: "hue",
+    name: "Hue Rotate",
+    description: "Rotate color hue",
+    params: [
+      { key: "angle", label: "Angle", min: -180, max: 180, step: 1, default: 0, unit: "°" },
+    ],
+    cssFilter: "hue-rotate",
+    ffmpegFilter: "hue=h={angle}",
+  },
+  temperature: {
+    type: "temperature",
+    name: "Temperature",
+    description: "Adjust color temperature (warm/cool)",
+    params: [
+      { key: "value", label: "Temperature", min: -100, max: 100, step: 1, default: 0, unit: "" },
+    ],
+    ffmpegFilter: "colortemperature=temperature={value}",
+  },
+  shadows: {
+    type: "shadows",
+    name: "Shadows",
+    description: "Adjust shadow levels",
+    params: [
+      { key: "value", label: "Shadows", min: -100, max: 100, step: 1, default: 0, unit: "%" },
+    ],
+    ffmpegFilter: "curves=m='0/0 0.25/{value} 1/1'",
+  },
+  highlights: {
+    type: "highlights",
+    name: "Highlights",
+    description: "Adjust highlight levels",
+    params: [
+      { key: "value", label: "Highlights", min: -100, max: 100, step: 1, default: 0, unit: "%" },
+    ],
+    ffmpegFilter: "curves=m='0/0 0.75/{value} 1/1'",
+  },
+  fade: {
+    type: "fade",
+    name: "Fade",
+    description: "Reduce overall intensity",
+    params: [
+      { key: "amount", label: "Amount", min: 0, max: 100, step: 1, default: 0, unit: "%" },
+    ],
+    cssFilter: "opacity",
+    ffmpegFilter: "colorlevels=rimin={amount}:gimin={amount}:bimin={amount}",
+  },
+};
+
+/**
+ * Effect presets for quick application
+ */
+export const EFFECT_PRESETS: EffectPreset[] = [
+  {
+    id: "cinematic",
+    name: "Cinematic",
+    description: "Film-like look with enhanced contrast and subtle color grading",
+    effects: [
+      { type: "contrast", params: { value: 15 } },
+      { type: "saturation", params: { value: -10 } },
+      { type: "vignette", params: { intensity: 30, radius: 60 } },
+      { type: "shadows", params: { value: -10 } },
+    ],
+    preview: "linear-gradient(135deg, #1a1a2e, #16213e)",
+  },
+  {
+    id: "vintage",
+    name: "Vintage",
+    description: "Retro look with sepia tones and faded colors",
+    effects: [
+      { type: "sepia", params: { amount: 40 } },
+      { type: "contrast", params: { value: -10 } },
+      { type: "saturation", params: { value: -30 } },
+      { type: "vignette", params: { intensity: 40, radius: 50 } },
+      { type: "fade", params: { amount: 15 } },
+    ],
+    preview: "linear-gradient(135deg, #d4a574, #8b7355)",
+  },
+  {
+    id: "blackwhite",
+    name: "Black & White",
+    description: "Classic monochrome with enhanced contrast",
+    effects: [
+      { type: "grayscale", params: { amount: 100 } },
+      { type: "contrast", params: { value: 20 } },
+    ],
+    preview: "linear-gradient(135deg, #2d2d2d, #808080)",
+  },
+  {
+    id: "vibrant",
+    name: "Vibrant",
+    description: "Boosted colors and brightness",
+    effects: [
+      { type: "saturation", params: { value: 40 } },
+      { type: "brightness", params: { value: 10 } },
+      { type: "contrast", params: { value: 10 } },
+    ],
+    preview: "linear-gradient(135deg, #ff6b6b, #4ecdc4)",
+  },
+  {
+    id: "moody",
+    name: "Moody",
+    description: "Dark and atmospheric",
+    effects: [
+      { type: "brightness", params: { value: -15 } },
+      { type: "contrast", params: { value: 20 } },
+      { type: "saturation", params: { value: -20 } },
+      { type: "shadows", params: { value: -20 } },
+      { type: "vignette", params: { intensity: 50, radius: 40 } },
+    ],
+    preview: "linear-gradient(135deg, #0f0f23, #1a1a3e)",
+  },
+  {
+    id: "warm",
+    name: "Warm",
+    description: "Cozy warm tones",
+    effects: [
+      { type: "temperature", params: { value: 30 } },
+      { type: "saturation", params: { value: 10 } },
+    ],
+    preview: "linear-gradient(135deg, #ff9a56, #ff6b6b)",
+  },
+  {
+    id: "cool",
+    name: "Cool",
+    description: "Cool blue tones",
+    effects: [
+      { type: "temperature", params: { value: -30 } },
+      { type: "saturation", params: { value: 10 } },
+    ],
+    preview: "linear-gradient(135deg, #667eea, #764ba2)",
+  },
+  {
+    id: "dreamy",
+    name: "Dreamy",
+    description: "Soft and ethereal look",
+    effects: [
+      { type: "brightness", params: { value: 15 } },
+      { type: "contrast", params: { value: -15 } },
+      { type: "saturation", params: { value: -20 } },
+      { type: "blur", params: { radius: 0.5 } },
+    ],
+    preview: "linear-gradient(135deg, #ffecd2, #fcb69f)",
+  },
+];
+
+/**
+ * Convert effect value from internal range to CSS filter range
+ */
+export function effectValueToCss(type: EffectType, params: Record<string, number>): number {
+  switch (type) {
+    case "brightness":
+      // -100 to 100 -> 0 to 2 (1 is default)
+      return 1 + (params.value ?? 0) / 100;
+    case "contrast":
+      // -100 to 100 -> 0 to 2 (1 is default)
+      return 1 + (params.value ?? 0) / 100;
+    case "saturation":
+      // -100 to 100 -> 0 to 2 (1 is default)
+      return 1 + (params.value ?? 0) / 100;
+    case "blur":
+      // 0 to 20 -> 0px to 20px
+      return params.radius ?? 0;
+    case "grayscale":
+    case "sepia":
+      // 0 to 100 -> 0% to 100%
+      return (params.amount ?? 100) / 100;
+    case "hue":
+      // -180 to 180 -> -180deg to 180deg
+      return params.angle ?? 0;
+    case "fade":
+      // 0 to 100 -> 1 to 0 opacity
+      return 1 - (params.amount ?? 0) / 100;
+    default:
+      return 1;
+  }
+}
+
+/**
+ * Generate CSS filter string from effects array
+ */
+export function generateCssFilter(effects: ClipEffect[]): string {
+  const filters: string[] = [];
+
+  // Sort by order and filter enabled effects
+  const sortedEffects = [...effects]
+    .filter((e) => e.enabled)
+    .sort((a, b) => a.order - b.order);
+
+  for (const effect of sortedEffects) {
+    const config = EFFECT_CONFIGS[effect.type];
+    if (!config.cssFilter) continue;
+
+    const value = effectValueToCss(effect.type, effect.params);
+
+    switch (effect.type) {
+      case "brightness":
+      case "contrast":
+        filters.push(`${config.cssFilter}(${value})`);
+        break;
+      case "blur":
+        if (value > 0) {
+          filters.push(`blur(${value}px)`);
+        }
+        break;
+      case "grayscale":
+      case "sepia":
+        filters.push(`${config.cssFilter}(${value * 100}%)`);
+        break;
+      case "hue":
+        filters.push(`hue-rotate(${value}deg)`);
+        break;
+      case "fade":
+        filters.push(`opacity(${value})`);
+        break;
+    }
+  }
+
+  // Handle saturation (uses "saturate" in CSS, not "saturation")
+  const satEffect = sortedEffects.find((e) => e.type === "saturation");
+  if (satEffect) {
+    const value = effectValueToCss("saturation", satEffect.params);
+    filters.push(`saturate(${value})`);
+  }
+
+  return filters.join(" ");
+}
+
+/**
+ * Convert effect value from internal range to FFmpeg range
+ */
+export function effectValueToFFmpeg(type: EffectType, params: Record<string, number>): Record<string, number> {
+  switch (type) {
+    case "brightness":
+      // -100 to 100 -> -1 to 1 for FFmpeg eq filter
+      return { value: (params.value ?? 0) / 100 };
+    case "contrast":
+      // -100 to 100 -> 0 to 2 for FFmpeg
+      return { value: 1 + (params.value ?? 0) / 100 };
+    case "saturation":
+      // -100 to 100 -> 0 to 3 for FFmpeg
+      return { value: 1 + (params.value ?? 0) / 50 };
+    case "blur":
+      // 0 to 20 -> blur radius
+      return { radius: Math.max(1, Math.round(params.radius ?? 0)) };
+    case "sharpen":
+      // 0 to 100 -> 0 to 1.5 for unsharp
+      return { amount: (params.amount ?? 0) / 66.67 };
+    case "vignette":
+      // Convert intensity to angle
+      return {
+        intensity: ((params.intensity ?? 50) / 100) * 0.5,
+      };
+    case "hue":
+      return { angle: params.angle ?? 0 };
+    default:
+      return params;
+  }
+}
+
+/**
+ * Generate FFmpeg filter string from effects array
+ */
+export function generateFFmpegFilterChain(effects: ClipEffect[]): string {
+  const filters: string[] = [];
+
+  // Sort by order and filter enabled effects
+  const sortedEffects = [...effects]
+    .filter((e) => e.enabled)
+    .sort((a, b) => a.order - b.order);
+
+  // Combine eq filters (brightness, contrast, saturation)
+  const eqParams: string[] = [];
+  for (const effect of sortedEffects) {
+    const ffmpegParams = effectValueToFFmpeg(effect.type, effect.params);
+
+    switch (effect.type) {
+      case "brightness":
+        eqParams.push(`brightness=${ffmpegParams.value}`);
+        break;
+      case "contrast":
+        eqParams.push(`contrast=${ffmpegParams.value}`);
+        break;
+      case "saturation":
+        eqParams.push(`saturation=${ffmpegParams.value}`);
+        break;
+    }
+  }
+
+  // Add combined eq filter if any
+  if (eqParams.length > 0) {
+    filters.push(`eq=${eqParams.join(":")}`);
+  }
+
+  // Add other filters
+  for (const effect of sortedEffects) {
+    const config = EFFECT_CONFIGS[effect.type];
+    const ffmpegParams = effectValueToFFmpeg(effect.type, effect.params);
+
+    switch (effect.type) {
+      case "blur":
+        if ((effect.params.radius ?? 0) > 0) {
+          filters.push(`boxblur=${ffmpegParams.radius}:1`);
+        }
+        break;
+      case "sharpen":
+        if ((effect.params.amount ?? 0) > 0) {
+          filters.push(`unsharp=5:5:${ffmpegParams.amount}:5:5:0`);
+        }
+        break;
+      case "grayscale":
+        if ((effect.params.amount ?? 0) > 0) {
+          filters.push("colorchannelmixer=.3:.4:.3:0:.3:.4:.3:0:.3:.4:.3");
+        }
+        break;
+      case "sepia":
+        if ((effect.params.amount ?? 0) > 0) {
+          filters.push("colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131");
+        }
+        break;
+      case "vignette":
+        filters.push(`vignette=angle=${ffmpegParams.intensity}*PI/180`);
+        break;
+      case "hue":
+        if ((effect.params.angle ?? 0) !== 0) {
+          filters.push(`hue=h=${ffmpegParams.angle}`);
+        }
+        break;
+    }
+  }
+
+  return filters.join(",");
+}
+
+/**
+ * Create a new effect with default parameters
+ */
+export function createEffect(
+  clipId: string,
+  type: EffectType,
+  order: number,
+  overrideParams?: Record<string, number>
+): ClipEffect {
+  const config = EFFECT_CONFIGS[type];
+
+  // Build default params from config
+  const defaultParams: Record<string, number> = {};
+  for (const param of config.params) {
+    defaultParams[param.key] = param.default;
+  }
+
+  return {
+    id: generateEffectId(),
+    clipId,
+    type,
+    params: { ...defaultParams, ...overrideParams },
+    enabled: true,
+    order,
+  };
+}
+
+/**
+ * Apply a preset to a clip, returning array of effects
+ */
+export function applyEffectPreset(
+  clipId: string,
+  preset: EffectPreset,
+  startOrder: number = 0
+): ClipEffect[] {
+  return preset.effects.map((effectDef, index) =>
+    createEffect(clipId, effectDef.type, startOrder + index, effectDef.params)
+  );
+}
+
+/**
+ * Reset effect parameters to defaults
+ */
+export function resetEffectParams(effect: ClipEffect): ClipEffect {
+  const config = EFFECT_CONFIGS[effect.type];
+  const defaultParams: Record<string, number> = {};
+
+  for (const param of config.params) {
+    defaultParams[param.key] = param.default;
+  }
+
+  return {
+    ...effect,
+    params: defaultParams,
+  };
+}
+
+/**
+ * Check if effect has non-default values
+ */
+export function isEffectModified(effect: ClipEffect): boolean {
+  const config = EFFECT_CONFIGS[effect.type];
+
+  for (const param of config.params) {
+    if (effect.params[param.key] !== param.default) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Get list of available effect types
+ */
+export function getAvailableEffects(): EffectConfig[] {
+  return Object.values(EFFECT_CONFIGS);
+}

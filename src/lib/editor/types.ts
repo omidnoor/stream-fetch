@@ -683,3 +683,181 @@ export interface AnimationPickerProps {
   label?: string;
   className?: string;
 }
+
+// ============================================================================
+// Effects & Filters Types
+// ============================================================================
+
+/**
+ * Available effect types
+ */
+export type EffectType =
+  | "brightness"
+  | "contrast"
+  | "saturation"
+  | "blur"
+  | "sharpen"
+  | "grayscale"
+  | "sepia"
+  | "vignette"
+  | "hue"
+  | "temperature"
+  | "shadows"
+  | "highlights"
+  | "fade";
+
+/**
+ * Effect parameter range configuration
+ */
+export interface EffectParamConfig {
+  /** Parameter key name */
+  key: string;
+  /** Display label */
+  label: string;
+  /** Minimum value */
+  min: number;
+  /** Maximum value */
+  max: number;
+  /** Step increment */
+  step: number;
+  /** Default value */
+  default: number;
+  /** Unit label (%, px, etc.) */
+  unit?: string;
+}
+
+/**
+ * Effect configuration with metadata
+ */
+export interface EffectConfig {
+  type: EffectType;
+  name: string;
+  description: string;
+  icon?: string;
+  params: EffectParamConfig[];
+  /** CSS filter function name */
+  cssFilter?: string;
+  /** FFmpeg filter string template */
+  ffmpegFilter: string;
+}
+
+/**
+ * An effect applied to a clip
+ */
+export interface ClipEffect {
+  id: string;
+  /** The clip this effect is applied to */
+  clipId: string;
+  /** Effect type */
+  type: EffectType;
+  /** Effect parameters */
+  params: Record<string, number>;
+  /** Whether the effect is enabled */
+  enabled: boolean;
+  /** Order in the effect chain (lower = applied first) */
+  order: number;
+}
+
+/**
+ * Input for creating an effect
+ */
+export interface CreateEffectDto {
+  clipId: string;
+  type: EffectType;
+  params?: Record<string, number>;
+  enabled?: boolean;
+}
+
+/**
+ * Input for updating an effect
+ */
+export interface UpdateEffectDto {
+  params?: Record<string, number>;
+  enabled?: boolean;
+  order?: number;
+}
+
+/**
+ * Effect preset configuration
+ */
+export interface EffectPreset {
+  id: string;
+  name: string;
+  description: string;
+  /** Effects to apply */
+  effects: Array<{
+    type: EffectType;
+    params: Record<string, number>;
+  }>;
+  /** Preview thumbnail or gradient */
+  preview?: string;
+}
+
+/**
+ * Effects state for a clip
+ */
+export interface EffectsState {
+  /** Effects for the current clip */
+  effects: ClipEffect[];
+  /** Currently selected effect ID */
+  selectedEffectId: string | null;
+  /** Loading state */
+  loading: boolean;
+  /** Error message */
+  error: string | null;
+}
+
+/**
+ * Effects actions for state management
+ */
+export type EffectsAction =
+  | { type: "SET_EFFECTS"; payload: ClipEffect[] }
+  | { type: "ADD_EFFECT"; payload: ClipEffect }
+  | { type: "UPDATE_EFFECT"; payload: { id: string; updates: Partial<ClipEffect> } }
+  | { type: "REMOVE_EFFECT"; payload: string }
+  | { type: "REORDER_EFFECTS"; payload: string[] }
+  | { type: "SELECT_EFFECT"; payload: string | null }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null }
+  | { type: "TOGGLE_EFFECT"; payload: string }
+  | { type: "RESET_EFFECT"; payload: string };
+
+/**
+ * Props for EffectsPanel component
+ */
+export interface EffectsPanelProps {
+  clipId: string;
+  projectId: string;
+  onEffectChange?: (effects: ClipEffect[]) => void;
+  className?: string;
+}
+
+/**
+ * Props for EffectSlider component
+ */
+export interface EffectSliderProps {
+  effect: ClipEffect;
+  config: EffectConfig;
+  onParamChange: (key: string, value: number) => void;
+  onToggle: () => void;
+  onRemove: () => void;
+  onReset: () => void;
+  className?: string;
+}
+
+/**
+ * Props for EffectPreview component
+ */
+export interface EffectPreviewProps {
+  effects: ClipEffect[];
+  children: React.ReactNode;
+  className?: string;
+}
+
+/**
+ * Props for EffectPresets component
+ */
+export interface EffectPresetsProps {
+  onApplyPreset: (preset: EffectPreset) => void;
+  className?: string;
+}

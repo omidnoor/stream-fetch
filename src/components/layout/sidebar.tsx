@@ -28,7 +28,7 @@ export function Sidebar() {
       {/* Collapse Toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-20 z-10 hidden lg:flex h-6 w-6 items-center justify-center rounded-full border border-border bg-surface-1 text-muted-foreground hover:text-foreground hover:bg-surface-3 transition-colors"
+        className="absolute -right-3 top-20 z-10 hidden lg:flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-gradient-start to-gradient-end text-white shadow-md hover:shadow-lg transition-shadow"
         title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
         {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
