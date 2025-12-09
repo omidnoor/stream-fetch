@@ -378,3 +378,308 @@ export interface MediaUploaderProps {
   maxSizeMB?: number;
   className?: string;
 }
+
+// ============================================================================
+// Text Overlay Types
+// ============================================================================
+
+/**
+ * Text alignment options
+ */
+export type TextAlign = "left" | "center" | "right";
+
+/**
+ * Vertical alignment options
+ */
+export type TextVerticalAlign = "top" | "middle" | "bottom";
+
+/**
+ * Animation types for text overlays
+ */
+export type TextAnimationType = "none" | "fade" | "slide" | "typewriter" | "scale" | "blur";
+
+/**
+ * Slide direction for slide animation
+ */
+export type SlideDirection = "left" | "right" | "up" | "down";
+
+/**
+ * Text animation configuration
+ */
+export interface TextAnimation {
+  /** Animation type */
+  type: TextAnimationType;
+  /** Animation duration in seconds */
+  duration: number;
+  /** Delay before animation starts in seconds */
+  delay?: number;
+  /** Slide direction (for slide animation) */
+  slideDirection?: SlideDirection;
+  /** Easing function */
+  easing?: "linear" | "ease-in" | "ease-out" | "ease-in-out";
+}
+
+/**
+ * Text style configuration
+ */
+export interface TextStyle {
+  /** Font family */
+  fontFamily: string;
+  /** Font size in pixels */
+  fontSize: number;
+  /** Font weight */
+  fontWeight: "normal" | "bold" | number;
+  /** Font color (hex or rgba) */
+  color: string;
+  /** Background color (hex or rgba) */
+  backgroundColor?: string;
+  /** Text opacity 0-1 */
+  opacity: number;
+  /** Horizontal alignment */
+  align: TextAlign;
+  /** Vertical alignment */
+  verticalAlign: TextVerticalAlign;
+  /** Bold flag */
+  bold: boolean;
+  /** Italic flag */
+  italic: boolean;
+  /** Underline flag */
+  underline: boolean;
+  /** Letter spacing in pixels */
+  letterSpacing?: number;
+  /** Line height multiplier */
+  lineHeight?: number;
+  /** Text shadow */
+  shadow?: {
+    offsetX: number;
+    offsetY: number;
+    blur: number;
+    color: string;
+  };
+  /** Text stroke/outline */
+  stroke?: {
+    width: number;
+    color: string;
+  };
+  /** Padding inside text box */
+  padding?: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+  /** Border radius for background */
+  borderRadius?: number;
+}
+
+/**
+ * Text position on the video canvas
+ */
+export interface TextPosition {
+  /** X position as percentage 0-100 */
+  x: number;
+  /** Y position as percentage 0-100 */
+  y: number;
+  /** Width as percentage of canvas (optional, auto-sizes if not set) */
+  width?: number;
+  /** Height as percentage of canvas (optional) */
+  height?: number;
+  /** Rotation in degrees */
+  rotation?: number;
+}
+
+/**
+ * Text overlay on the timeline
+ */
+export interface TextOverlay {
+  id: string;
+  /** Track ID this text belongs to */
+  trackId: string;
+  /** Text content */
+  content: string;
+  /** Start time on timeline in seconds */
+  startTime: number;
+  /** Duration in seconds */
+  duration: number;
+  /** Position on video canvas */
+  position: TextPosition;
+  /** Text styling */
+  style: TextStyle;
+  /** Entry animation */
+  animationIn?: TextAnimation;
+  /** Exit animation */
+  animationOut?: TextAnimation;
+  /** Preset name if using a preset */
+  preset?: TextPresetType;
+  /** Whether the text is locked from editing */
+  locked?: boolean;
+  /** Whether the text is visible */
+  visible?: boolean;
+}
+
+/**
+ * Available text presets
+ */
+export type TextPresetType = "title" | "subtitle" | "lower-third" | "caption" | "watermark" | "custom";
+
+/**
+ * Text preset configuration
+ */
+export interface TextPreset {
+  type: TextPresetType;
+  name: string;
+  description: string;
+  position: TextPosition;
+  style: TextStyle;
+  animationIn?: TextAnimation;
+  animationOut?: TextAnimation;
+  defaultDuration: number;
+}
+
+/**
+ * Input for creating a text overlay
+ */
+export interface CreateTextOverlayDto {
+  content: string;
+  trackId?: string;
+  startTime: number;
+  duration?: number;
+  position?: Partial<TextPosition>;
+  style?: Partial<TextStyle>;
+  animationIn?: Partial<TextAnimation>;
+  animationOut?: Partial<TextAnimation>;
+  preset?: TextPresetType;
+}
+
+/**
+ * Input for updating a text overlay
+ */
+export interface UpdateTextOverlayDto {
+  content?: string;
+  startTime?: number;
+  duration?: number;
+  position?: Partial<TextPosition>;
+  style?: Partial<TextStyle>;
+  animationIn?: Partial<TextAnimation>;
+  animationOut?: Partial<TextAnimation>;
+  locked?: boolean;
+  visible?: boolean;
+}
+
+/**
+ * Text overlay state for the editor
+ */
+export interface TextOverlayState {
+  /** All text overlays in the project */
+  overlays: TextOverlay[];
+  /** Currently selected text ID */
+  selectedTextId: string | null;
+  /** Whether text is being edited */
+  isEditing: boolean;
+  /** Currently dragging text ID */
+  draggingTextId: string | null;
+  /** Loading state */
+  loading: boolean;
+  /** Error message */
+  error: string | null;
+}
+
+/**
+ * Text overlay actions for state management
+ */
+export type TextOverlayAction =
+  | { type: "SET_OVERLAYS"; payload: TextOverlay[] }
+  | { type: "ADD_OVERLAY"; payload: TextOverlay }
+  | { type: "UPDATE_OVERLAY"; payload: { id: string; updates: Partial<TextOverlay> } }
+  | { type: "REMOVE_OVERLAY"; payload: string }
+  | { type: "SELECT_TEXT"; payload: string | null }
+  | { type: "SET_EDITING"; payload: boolean }
+  | { type: "SET_DRAGGING"; payload: string | null }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null }
+  | { type: "APPLY_PRESET"; payload: { id: string; preset: TextPresetType } }
+  | { type: "DUPLICATE_OVERLAY"; payload: string };
+
+/**
+ * Props for TextEditor component
+ */
+export interface TextEditorProps {
+  overlay: TextOverlay | null;
+  onUpdate: (updates: UpdateTextOverlayDto) => void;
+  onDelete?: () => void;
+  onDuplicate?: () => void;
+  className?: string;
+}
+
+/**
+ * Props for TextPreview component
+ */
+export interface TextPreviewProps {
+  overlays: TextOverlay[];
+  currentTime: number;
+  canvasWidth: number;
+  canvasHeight: number;
+  selectedTextId?: string | null;
+  onTextSelect?: (id: string) => void;
+  onTextMove?: (id: string, position: TextPosition) => void;
+  className?: string;
+}
+
+/**
+ * Props for TextTrack component (timeline)
+ */
+export interface TextTrackProps {
+  track: TimelineTrack;
+  overlays: TextOverlay[];
+  pixelsPerSecond: number;
+  selectedTextId: string | null;
+  onTextSelect: (id: string) => void;
+  onTextMove: (id: string, startTime: number) => void;
+  onTextResize: (id: string, duration: number, fromStart?: boolean) => void;
+  className?: string;
+}
+
+/**
+ * Props for TextItem component (on timeline)
+ */
+export interface TextItemProps {
+  overlay: TextOverlay;
+  pixelsPerSecond: number;
+  isSelected: boolean;
+  onSelect: () => void;
+  onDragStart: () => void;
+  onDragEnd: (newStartTime: number) => void;
+  onResizeStart: (edge: "start" | "end") => void;
+  onResizeEnd: (newDuration: number, fromStart?: boolean) => void;
+  className?: string;
+}
+
+/**
+ * Props for FontPicker component
+ */
+export interface FontPickerProps {
+  value: string;
+  onChange: (fontFamily: string) => void;
+  className?: string;
+}
+
+/**
+ * Props for ColorPicker component
+ */
+export interface ColorPickerProps {
+  value: string;
+  onChange: (color: string) => void;
+  showAlpha?: boolean;
+  presets?: string[];
+  className?: string;
+}
+
+/**
+ * Props for AnimationPicker component
+ */
+export interface AnimationPickerProps {
+  value?: TextAnimation;
+  onChange: (animation: TextAnimation | undefined) => void;
+  label?: string;
+  className?: string;
+}
