@@ -22,6 +22,10 @@ import type {
   TransitionType,
   TransitionConfig,
   CreateTransitionDto,
+  AudioClip,
+  AudioConfig,
+  WaveformData,
+  AudioMixerTrack,
 } from "./types";
 
 /**
@@ -1873,4 +1877,320 @@ export function getClipTransitions(
     incoming: transitions.find((t) => t.toClipId === clipId),
     outgoing: transitions.find((t) => t.fromClipId === clipId),
   };
+}
+
+// ============================================================================
+// Audio Utilities
+// ============================================================================
+
+/**
+ * Convert linear volume (0-2) to decibels
+ */
+export function volumeToDb(volume: number): number {
+  if (volume === 0) return -Infinity;
+  return 20 * Math.log10(volume);
+}
+
+/**
+ * Convert decibels to linear volume (0-2)
+ */
+export function dbToVolume(db: number): number {
+  if (db === -Infinity) return 0;
+  return Math.pow(10, db / 20);
+}
+
+/**
+ * Format volume as dB string
+ */
+export function formatVolumeDb(volume: number): string {
+  const db = volumeToDb(volume);
+  if (db === -Infinity) return "-∞ dB";
+  return `${db > 0 ? "+" : ""}${db.toFixed(1)} dB`;
+}
+
+/**
+ * Format volume as percentage
+ */
+export function formatVolumePercent(volume: number): string {
+  return `${Math.round(volume * 100)}%`;
+}
+
+/**
+ * Clamp volume to valid range (0-2)
+ */
+export function clampVolume(volume: number): number {
+  return Math.max(0, Math.min(2, volume));
+}
+
+/**
+ * Clamp pan to valid range (-1 to 1)
+ */
+export function clampPan(pan: number): number {
+  return Math.max(-1, Math.min(1, pan));
+}
+
+/**
+ * Generate FFmpeg volume filter
+ */
+export function generateVolumeFilter(volume: number): string {
+  if (volume === 1) return ""; // No filter needed for default volume
+  return `volume=${volume.toFixed(3)}`;
+}
+
+/**
+ * Generate FFmpeg fade filter
+ */
+export function generateAudioFadeFilter(
+  fadeIn?: number,
+  fadeOut?: number,
+  duration?: number
+): string {
+  const filters: string[] = [];
+
+  if (fadeIn && fadeIn > 0) {
+    filters.push(`afade=t=in:d=${fadeIn.toFixed(3)}`);
+  }
+
+  if (fadeOut && fadeOut > 0 && duration) {
+    const startTime = Math.max(0, duration - fadeOut);
+    filters.push(`afade=t=out:st=${startTime.toFixed(3)}:d=${fadeOut.toFixed(3)}`);
+  }
+
+  return filters.join(",");
+}
+
+/**
+ * Generate FFmpeg pan filter
+ */
+export function generatePanFilter(pan: number): string {
+  if (pan === 0) return ""; // No filter for center
+
+  // Pan from -1 (left) to 1 (right)
+  // Convert to FFmpeg pan format
+  const leftGain = pan <= 0 ? 1 : 1 - pan;
+  const rightGain = pan >= 0 ? 1 : 1 + pan;
+
+  return `pan=stereo|c0=${leftGain.toFixed(2)}*c0|c1=${rightGain.toFixed(2)}*c1`;
+}
+
+/**
+ * Generate complete audio filter chain for a clip
+ */
+export function generateAudioFilterChain(
+  config: AudioConfig,
+  clipDuration?: number
+): string {
+  const filters: string[] = [];
+
+  // Volume
+  const volumeFilter = generateVolumeFilter(config.volume);
+  if (volumeFilter) {
+    filters.push(volumeFilter);
+  }
+
+  // Fades
+  const fadeFilter = generateAudioFadeFilter(
+    config.fadeIn,
+    config.fadeOut,
+    clipDuration
+  );
+  if (fadeFilter) {
+    filters.push(fadeFilter);
+  }
+
+  // Pan
+  if (config.pan !== undefined) {
+    const panFilter = generatePanFilter(config.pan);
+    if (panFilter) {
+      filters.push(panFilter);
+    }
+  }
+
+  return filters.join(",");
+}
+
+/**
+ * Generate FFmpeg amix filter for multiple audio tracks
+ */
+export function generateAudioMixFilter(trackCount: number): string {
+  if (trackCount <= 1) return "";
+  return `amix=inputs=${trackCount}:duration=longest`;
+}
+
+/**
+ * Create default audio config for a clip
+ */
+export function createDefaultAudioConfig(clipId: string): AudioConfig {
+  return {
+    clipId,
+    volume: 1.0,
+    fadeIn: 0,
+    fadeOut: 0,
+    muted: false,
+    pan: 0,
+  };
+}
+
+/**
+ * Create default mixer track
+ */
+export function createDefaultMixerTrack(
+  trackId: string,
+  name: string
+): AudioMixerTrack {
+  return {
+    trackId,
+    name,
+    volume: 1.0,
+    muted: false,
+    solo: false,
+    pan: 0,
+    visible: true,
+  };
+}
+
+/**
+ * Calculate effective volume considering mute and solo states
+ */
+export function calculateEffectiveVolume(
+  track: AudioMixerTrack,
+  hasSolo: boolean,
+  masterVolume: number,
+  masterMute: boolean
+): number {
+  // If master is muted, everything is muted
+  if (masterMute) return 0;
+
+  // If track is muted, volume is 0
+  if (track.muted) return 0;
+
+  // If any track is soloed and this track is not solo, volume is 0
+  if (hasSolo && !track.solo) return 0;
+
+  // Otherwise, multiply track volume by master volume
+  return track.volume * masterVolume;
+}
+
+/**
+ * Generate waveform peaks from raw audio data
+ * This is a simplified version - in production, use FFmpeg or Web Audio API
+ */
+export function generateWaveformPeaks(
+  audioData: Float32Array,
+  targetPeaks: number = 200
+): number[] {
+  const peaks: number[] = [];
+  const samplesPerPeak = Math.floor(audioData.length / targetPeaks);
+
+  for (let i = 0; i < targetPeaks; i++) {
+    const start = i * samplesPerPeak;
+    const end = start + samplesPerPeak;
+    let max = 0;
+
+    for (let j = start; j < end && j < audioData.length; j++) {
+      max = Math.max(max, Math.abs(audioData[j]));
+    }
+
+    peaks.push(max);
+  }
+
+  return peaks;
+}
+
+/**
+ * Normalize waveform peaks to 0-1 range
+ */
+export function normalizeWaveformPeaks(peaks: number[]): number[] {
+  const max = Math.max(...peaks, 0.0001); // Avoid division by zero
+  return peaks.map((peak) => peak / max);
+}
+
+/**
+ * Downsample waveform peaks for lower resolution
+ */
+export function downsampleWaveformPeaks(
+  peaks: number[],
+  targetCount: number
+): number[] {
+  if (peaks.length <= targetCount) return peaks;
+
+  const downsampled: number[] = [];
+  const ratio = peaks.length / targetCount;
+
+  for (let i = 0; i < targetCount; i++) {
+    const start = Math.floor(i * ratio);
+    const end = Math.floor((i + 1) * ratio);
+    let max = 0;
+
+    for (let j = start; j < end; j++) {
+      max = Math.max(max, peaks[j]);
+    }
+
+    downsampled.push(max);
+  }
+
+  return downsampled;
+}
+
+/**
+ * Create empty waveform data
+ */
+export function createEmptyWaveform(duration: number): WaveformData {
+  return {
+    peaks: new Array(200).fill(0),
+    sampleRate: 44100,
+    duration,
+    channels: 2,
+  };
+}
+
+/**
+ * Validate audio config
+ */
+export function validateAudioConfig(config: AudioConfig): {
+  valid: boolean;
+  errors: string[];
+} {
+  const errors: string[] = [];
+
+  if (config.volume < 0 || config.volume > 2) {
+    errors.push("Volume must be between 0 and 2");
+  }
+
+  if (config.fadeIn < 0) {
+    errors.push("Fade in cannot be negative");
+  }
+
+  if (config.fadeOut < 0) {
+    errors.push("Fade out cannot be negative");
+  }
+
+  if (config.pan !== undefined && (config.pan < -1 || config.pan > 1)) {
+    errors.push("Pan must be between -1 and 1");
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
+/**
+ * Get audio clip at a specific time
+ */
+export function getAudioClipAtTime(
+  clips: AudioClip[],
+  time: number
+): AudioClip | undefined {
+  return clips.find(
+    (clip) => time >= clip.startTime && time < clip.startTime + clip.duration
+  );
+}
+
+/**
+ * Calculate total audio duration from clips
+ */
+export function calculateTotalAudioDuration(clips: AudioClip[]): number {
+  if (clips.length === 0) return 0;
+  return Math.max(...clips.map((clip) => clip.startTime + clip.duration));
 }

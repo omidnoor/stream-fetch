@@ -1036,3 +1036,240 @@ export interface TransitionPreviewProps {
   autoPlay?: boolean;
   className?: string;
 }
+
+// ============================================================================
+// Audio System Types
+// ============================================================================
+
+/**
+ * Audio clip with volume and fade controls
+ */
+export interface AudioClip extends TimelineClip {
+  /** Volume level 0-2 (0=mute, 1=normal, 2=boost) */
+  volume: number;
+  /** Fade in duration in seconds */
+  fadeIn?: number;
+  /** Fade out duration in seconds */
+  fadeOut?: number;
+  /** Whether audio is muted */
+  muted: boolean;
+  /** Audio waveform data (peaks) */
+  waveformData?: WaveformData;
+}
+
+/**
+ * Waveform visualization data
+ */
+export interface WaveformData {
+  /** Array of peak values (0-1) */
+  peaks: number[];
+  /** Sample rate used for peaks */
+  sampleRate: number;
+  /** Duration of the audio in seconds */
+  duration: number;
+  /** Number of channels */
+  channels: number;
+}
+
+/**
+ * Audio configuration for a clip
+ */
+export interface AudioConfig {
+  /** Clip ID */
+  clipId: string;
+  /** Volume 0-2 */
+  volume: number;
+  /** Fade in seconds */
+  fadeIn: number;
+  /** Fade out seconds */
+  fadeOut: number;
+  /** Muted state */
+  muted: boolean;
+  /** Pan (-1 left, 0 center, 1 right) */
+  pan?: number;
+}
+
+/**
+ * Input for updating audio settings
+ */
+export interface UpdateAudioDto {
+  volume?: number;
+  fadeIn?: number;
+  fadeOut?: number;
+  muted?: boolean;
+  pan?: number;
+}
+
+/**
+ * Audio track mixer state
+ */
+export interface AudioMixerTrack {
+  /** Track ID */
+  trackId: string;
+  /** Track name */
+  name: string;
+  /** Volume 0-2 */
+  volume: number;
+  /** Muted state */
+  muted: boolean;
+  /** Solo state */
+  solo: boolean;
+  /** Pan (-1 left, 0 center, 1 right) */
+  pan: number;
+  /** Whether track is visible */
+  visible: boolean;
+}
+
+/**
+ * Master audio mixer state
+ */
+export interface AudioMixerState {
+  /** All audio tracks */
+  tracks: AudioMixerTrack[];
+  /** Master volume 0-2 */
+  masterVolume: number;
+  /** Master mute */
+  masterMute: boolean;
+  /** Whether any track is soloed */
+  hasSolo: boolean;
+}
+
+/**
+ * Audio state for a clip
+ */
+export interface AudioState {
+  /** Audio configuration */
+  config: AudioConfig;
+  /** Waveform data */
+  waveform: WaveformData | null;
+  /** Loading state */
+  loading: boolean;
+  /** Error message */
+  error: string | null;
+}
+
+/**
+ * Audio actions for state management
+ */
+export type AudioAction =
+  | { type: "SET_CONFIG"; payload: AudioConfig }
+  | { type: "SET_VOLUME"; payload: number }
+  | { type: "SET_FADE_IN"; payload: number }
+  | { type: "SET_FADE_OUT"; payload: number }
+  | { type: "TOGGLE_MUTE" }
+  | { type: "SET_PAN"; payload: number }
+  | { type: "SET_WAVEFORM"; payload: WaveformData }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null };
+
+/**
+ * Audio mixer actions
+ */
+export type AudioMixerAction =
+  | { type: "SET_TRACKS"; payload: AudioMixerTrack[] }
+  | { type: "SET_TRACK_VOLUME"; payload: { trackId: string; volume: number } }
+  | { type: "TOGGLE_TRACK_MUTE"; payload: string }
+  | { type: "TOGGLE_TRACK_SOLO"; payload: string }
+  | { type: "SET_TRACK_PAN"; payload: { trackId: string; pan: number } }
+  | { type: "SET_MASTER_VOLUME"; payload: number }
+  | { type: "TOGGLE_MASTER_MUTE" };
+
+/**
+ * Props for AudioTrack component
+ */
+export interface AudioTrackProps {
+  track: TimelineTrack;
+  clips: AudioClip[];
+  pixelsPerSecond: number;
+  playheadTime: number;
+  selectedClipIds: string[];
+  onClipSelect: (clipId: string) => void;
+  onVolumeChange: (clipId: string, volume: number) => void;
+  onFadeChange: (clipId: string, fadeIn?: number, fadeOut?: number) => void;
+  className?: string;
+}
+
+/**
+ * Props for Waveform component
+ */
+export interface WaveformProps {
+  /** Waveform data to display */
+  data: WaveformData | null;
+  /** Width in pixels */
+  width: number;
+  /** Height in pixels */
+  height: number;
+  /** Primary color */
+  color?: string;
+  /** Background color */
+  backgroundColor?: string;
+  /** Show progress bar */
+  progress?: number;
+  /** Click handler */
+  onClick?: (position: number) => void;
+  className?: string;
+}
+
+/**
+ * Props for VolumeSlider component
+ */
+export interface VolumeSliderProps {
+  /** Current volume 0-2 */
+  value: number;
+  /** Called when volume changes */
+  onChange: (volume: number) => void;
+  /** Whether muted */
+  muted?: boolean;
+  /** Called when mute toggled */
+  onMuteToggle?: () => void;
+  /** Orientation */
+  orientation?: "horizontal" | "vertical";
+  /** Show dB labels */
+  showDb?: boolean;
+  className?: string;
+}
+
+/**
+ * Props for AudioMixer component
+ */
+export interface AudioMixerProps {
+  /** Project ID */
+  projectId: string;
+  /** Mixer state */
+  state: AudioMixerState;
+  /** Called when state changes */
+  onChange: (state: AudioMixerState) => void;
+  /** Compact mode */
+  compact?: boolean;
+  className?: string;
+}
+
+/**
+ * Props for AudioClipSettings component
+ */
+export interface AudioClipSettingsProps {
+  /** Clip ID */
+  clipId: string;
+  /** Current audio config */
+  config: AudioConfig;
+  /** Called when settings change */
+  onChange: (config: Partial<AudioConfig>) => void;
+  className?: string;
+}
+
+/**
+ * Props for FadeHandle component
+ */
+export interface FadeHandleProps {
+  /** Fade type */
+  type: "in" | "out";
+  /** Fade duration in seconds */
+  duration: number;
+  /** Clip duration in seconds */
+  clipDuration: number;
+  /** Pixels per second */
+  pixelsPerSecond: number;
+  /** Called when duration changes */
+  onChange: (duration: number) => void;
+  className?: string;
+}
