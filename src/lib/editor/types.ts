@@ -861,3 +861,178 @@ export interface EffectPresetsProps {
   onApplyPreset: (preset: EffectPreset) => void;
   className?: string;
 }
+
+// ============================================================================
+// Transition Types
+// ============================================================================
+
+/**
+ * Available transition types
+ */
+export type TransitionType =
+  | "fade"
+  | "crossfade"
+  | "dissolve"
+  | "wipe"
+  | "wipeLeft"
+  | "wipeRight"
+  | "wipeUp"
+  | "wipeDown"
+  | "slide"
+  | "slideLeft"
+  | "slideRight"
+  | "slideUp"
+  | "slideDown"
+  | "zoom"
+  | "zoomIn"
+  | "zoomOut"
+  | "none";
+
+/**
+ * Transition between two clips
+ */
+export interface Transition {
+  id: string;
+  /** Project ID */
+  projectId: string;
+  /** Source clip ID (clip before transition) */
+  fromClipId: string;
+  /** Target clip ID (clip after transition) */
+  toClipId: string;
+  /** Transition type */
+  type: TransitionType;
+  /** Transition duration in milliseconds */
+  duration: number;
+  /** Additional transition parameters */
+  params?: Record<string, unknown>;
+}
+
+/**
+ * Transition configuration with metadata
+ */
+export interface TransitionConfig {
+  type: TransitionType;
+  name: string;
+  description: string;
+  icon?: string;
+  /** Default duration in milliseconds */
+  defaultDuration: number;
+  /** Minimum duration in milliseconds */
+  minDuration: number;
+  /** Maximum duration in milliseconds */
+  maxDuration: number;
+  /** FFmpeg xfade transition name */
+  ffmpegTransition: string;
+  /** CSS animation class for preview */
+  cssAnimation?: string;
+  /** Whether this transition supports direction parameters */
+  hasDirection?: boolean;
+}
+
+/**
+ * Input for creating a transition
+ */
+export interface CreateTransitionDto {
+  fromClipId: string;
+  toClipId: string;
+  type: TransitionType;
+  duration?: number;
+  params?: Record<string, unknown>;
+}
+
+/**
+ * Input for updating a transition
+ */
+export interface UpdateTransitionDto {
+  type?: TransitionType;
+  duration?: number;
+  params?: Record<string, unknown>;
+}
+
+/**
+ * Transitions state for the editor
+ */
+export interface TransitionsState {
+  /** All transitions in the project */
+  transitions: Transition[];
+  /** Currently selected transition ID */
+  selectedTransitionId: string | null;
+  /** Transition being previewed */
+  previewingTransitionId: string | null;
+  /** Loading state */
+  loading: boolean;
+  /** Error message */
+  error: string | null;
+}
+
+/**
+ * Transitions actions for state management
+ */
+export type TransitionsAction =
+  | { type: "SET_TRANSITIONS"; payload: Transition[] }
+  | { type: "ADD_TRANSITION"; payload: Transition }
+  | { type: "UPDATE_TRANSITION"; payload: { id: string; updates: Partial<Transition> } }
+  | { type: "REMOVE_TRANSITION"; payload: string }
+  | { type: "SELECT_TRANSITION"; payload: string | null }
+  | { type: "SET_PREVIEWING"; payload: string | null }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null };
+
+/**
+ * Props for TransitionHandle component
+ */
+export interface TransitionHandleProps {
+  /** Position between clips (x coordinate) */
+  position: number;
+  /** Whether a transition exists at this position */
+  hasTransition: boolean;
+  /** The transition if it exists */
+  transition?: Transition;
+  /** Whether this handle is selected */
+  isSelected: boolean;
+  /** Whether this handle is being previewed */
+  isPreviewing: boolean;
+  /** Click handler to add/edit transition */
+  onClick: () => void;
+  /** Double-click handler to remove transition */
+  onDoubleClick?: () => void;
+  /** Hover handler for preview */
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+  className?: string;
+}
+
+/**
+ * Props for TransitionPicker component
+ */
+export interface TransitionPickerProps {
+  /** Currently selected transition type */
+  selectedType?: TransitionType;
+  /** Current duration */
+  duration?: number;
+  /** Called when a transition type is selected */
+  onSelect: (type: TransitionType) => void;
+  /** Called when duration changes */
+  onDurationChange?: (duration: number) => void;
+  /** Called when picker is closed */
+  onClose?: () => void;
+  className?: string;
+}
+
+/**
+ * Props for TransitionPreview component
+ */
+export interface TransitionPreviewProps {
+  /** Transition to preview */
+  transition: Transition;
+  /** First clip thumbnail URL */
+  fromThumbnail?: string;
+  /** Second clip thumbnail URL */
+  toThumbnail?: string;
+  /** Preview dimensions */
+  width?: number;
+  height?: number;
+  /** Whether to auto-play the preview */
+  autoPlay?: boolean;
+  className?: string;
+}

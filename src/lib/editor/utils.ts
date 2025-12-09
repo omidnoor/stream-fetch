@@ -18,6 +18,10 @@ import type {
   EffectConfig,
   ClipEffect,
   EffectPreset,
+  Transition,
+  TransitionType,
+  TransitionConfig,
+  CreateTransitionDto,
 } from "./types";
 
 /**
@@ -1410,4 +1414,463 @@ export function isEffectModified(effect: ClipEffect): boolean {
  */
 export function getAvailableEffects(): EffectConfig[] {
   return Object.values(EFFECT_CONFIGS);
+}
+
+// ============================================================================
+// Transition Utilities
+// ============================================================================
+
+/**
+ * Transition configurations with metadata
+ */
+export const TRANSITION_CONFIGS: Record<TransitionType, TransitionConfig> = {
+  fade: {
+    type: "fade",
+    name: "Fade",
+    description: "Simple fade to black between clips",
+    defaultDuration: 500,
+    minDuration: 100,
+    maxDuration: 3000,
+    ffmpegTransition: "fade",
+    cssAnimation: "transition-fade",
+  },
+  crossfade: {
+    type: "crossfade",
+    name: "Crossfade",
+    description: "Smooth crossfade between two clips",
+    defaultDuration: 500,
+    minDuration: 100,
+    maxDuration: 3000,
+    ffmpegTransition: "fade",
+    cssAnimation: "transition-crossfade",
+  },
+  dissolve: {
+    type: "dissolve",
+    name: "Dissolve",
+    description: "Dissolve transition with gradual blend",
+    defaultDuration: 750,
+    minDuration: 200,
+    maxDuration: 3000,
+    ffmpegTransition: "dissolve",
+    cssAnimation: "transition-dissolve",
+  },
+  wipe: {
+    type: "wipe",
+    name: "Wipe",
+    description: "Wipe from left to right",
+    defaultDuration: 500,
+    minDuration: 100,
+    maxDuration: 2000,
+    ffmpegTransition: "wipeleft",
+    cssAnimation: "transition-wipe",
+    hasDirection: true,
+  },
+  wipeLeft: {
+    type: "wipeLeft",
+    name: "Wipe Left",
+    description: "Wipe from right to left",
+    defaultDuration: 500,
+    minDuration: 100,
+    maxDuration: 2000,
+    ffmpegTransition: "wipeleft",
+    cssAnimation: "transition-wipe-left",
+  },
+  wipeRight: {
+    type: "wipeRight",
+    name: "Wipe Right",
+    description: "Wipe from left to right",
+    defaultDuration: 500,
+    minDuration: 100,
+    maxDuration: 2000,
+    ffmpegTransition: "wiperight",
+    cssAnimation: "transition-wipe-right",
+  },
+  wipeUp: {
+    type: "wipeUp",
+    name: "Wipe Up",
+    description: "Wipe from bottom to top",
+    defaultDuration: 500,
+    minDuration: 100,
+    maxDuration: 2000,
+    ffmpegTransition: "wipeup",
+    cssAnimation: "transition-wipe-up",
+  },
+  wipeDown: {
+    type: "wipeDown",
+    name: "Wipe Down",
+    description: "Wipe from top to bottom",
+    defaultDuration: 500,
+    minDuration: 100,
+    maxDuration: 2000,
+    ffmpegTransition: "wipedown",
+    cssAnimation: "transition-wipe-down",
+  },
+  slide: {
+    type: "slide",
+    name: "Slide",
+    description: "Slide transition between clips",
+    defaultDuration: 500,
+    minDuration: 100,
+    maxDuration: 2000,
+    ffmpegTransition: "slideleft",
+    cssAnimation: "transition-slide",
+    hasDirection: true,
+  },
+  slideLeft: {
+    type: "slideLeft",
+    name: "Slide Left",
+    description: "New clip slides in from right",
+    defaultDuration: 500,
+    minDuration: 100,
+    maxDuration: 2000,
+    ffmpegTransition: "slideleft",
+    cssAnimation: "transition-slide-left",
+  },
+  slideRight: {
+    type: "slideRight",
+    name: "Slide Right",
+    description: "New clip slides in from left",
+    defaultDuration: 500,
+    minDuration: 100,
+    maxDuration: 2000,
+    ffmpegTransition: "slideright",
+    cssAnimation: "transition-slide-right",
+  },
+  slideUp: {
+    type: "slideUp",
+    name: "Slide Up",
+    description: "New clip slides in from bottom",
+    defaultDuration: 500,
+    minDuration: 100,
+    maxDuration: 2000,
+    ffmpegTransition: "slideup",
+    cssAnimation: "transition-slide-up",
+  },
+  slideDown: {
+    type: "slideDown",
+    name: "Slide Down",
+    description: "New clip slides in from top",
+    defaultDuration: 500,
+    minDuration: 100,
+    maxDuration: 2000,
+    ffmpegTransition: "slidedown",
+    cssAnimation: "transition-slide-down",
+  },
+  zoom: {
+    type: "zoom",
+    name: "Zoom",
+    description: "Zoom transition between clips",
+    defaultDuration: 600,
+    minDuration: 200,
+    maxDuration: 2000,
+    ffmpegTransition: "circleopen",
+    cssAnimation: "transition-zoom",
+    hasDirection: true,
+  },
+  zoomIn: {
+    type: "zoomIn",
+    name: "Zoom In",
+    description: "Zoom in to reveal new clip",
+    defaultDuration: 600,
+    minDuration: 200,
+    maxDuration: 2000,
+    ffmpegTransition: "circleopen",
+    cssAnimation: "transition-zoom-in",
+  },
+  zoomOut: {
+    type: "zoomOut",
+    name: "Zoom Out",
+    description: "Zoom out to reveal new clip",
+    defaultDuration: 600,
+    minDuration: 200,
+    maxDuration: 2000,
+    ffmpegTransition: "circleclose",
+    cssAnimation: "transition-zoom-out",
+  },
+  none: {
+    type: "none",
+    name: "None",
+    description: "No transition",
+    defaultDuration: 0,
+    minDuration: 0,
+    maxDuration: 0,
+    ffmpegTransition: "",
+    cssAnimation: "",
+  },
+};
+
+/**
+ * Generate unique transition ID
+ */
+export function generateTransitionId(): string {
+  return `transition_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+}
+
+/**
+ * Create a new transition between two clips
+ */
+export function createTransition(
+  projectId: string,
+  dto: CreateTransitionDto
+): Transition {
+  const config = TRANSITION_CONFIGS[dto.type];
+
+  return {
+    id: generateTransitionId(),
+    projectId,
+    fromClipId: dto.fromClipId,
+    toClipId: dto.toClipId,
+    type: dto.type,
+    duration: dto.duration ?? config.defaultDuration,
+    params: dto.params,
+  };
+}
+
+/**
+ * Get transition configuration
+ */
+export function getTransitionConfig(type: TransitionType): TransitionConfig {
+  return TRANSITION_CONFIGS[type];
+}
+
+/**
+ * Get all available transition types
+ */
+export function getAvailableTransitions(): TransitionConfig[] {
+  return Object.values(TRANSITION_CONFIGS);
+}
+
+/**
+ * Get basic transition types (without directional variants)
+ */
+export function getBasicTransitions(): TransitionConfig[] {
+  return [
+    TRANSITION_CONFIGS.fade,
+    TRANSITION_CONFIGS.crossfade,
+    TRANSITION_CONFIGS.dissolve,
+    TRANSITION_CONFIGS.wipe,
+    TRANSITION_CONFIGS.slide,
+    TRANSITION_CONFIGS.zoom,
+  ];
+}
+
+/**
+ * Generate FFmpeg xfade filter for a transition
+ */
+export function generateTransitionFFmpegFilter(
+  transition: Transition,
+  offset: number
+): string {
+  const config = TRANSITION_CONFIGS[transition.type];
+  const durationSeconds = transition.duration / 1000;
+
+  return `xfade=transition=${config.ffmpegTransition}:duration=${durationSeconds}:offset=${offset}`;
+}
+
+/**
+ * Generate FFmpeg filter complex for multiple transitions
+ */
+export function generateTransitionsFilterComplex(
+  transitions: Transition[],
+  clipDurations: number[]
+): string {
+  if (transitions.length === 0 || clipDurations.length < 2) {
+    return "";
+  }
+
+  const filters: string[] = [];
+  let currentOffset = 0;
+
+  for (let i = 0; i < transitions.length; i++) {
+    const transition = transitions[i];
+    const clipDuration = clipDurations[i];
+    const transitionDuration = transition.duration / 1000;
+
+    // Calculate offset (end of current clip minus transition duration)
+    currentOffset += clipDuration - transitionDuration;
+
+    const filter = generateTransitionFFmpegFilter(transition, currentOffset);
+
+    // Handle filter chain labeling
+    if (i === 0) {
+      filters.push(`[0:v][1:v]${filter}[v${i}]`);
+    } else if (i === transitions.length - 1) {
+      filters.push(`[v${i - 1}][${i + 1}:v]${filter}[outv]`);
+    } else {
+      filters.push(`[v${i - 1}][${i + 1}:v]${filter}[v${i}]`);
+    }
+  }
+
+  return filters.join(";");
+}
+
+/**
+ * Calculate transition offset given clip positions
+ */
+export function calculateTransitionOffset(
+  fromClipEnd: number,
+  transitionDuration: number
+): number {
+  // Transition starts before the clip ends
+  return fromClipEnd - transitionDuration / 1000;
+}
+
+/**
+ * Validate transition duration against clip durations
+ */
+export function validateTransitionDuration(
+  duration: number,
+  fromClipDuration: number,
+  toClipDuration: number
+): { valid: boolean; maxDuration: number; message?: string } {
+  // Duration in seconds
+  const durationSec = duration / 1000;
+
+  // Transition can't be longer than the shorter clip
+  const maxDuration = Math.min(fromClipDuration, toClipDuration) * 1000;
+
+  if (duration > maxDuration) {
+    return {
+      valid: false,
+      maxDuration,
+      message: `Transition duration cannot exceed ${(maxDuration / 1000).toFixed(1)} seconds`,
+    };
+  }
+
+  // Minimum duration check
+  const config = TRANSITION_CONFIGS.fade; // Use default config for min
+  if (duration < config.minDuration) {
+    return {
+      valid: false,
+      maxDuration,
+      message: `Transition duration must be at least ${config.minDuration}ms`,
+    };
+  }
+
+  return { valid: true, maxDuration };
+}
+
+/**
+ * Get CSS keyframes for transition preview
+ */
+export function getTransitionCssKeyframes(type: TransitionType): string {
+  switch (type) {
+    case "fade":
+    case "crossfade":
+      return `
+        @keyframes transition-fade {
+          0% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+      `;
+    case "dissolve":
+      return `
+        @keyframes transition-dissolve {
+          0% { opacity: 1; filter: blur(0); }
+          50% { opacity: 0.5; filter: blur(2px); }
+          100% { opacity: 0; filter: blur(4px); }
+        }
+      `;
+    case "wipeLeft":
+    case "wipe":
+      return `
+        @keyframes transition-wipe-left {
+          0% { clip-path: inset(0 0 0 0); }
+          100% { clip-path: inset(0 100% 0 0); }
+        }
+      `;
+    case "wipeRight":
+      return `
+        @keyframes transition-wipe-right {
+          0% { clip-path: inset(0 0 0 0); }
+          100% { clip-path: inset(0 0 0 100%); }
+        }
+      `;
+    case "wipeUp":
+      return `
+        @keyframes transition-wipe-up {
+          0% { clip-path: inset(0 0 0 0); }
+          100% { clip-path: inset(100% 0 0 0); }
+        }
+      `;
+    case "wipeDown":
+      return `
+        @keyframes transition-wipe-down {
+          0% { clip-path: inset(0 0 0 0); }
+          100% { clip-path: inset(0 0 100% 0); }
+        }
+      `;
+    case "slideLeft":
+    case "slide":
+      return `
+        @keyframes transition-slide-left {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-100%); }
+        }
+      `;
+    case "slideRight":
+      return `
+        @keyframes transition-slide-right {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(100%); }
+        }
+      `;
+    case "slideUp":
+      return `
+        @keyframes transition-slide-up {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-100%); }
+        }
+      `;
+    case "slideDown":
+      return `
+        @keyframes transition-slide-down {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(100%); }
+        }
+      `;
+    case "zoomIn":
+    case "zoom":
+      return `
+        @keyframes transition-zoom-in {
+          0% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(2); opacity: 0; }
+        }
+      `;
+    case "zoomOut":
+      return `
+        @keyframes transition-zoom-out {
+          0% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(0); opacity: 0; }
+        }
+      `;
+    default:
+      return "";
+  }
+}
+
+/**
+ * Find transition between two specific clips
+ */
+export function findTransitionBetweenClips(
+  transitions: Transition[],
+  fromClipId: string,
+  toClipId: string
+): Transition | undefined {
+  return transitions.find(
+    (t) => t.fromClipId === fromClipId && t.toClipId === toClipId
+  );
+}
+
+/**
+ * Get all transitions for a specific clip
+ */
+export function getClipTransitions(
+  transitions: Transition[],
+  clipId: string
+): { incoming?: Transition; outgoing?: Transition } {
+  return {
+    incoming: transitions.find((t) => t.toClipId === clipId),
+    outgoing: transitions.find((t) => t.fromClipId === clipId),
+  };
 }

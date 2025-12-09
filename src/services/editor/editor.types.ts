@@ -105,6 +105,28 @@ export type EffectType =
   | "flip";
 
 /**
+ * Available transition types
+ */
+export type TransitionType =
+  | "fade"
+  | "crossfade"
+  | "dissolve"
+  | "wipe"
+  | "wipeLeft"
+  | "wipeRight"
+  | "wipeUp"
+  | "wipeDown"
+  | "slide"
+  | "slideLeft"
+  | "slideRight"
+  | "slideUp"
+  | "slideDown"
+  | "zoom"
+  | "zoomIn"
+  | "zoomOut"
+  | "none";
+
+/**
  * Transition type
  */
 export interface Transition {
@@ -112,12 +134,10 @@ export interface Transition {
   type: TransitionType;
   duration: number; // in seconds
   position: number; // position in timeline
+  fromClipId?: string; // Source clip ID
+  toClipId?: string; // Target clip ID
+  params?: Record<string, unknown>; // Additional parameters
 }
-
-/**
- * Available transition types
- */
-export type TransitionType = "fade" | "dissolve" | "wipe" | "slide" | "none";
 
 /**
  * Timeline data structure
