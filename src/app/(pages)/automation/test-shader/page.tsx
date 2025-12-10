@@ -314,6 +314,7 @@ export default function ShaderTestPage() {
         {activeShader === 'particle3DIcon' ? (
           <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-surface-1">
             <Particle3DIcon
+              icon={selectedIcon}
               testIcons={testIconsCycle}
               testDuration={3}
               particleCount={65536}
@@ -329,6 +330,7 @@ export default function ShaderTestPage() {
         ) : activeShader === 'particleMorph' ? (
           <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-surface-1">
             <ParticleMorphText
+              text={particleText}
               testTexts={testStatusCycle}
               testDuration={4}
               particleCount={65536}

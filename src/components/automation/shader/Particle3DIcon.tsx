@@ -641,11 +641,14 @@ export function Particle3DIcon({
     let targetsReady = false;
     let startTime = performance.now();
     let lastKnownDepth = depthRef.current;
+    let lastKnownIcon = iconRef.current;
+    let lastKnownScale = scaleRef.current;
 
-    // Initialize with first icon
+    // Initialize with first icon (prefer icon prop over testIcons)
     const initialTestIcons = testIconsRef.current;
-    const initialIcon = initialTestIcons && initialTestIcons.length > 0 ? initialTestIcons[0] : iconRef.current;
+    const initialIcon = iconRef.current || (initialTestIcons && initialTestIcons.length > 0 ? initialTestIcons[0] : '⚡');
     iconRef.current = initialIcon;
+    lastKnownIcon = initialIcon;
     lastIconChangeRef.current = startTime;
 
     buildTargetsFromIcon(initialIcon);
@@ -683,14 +686,23 @@ export function Particle3DIcon({
       const tSec = (now - startTime) / 1000;
       const temperature = temperatureFromT(tSec);
 
-      // Check for depth changes and rebuild targets if needed
-      if (depthRef.current !== lastKnownDepth) {
+      // Check for depth or scale changes and rebuild targets if needed
+      if (depthRef.current !== lastKnownDepth || scaleRef.current !== lastKnownScale) {
         lastKnownDepth = depthRef.current;
+        lastKnownScale = scaleRef.current;
         buildTargetsFromIcon(iconRef.current);
         startTime = now; // Reset entropy for smooth transition
       }
 
-      // Test mode: cycle through icons automatically
+      // Check for icon prop changes (user manual selection)
+      if (iconRef.current !== lastKnownIcon) {
+        lastKnownIcon = iconRef.current;
+        buildTargetsFromIcon(iconRef.current);
+        startTime = now;
+        lastIconChangeRef.current = now;
+      }
+
+      // Test mode: cycle through icons automatically (only if no manual selection pending)
       const currentTestIcons = testIconsRef.current;
       const currentTestDuration = testDurationRef.current;
       const currentSettleTime = settleTimeRef.current;
@@ -701,6 +713,7 @@ export function Particle3DIcon({
           iconIndexRef.current = (iconIndexRef.current + 1) % currentTestIcons.length;
           const newIcon = currentTestIcons[iconIndexRef.current];
           iconRef.current = newIcon;
+          lastKnownIcon = newIcon; // Update lastKnownIcon to prevent double-trigger
           buildTargetsFromIcon(newIcon);
           startTime = now;
           lastIconChangeRef.current = now;

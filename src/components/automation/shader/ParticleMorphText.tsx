@@ -527,8 +527,10 @@ export function ParticleMorphText({
     let targetsReady = false;
     let startTime = performance.now();
     let lastKnownFont = fontFamilyRef.current;
+    let lastKnownScale = scale;
+    let lastKnownText = text;
 
-    // Initialize with first text
+    // Initialize with first text (prefer text prop if different from first testText)
     const initialText = testTexts && testTexts.length > 0 ? testTexts[0] : text;
     textRef.current = initialText;
     lastTextChangeRef.current = startTime;
@@ -568,14 +570,24 @@ export function ParticleMorphText({
       const tSec = (now - startTime) / 1000;
       const temperature = temperatureFromT(tSec);
 
-      // Check for font changes and rebuild targets if needed
-      if (fontFamilyRef.current !== lastKnownFont) {
+      // Check for font or scale changes and rebuild targets if needed
+      if (fontFamilyRef.current !== lastKnownFont || scale !== lastKnownScale) {
         lastKnownFont = fontFamilyRef.current;
+        lastKnownScale = scale;
         buildTargetsFromText(textRef.current);
         startTime = now; // Reset entropy for smooth transition
       }
 
-      // Test mode: cycle through texts automatically
+      // Check for text prop changes (user manual input via Update button)
+      if (text !== lastKnownText) {
+        lastKnownText = text;
+        textRef.current = text;
+        buildTargetsFromText(text);
+        startTime = now;
+        lastTextChangeRef.current = now;
+      }
+
+      // Test mode: cycle through texts automatically (only if no manual text change pending)
       if (testTexts && testTexts.length > 1) {
         const timeSinceLastChange = (now - lastTextChangeRef.current) / 1000;
         if (timeSinceLastChange >= testDuration + settleTime) {
@@ -583,17 +595,10 @@ export function ParticleMorphText({
           textIndexRef.current = (textIndexRef.current + 1) % testTexts.length;
           const newText = testTexts[textIndexRef.current];
           textRef.current = newText;
+          lastKnownText = newText; // Update to prevent double-trigger
           buildTargetsFromText(newText);
           startTime = now; // Reset entropy
           lastTextChangeRef.current = now;
-        }
-      } else {
-        // Production mode: use text prop (updated from API)
-        const currentText = testTexts && testTexts.length > 0 ? testTexts[0] : text;
-        if (textRef.current !== currentText) {
-          textRef.current = currentText;
-          buildTargetsFromText(currentText);
-          startTime = now; // Reset entropy
         }
       }
 
