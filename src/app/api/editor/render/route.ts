@@ -50,7 +50,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: jobDto,
+      renderId: jobDto.jobId,
+      projectId: jobDto.projectId,
+      status: jobDto.status,
+      progress: jobDto.progress,
       message: "Render job started successfully",
     });
   } catch (error) {

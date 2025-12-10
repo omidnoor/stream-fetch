@@ -72,13 +72,14 @@ export function ExportDialog({
     }
   }, [open])
 
-  // Poll for render completion
+  // Poll for render completion using projectId (status is tracked by project)
   useEffect(() => {
     if (stage !== "rendering" || !renderId) return
 
     const pollInterval = setInterval(async () => {
       try {
-        const response = await fetch(`/api/editor/render/${renderId}/status`)
+        // Poll using projectId since that's how status is tracked in the backend
+        const response = await fetch(`/api/editor/render/${projectId}/status`)
         if (!response.ok) {
           throw new Error("Failed to check render status")
         }
@@ -106,7 +107,7 @@ export function ExportDialog({
     }, 2000) // Poll every 2 seconds
 
     return () => clearInterval(pollInterval)
-  }, [stage, renderId])
+  }, [stage, renderId, projectId])
 
   // Handle export start
   const handleStartExport = useCallback(async () => {
