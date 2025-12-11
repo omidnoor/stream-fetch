@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useEffectPreview } from "@/hooks/useEffectPreview"
-import type { ClipEffect, Transform } from "@/lib/editor/types"
+import type { ClipEffect, Transform, TextOverlay } from "@/lib/editor/types"
 
 // Extended types for ReactPlayer callbacks not included in v3 types
 interface ProgressState {
@@ -61,6 +61,8 @@ interface VideoPlayerProps {
   url?: string
   effects?: ClipEffect[]
   transform?: Transform
+  textOverlays?: TextOverlay[]
+  currentTime?: number
   volume?: number
   muted?: boolean
   onReady?: () => void
@@ -74,6 +76,8 @@ export function VideoPlayer({
   url,
   effects = [],
   transform,
+  textOverlays = [],
+  currentTime: externalCurrentTime,
   volume: externalVolume,
   muted: externalMuted,
   onReady,
@@ -160,6 +164,16 @@ export function VideoPlayer({
       setMuted(externalMuted)
     }
   }, [externalMuted])
+
+  // Filter visible text overlays based on current time
+  const visibleTextOverlays = useMemo(() => {
+    const currentPlayTime = externalCurrentTime ?? playedSeconds
+    return textOverlays.filter((overlay) => {
+      const overlayStart = overlay.startTime
+      const overlayEnd = overlay.startTime + overlay.duration
+      return currentPlayTime >= overlayStart && currentPlayTime <= overlayEnd
+    })
+  }, [textOverlays, externalCurrentTime, playedSeconds])
 
   // Format time as MM:SS
   const formatTime = (seconds: number): string => {
@@ -407,6 +421,37 @@ export function VideoPlayer({
 
           {/* Vignette overlay if effect is applied */}
           {vignetteOverlay && <div style={vignetteOverlay} />}
+
+          {/* Text overlays */}
+          {visibleTextOverlays.map((overlay) => (
+            <div
+              key={overlay.id}
+              style={{
+                position: 'absolute',
+                left: `${overlay.position.x}%`,
+                top: `${overlay.position.y}%`,
+                width: overlay.position.width ? `${overlay.position.width}%` : 'auto',
+                transform: overlay.position.rotation ? `rotate(${overlay.position.rotation}deg)` : undefined,
+                transformOrigin: 'center center',
+                fontFamily: overlay.style.fontFamily,
+                fontSize: `${overlay.style.fontSize}px`,
+                fontWeight: overlay.style.fontWeight,
+                fontStyle: overlay.style.fontStyle,
+                color: overlay.style.color,
+                backgroundColor: overlay.style.backgroundColor,
+                opacity: overlay.style.opacity,
+                textAlign: overlay.style.align,
+                textDecoration: overlay.style.underline ? 'underline' : undefined,
+                padding: '4px 8px',
+                pointerEvents: 'none',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                zIndex: 20,
+              }}
+            >
+              {overlay.content}
+            </div>
+          ))}
         </div>
       </div>
 

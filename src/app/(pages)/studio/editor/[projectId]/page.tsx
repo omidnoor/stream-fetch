@@ -382,6 +382,8 @@ export default function ProjectEditorPage({
                 url={mainVideoUrl}
                 effects={currentEffects}
                 transform={transformState}
+                textOverlays={project?.timeline.textOverlays || []}
+                currentTime={currentTime}
                 volume={audioMixerState.masterVolume}
                 muted={audioMixerState.masterMute}
                 onProgress={handleVideoProgress}
