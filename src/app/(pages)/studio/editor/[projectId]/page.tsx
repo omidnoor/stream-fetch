@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { ArrowLeft, Save, Download as DownloadIcon, Loader2, AlertCircle, FolderOpen, Sparkles, Type, Zap, Volume2, Move } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -381,6 +381,9 @@ export default function ProjectEditorPage({
               <VideoPlayer
                 url={mainVideoUrl}
                 effects={currentEffects}
+                transform={transformState}
+                volume={audioMixerState.masterVolume}
+                muted={audioMixerState.masterMute}
                 onProgress={handleVideoProgress}
                 onDuration={handleVideoDuration}
                 onSeek={handleTimelineSeek}

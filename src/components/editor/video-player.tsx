@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useCallback, useEffect } from "react"
+import { useState, useRef, useCallback, useEffect, useMemo } from "react"
 import ReactPlayerBase from "react-player"
 import {
   Play,
@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useEffectPreview } from "@/hooks/useEffectPreview"
-import type { ClipEffect } from "@/lib/editor/types"
+import type { ClipEffect, Transform } from "@/lib/editor/types"
 
 // Extended types for ReactPlayer callbacks not included in v3 types
 interface ProgressState {
@@ -60,6 +60,9 @@ interface ReactPlayerInstance {
 interface VideoPlayerProps {
   url?: string
   effects?: ClipEffect[]
+  transform?: Transform
+  volume?: number
+  muted?: boolean
   onReady?: () => void
   onProgress?: (progress: { played: number; playedSeconds: number }) => void
   onDuration?: (duration: number) => void
@@ -70,6 +73,9 @@ interface VideoPlayerProps {
 export function VideoPlayer({
   url,
   effects = [],
+  transform,
+  volume: externalVolume,
+  muted: externalMuted,
   onReady,
   onProgress,
   onDuration,
@@ -79,7 +85,7 @@ export function VideoPlayer({
   const playerInstanceRef = useRef<ReactPlayerInstance | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [playing, setPlaying] = useState(false)
-  const [volume, setVolume] = useState(0.8)
+  const [volume, setVolume] = useState(externalVolume ?? 0.8)
   const [muted, setMuted] = useState(false)
   const [played, setPlayed] = useState(0)
   const [playedSeconds, setPlayedSeconds] = useState(0)
@@ -94,6 +100,66 @@ export function VideoPlayer({
 
   // Apply effects to video
   const { filter, vignetteOverlay } = useEffectPreview(effects)
+
+  // Apply transforms to video
+  const transformStyle = useMemo((): React.CSSProperties => {
+    if (!transform) return {}
+
+    const transforms: string[] = []
+
+    // Apply position offset
+    if (transform.position.x !== 0 || transform.position.y !== 0) {
+      transforms.push(`translate(${transform.position.x}px, ${transform.position.y}px)`)
+    }
+
+    // Apply scale
+    if (transform.scale !== 1) {
+      transforms.push(`scale(${transform.scale})`)
+    }
+
+    // Apply rotation
+    if (transform.rotation !== 0) {
+      transforms.push(`rotate(${transform.rotation}deg)`)
+    }
+
+    // Apply flip
+    const scaleX = transform.flipH ? -1 : 1
+    const scaleY = transform.flipV ? -1 : 1
+    if (scaleX !== 1 || scaleY !== 1) {
+      transforms.push(`scale(${scaleX}, ${scaleY})`)
+    }
+
+    return {
+      transform: transforms.length > 0 ? transforms.join(' ') : undefined,
+      transformOrigin: 'center center',
+    }
+  }, [transform])
+
+  // Apply crop (using clip-path)
+  const cropStyle = useMemo((): React.CSSProperties => {
+    if (!transform?.crop) return {}
+
+    const { top, right, bottom, left } = transform.crop
+    if (top === 0 && right === 0 && bottom === 0 && left === 0) return {}
+
+    // Convert crop values to clip-path inset
+    return {
+      clipPath: `inset(${top}% ${right}% ${bottom}% ${left}%)`,
+    }
+  }, [transform])
+
+  // Sync with external volume/muted props from audio mixer
+  useEffect(() => {
+    if (externalVolume !== undefined) {
+      setVolume(externalVolume)
+    }
+  }, [externalVolume])
+
+  useEffect(() => {
+    if (externalMuted !== undefined) {
+      setMuted(externalMuted)
+    }
+  }, [externalMuted])
 
   // Format time as MM:SS
   const formatTime = (seconds: number): string => {
@@ -296,10 +362,14 @@ export function VideoPlayer({
           </div>
         )}
 
-        {/* Video with effects applied */}
+        {/* Video with effects and transforms applied */}
         <div
           className="w-full h-full relative"
-          style={{ filter: filter || undefined }}
+          style={{
+            filter: filter || undefined,
+            ...transformStyle,
+            ...cropStyle,
+          }}
         >
           <ReactPlayer
             ref={(player) => {
