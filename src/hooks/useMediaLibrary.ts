@@ -15,6 +15,7 @@ interface MediaAssetResponse {
   id: string;
   type: MediaAssetType;
   filename: string;
+  url: string;
   size: number;
   mimeType: string;
   thumbnail?: string;
@@ -110,7 +111,7 @@ function transformAsset(response: MediaAssetResponse): MediaAsset {
     type: response.type,
     filename: response.filename,
     originalFilename: response.filename,
-    path: "", // Server-side only
+    path: response.url, // URL to stream the asset
     size: response.size,
     mimeType: response.mimeType,
     thumbnail: response.thumbnail,

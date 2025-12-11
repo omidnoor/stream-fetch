@@ -10,6 +10,14 @@ import { getMediaService } from "@/services/editor";
 import { FFmpegService } from "@/services/ffmpeg/ffmpeg.service";
 import { errorHandler } from "@/middleware/error-handler";
 
+// Configure route to accept larger file uploads
+export const runtime = 'nodejs';
+export const maxDuration = 300; // 5 minutes timeout for large uploads
+export const dynamic = 'force-dynamic';
+export const bodyParser = {
+  sizeLimit: '500mb', // Allow up to 500MB uploads
+};
+
 /**
  * GET - List all media assets for a project
  */
@@ -30,6 +38,7 @@ export async function GET(
       id: asset.id,
       type: asset.type,
       filename: asset.originalFilename,
+      url: mediaService.getAssetUrl(projectId, asset.filename),
       size: asset.size,
       mimeType: asset.mimeType,
       thumbnail: asset.thumbnail
@@ -114,6 +123,7 @@ export async function POST(
         id: asset.id,
         type: asset.type,
         filename: asset.originalFilename,
+        url: mediaService.getAssetUrl(projectId, asset.filename),
         size: asset.size,
         mimeType: asset.mimeType,
         thumbnail: asset.thumbnail

@@ -1,13 +1,20 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
-import { ArrowLeft, Save, Download as DownloadIcon, Loader2, AlertCircle } from "lucide-react"
+import { ArrowLeft, Save, Download as DownloadIcon, Loader2, AlertCircle, FolderOpen, Sparkles, Type, Zap, Volume2, Move } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { VideoPlayer } from "@/components/editor/video-player"
 import { Timeline } from "@/components/editor/timeline"
 import { ExportDialog } from "@/components/editor/export-dialog"
+import { MediaLibrary } from "@/components/editor/media/media-library"
+import { EffectsPanel } from "@/components/editor/effects/effects-panel"
+import { TextEditor } from "@/components/editor/text/text-editor"
+import { TransitionPicker } from "@/components/editor/transitions/transition-picker"
+import { AudioMixer } from "@/components/editor/audio/audio-mixer"
+import { TransformPanel } from "@/components/editor/transform/transform-panel"
 import { toast } from "sonner"
+import type { MediaAsset, AudioMixerState, Transform, TransitionType, ClipEffect } from "@/lib/editor/types"
 
 interface Clip {
   id: string
@@ -71,9 +78,30 @@ export default function ProjectEditorPage({
   const [saving, setSaving] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
 
+  // Tool panel state
+  const [activeTab, setActiveTab] = useState<"media" | "effects" | "text" | "transitions" | "audio" | "transform">("media")
+  const [selectedClipId, setSelectedClipId] = useState<string | null>(null)
+  const [selectedTextOverlay, setSelectedTextOverlay] = useState<any | null>(null)
+  const [audioMixerState, setAudioMixerState] = useState<AudioMixerState>({
+    masterVolume: 1,
+    masterMute: false,
+    hasSolo: false,
+    tracks: []
+  })
+  const [transformState, setTransformState] = useState<Transform>({
+    position: { x: 0, y: 0 },
+    scale: 1,
+    rotation: 0,
+    crop: { top: 0, right: 0, bottom: 0, left: 0 },
+    flipH: false,
+    flipV: false,
+    lockAspectRatio: true
+  })
+  const [currentEffects, setCurrentEffects] = useState<ClipEffect[]>([])
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+
   // Refs for auto-save
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const hasUnsavedChanges = useRef(false)
 
   // Resolve async params
   useEffect(() => {
@@ -89,7 +117,7 @@ export default function ProjectEditorPage({
 
   // Auto-save when clips change
   useEffect(() => {
-    if (project && hasUnsavedChanges.current) {
+    if (project && hasUnsavedChanges) {
       // Clear existing timeout
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
@@ -193,7 +221,7 @@ export default function ProjectEditorPage({
         throw new Error(errorMessage)
       }
 
-      hasUnsavedChanges.current = false
+      setHasUnsavedChanges(false)
       toast.success("Project saved successfully")
     } catch (err) {
       console.error("Error saving project:", err)
@@ -225,14 +253,26 @@ export default function ProjectEditorPage({
 
   const handleClipsChange = useCallback((newClips: Clip[]) => {
     setClips(newClips)
-    hasUnsavedChanges.current = true
+    setHasUnsavedChanges(true)
   }, [])
 
   const handleDeleteClip = useCallback((clipId: string) => {
     setClips((prev) => prev.filter((clip) => clip.id !== clipId))
-    hasUnsavedChanges.current = true
+    setHasUnsavedChanges(true)
+    if (selectedClipId === clipId) {
+      setSelectedClipId(null)
+    }
     toast.success("Clip removed from timeline")
-  }, [])
+  }, [selectedClipId])
+
+  const handleClipSelect = useCallback((clipId: string) => {
+    setSelectedClipId(clipId)
+    // Auto-switch to appropriate tab based on context
+    // For now, just switch to effects tab when a clip is selected
+    if (activeTab === "media") {
+      setActiveTab("effects")
+    }
+  }, [activeTab])
 
   const handleExport = () => {
     setExportDialogOpen(true)
@@ -307,7 +347,7 @@ export default function ProjectEditorPage({
                 size="sm"
                 className="gap-2"
                 onClick={handleManualSave}
-                disabled={saving || !hasUnsavedChanges.current}
+                disabled={saving || !hasUnsavedChanges}
               >
                 {saving ? (
                   <>
@@ -340,6 +380,7 @@ export default function ProjectEditorPage({
               <h2 className="text-sm font-medium text-muted-foreground">Preview</h2>
               <VideoPlayer
                 url={mainVideoUrl}
+                effects={currentEffects}
                 onProgress={handleVideoProgress}
                 onDuration={handleVideoDuration}
                 onSeek={handleTimelineSeek}
@@ -357,6 +398,7 @@ export default function ProjectEditorPage({
                 onClipsChange={handleClipsChange}
                 onSeek={handleTimelineSeek}
                 onDeleteClip={handleDeleteClip}
+                onClipSelect={handleClipSelect}
               />
             </div>
           </div>
@@ -394,46 +436,178 @@ export default function ProjectEditorPage({
               </div>
             </div>
 
-            {/* Tools */}
-            <div className="rounded-lg border border-border bg-card p-4">
-              <h3 className="font-semibold mb-3 text-sm">Tools</h3>
-              <div className="space-y-2">
+            {/* Tool Tabs */}
+            <div className="rounded-lg border border-border bg-card overflow-hidden flex flex-col h-[600px]">
+              {/* Tab Headers */}
+              <div className="flex border-b border-border bg-muted/30">
                 <button
-                  className="w-full rounded-lg border border-border bg-secondary/50 p-3 text-left text-sm hover:bg-secondary transition-colors"
-                  disabled
+                  onClick={() => setActiveTab("media")}
+                  className={`flex-1 px-3 py-2 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                    activeTab === "media"
+                      ? "bg-background border-b-2 border-primary text-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                  }`}
+                  title="Media Library"
                 >
-                  Media Library
-                  <span className="block text-xs text-muted-foreground mt-0.5">
-                    Coming soon
-                  </span>
+                  <FolderOpen className="w-3.5 h-3.5" />
+                  Media
                 </button>
                 <button
-                  className="w-full rounded-lg border border-border bg-secondary/50 p-3 text-left text-sm hover:bg-secondary transition-colors"
-                  disabled
+                  onClick={() => setActiveTab("effects")}
+                  className={`flex-1 px-3 py-2 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                    activeTab === "effects"
+                      ? "bg-background border-b-2 border-primary text-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                  }`}
+                  title="Effects"
                 >
-                  Text Overlay
-                  <span className="block text-xs text-muted-foreground mt-0.5">
-                    Coming soon
-                  </span>
-                </button>
-                <button
-                  className="w-full rounded-lg border border-border bg-secondary/50 p-3 text-left text-sm hover:bg-secondary transition-colors"
-                  disabled
-                >
+                  <Sparkles className="w-3.5 h-3.5" />
                   Effects
-                  <span className="block text-xs text-muted-foreground mt-0.5">
-                    Coming soon
-                  </span>
                 </button>
                 <button
-                  className="w-full rounded-lg border border-border bg-secondary/50 p-3 text-left text-sm hover:bg-secondary transition-colors"
-                  disabled
+                  onClick={() => setActiveTab("text")}
+                  className={`flex-1 px-3 py-2 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                    activeTab === "text"
+                      ? "bg-background border-b-2 border-primary text-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                  }`}
+                  title="Text Overlays"
                 >
-                  Transitions
-                  <span className="block text-xs text-muted-foreground mt-0.5">
-                    Coming soon
-                  </span>
+                  <Type className="w-3.5 h-3.5" />
+                  Text
                 </button>
+                <button
+                  onClick={() => setActiveTab("transitions")}
+                  className={`flex-1 px-3 py-2 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                    activeTab === "transitions"
+                      ? "bg-background border-b-2 border-primary text-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                  }`}
+                  title="Transitions"
+                >
+                  <Zap className="w-3.5 h-3.5" />
+                  Trans
+                </button>
+                <button
+                  onClick={() => setActiveTab("audio")}
+                  className={`flex-1 px-3 py-2 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                    activeTab === "audio"
+                      ? "bg-background border-b-2 border-primary text-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                  }`}
+                  title="Audio Mixer"
+                >
+                  <Volume2 className="w-3.5 h-3.5" />
+                  Audio
+                </button>
+                <button
+                  onClick={() => setActiveTab("transform")}
+                  className={`flex-1 px-3 py-2 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                    activeTab === "transform"
+                      ? "bg-background border-b-2 border-primary text-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                  }`}
+                  title="Transform"
+                >
+                  <Move className="w-3.5 h-3.5" />
+                  Move
+                </button>
+              </div>
+
+              {/* Tab Content */}
+              <div className="flex-1 overflow-hidden">
+                {activeTab === "media" && projectId && (
+                  <MediaLibrary
+                    projectId={projectId}
+                    onAssetSelect={(asset: MediaAsset) => {
+                      // Add asset to timeline as a new clip
+                      const newClip: Clip = {
+                        id: `clip-${Date.now()}`,
+                        name: asset.originalFilename,
+                        startTime: 0,
+                        duration: asset.metadata.duration || 10,
+                        position: duration,
+                        sourceUrl: asset.path
+                      }
+                      setClips(prev => [...prev, newClip])
+                      setDuration(prev => prev + (asset.metadata.duration || 10))
+                      setHasUnsavedChanges(true)
+                      toast.success(`Added ${asset.originalFilename} to timeline`)
+                    }}
+                    className="h-full"
+                  />
+                )}
+
+                {activeTab === "effects" && projectId && (
+                  <EffectsPanel
+                    clipId={selectedClipId || ""}
+                    projectId={projectId}
+                    onEffectChange={(effects) => {
+                      console.log("Effects changed:", effects)
+                      setCurrentEffects(effects)
+                      setHasUnsavedChanges(true)
+                    }}
+                    className="h-full"
+                  />
+                )}
+
+                {activeTab === "text" && (
+                  <TextEditor
+                    overlay={selectedTextOverlay}
+                    onUpdate={(updates) => {
+                      console.log("Text overlay updated:", updates)
+                      setHasUnsavedChanges(true)
+                    }}
+                    onDelete={() => {
+                      setSelectedTextOverlay(null)
+                      toast.success("Text overlay deleted")
+                    }}
+                    className="h-full p-4"
+                  />
+                )}
+
+                {activeTab === "transitions" && (
+                  <div className="h-full p-4">
+                    <TransitionPicker
+                      onSelect={(type: TransitionType) => {
+                        console.log("Transition selected:", type)
+                        toast.success(`Applied ${type} transition`)
+                      }}
+                      onDurationChange={(duration) => {
+                        console.log("Transition duration:", duration)
+                      }}
+                    />
+                  </div>
+                )}
+
+                {activeTab === "audio" && projectId && (
+                  <AudioMixer
+                    projectId={projectId}
+                    state={audioMixerState}
+                    onChange={(newState) => {
+                      setAudioMixerState(newState)
+                      setHasUnsavedChanges(true)
+                    }}
+                    className="h-full"
+                  />
+                )}
+
+                {activeTab === "transform" && projectId && (
+                  <TransformPanel
+                    clipId={selectedClipId || ""}
+                    projectId={projectId}
+                    transform={transformState}
+                    onChange={(newTransform) => {
+                      setTransformState(newTransform)
+                      setHasUnsavedChanges(true)
+                    }}
+                    videoDimensions={{
+                      width: project?.settings.resolution.width || 1920,
+                      height: project?.settings.resolution.height || 1080
+                    }}
+                    className="h-full"
+                  />
+                )}
               </div>
             </div>
 
@@ -449,7 +623,7 @@ export default function ProjectEditorPage({
             </Button>
 
             {/* Status Info */}
-            {hasUnsavedChanges.current && (
+            {hasUnsavedChanges && (
               <div className="rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-3">
                 <p className="text-xs text-yellow-600 dark:text-yellow-400">
                   Auto-save enabled. Changes will be saved automatically.

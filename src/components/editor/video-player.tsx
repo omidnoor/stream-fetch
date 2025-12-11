@@ -13,6 +13,8 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { useEffectPreview } from "@/hooks/useEffectPreview"
+import type { ClipEffect } from "@/lib/editor/types"
 
 // Extended types for ReactPlayer callbacks not included in v3 types
 interface ProgressState {
@@ -57,6 +59,7 @@ interface ReactPlayerInstance {
 
 interface VideoPlayerProps {
   url?: string
+  effects?: ClipEffect[]
   onReady?: () => void
   onProgress?: (progress: { played: number; playedSeconds: number }) => void
   onDuration?: (duration: number) => void
@@ -66,6 +69,7 @@ interface VideoPlayerProps {
 
 export function VideoPlayer({
   url,
+  effects = [],
   onReady,
   onProgress,
   onDuration,
@@ -87,6 +91,9 @@ export function VideoPlayer({
   const [isFullscreen, setIsFullscreen] = useState(false)
 
   const playbackRates = [0.5, 1, 1.5, 2]
+
+  // Apply effects to video
+  const { filter, vignetteOverlay } = useEffectPreview(effects)
 
   // Format time as MM:SS
   const formatTime = (seconds: number): string => {
@@ -289,39 +296,48 @@ export function VideoPlayer({
           </div>
         )}
 
-        <ReactPlayer
-          ref={(player) => {
-            if (player) {
-              const typedPlayer = player as unknown as ReactPlayerInstance
-              playerInstanceRef.current = {
-                seekTo: typedPlayer.seekTo.bind(player),
-                getCurrentTime: typedPlayer.getCurrentTime.bind(player),
-                getSecondsLoaded: typedPlayer.getSecondsLoaded.bind(player),
-                getDuration: typedPlayer.getDuration.bind(player),
+        {/* Video with effects applied */}
+        <div
+          className="w-full h-full relative"
+          style={{ filter: filter || undefined }}
+        >
+          <ReactPlayer
+            ref={(player) => {
+              if (player) {
+                const typedPlayer = player as unknown as ReactPlayerInstance
+                playerInstanceRef.current = {
+                  seekTo: typedPlayer.seekTo.bind(player),
+                  getCurrentTime: typedPlayer.getCurrentTime.bind(player),
+                  getSecondsLoaded: typedPlayer.getSecondsLoaded.bind(player),
+                  getDuration: typedPlayer.getDuration.bind(player),
+                }
+              } else {
+                playerInstanceRef.current = null
               }
-            } else {
-              playerInstanceRef.current = null
-            }
-          }}
-          url={url}
-          playing={playing}
-          volume={volume}
-          muted={muted}
-          playbackRate={playbackRate}
-          width="100%"
-          height="100%"
-          onReady={handleReady}
-          onProgress={handleProgress}
-          onDuration={handleDuration}
-          onError={handleError}
-          config={{
-            file: {
-              attributes: {
-                controlsList: "nodownload",
+            }}
+            url={url}
+            playing={playing}
+            volume={volume}
+            muted={muted}
+            playbackRate={playbackRate}
+            width="100%"
+            height="100%"
+            onReady={handleReady}
+            onProgress={handleProgress}
+            onDuration={handleDuration}
+            onError={handleError}
+            config={{
+              file: {
+                attributes: {
+                  controlsList: "nodownload",
+                },
               },
-            },
-          }}
-        />
+            }}
+          />
+
+          {/* Vignette overlay if effect is applied */}
+          {vignetteOverlay && <div style={vignetteOverlay} />}
+        </div>
       </div>
 
       {/* Controls Container */}
