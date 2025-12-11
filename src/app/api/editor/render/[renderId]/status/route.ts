@@ -4,8 +4,14 @@
  * GET /api/editor/render/[renderId]/status
  *
  * Returns the current status and progress of a render job.
- * The renderId is the jobId returned when starting a render.
- * Status is tracked by projectId in the repository.
+ *
+ * NOTE: The URL parameter is named [renderId] for semantic reasons,
+ * but the frontend passes the projectId here since render status
+ * is tracked at the project level in the current implementation.
+ *
+ * In a production system, you would have a job registry that maps
+ * jobId (renderId) to projectId, but for simplicity, we accept
+ * projectId directly.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -17,40 +23,36 @@ export async function GET(
   { params }: { params: Promise<{ renderId: string }> }
 ) {
   try {
-    const { renderId } = await params;
+    // Note: renderId parameter is actually the projectId from frontend
+    const { renderId: projectIdOrRenderId } = await params;
     const editorService = getEditorService();
 
-    // The renderId is actually the jobId, but status is tracked by project
-    // We need to find the project associated with this job
-    // For now, we'll try to look up by projectId since that's what the service uses
-    // In a production system, you'd have a job-to-project mapping table
+    // Try to get project status using the ID
+    // This works because frontend passes projectId as renderId parameter
+    const project = await editorService.getProject(projectIdOrRenderId);
 
-    // Try to get project status - the renderId might actually be the projectId
-    // passed during render, or we need a job registry
-    // For simplicity, we'll check if it's a valid projectId
-    try {
-      const project = await editorService.getProject(renderId);
-
-      return NextResponse.json({
-        success: true,
-        status: project.status || "processing",
-        progress: project.progress || 0,
-        renderId,
-        projectId: project.id,
-      });
-    } catch {
-      // If not found as projectId, it might be a jobId
-      // In a real implementation, you'd look up the job registry
-      // For now, return a processing status
-      return NextResponse.json({
-        success: true,
-        status: "processing",
-        progress: 0,
-        renderId,
-        message: "Job status lookup not fully implemented - checking project status instead",
-      });
-    }
+    return NextResponse.json({
+      success: true,
+      status: project.status || "draft",
+      progress: project.progress || 0,
+      projectId: project.id,
+      message: project.status === "failed" ? "Render failed" : undefined,
+    });
   } catch (error) {
+    // If project not found, return appropriate error
+    if (error instanceof Error && error.message.includes("not found")) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "PROJECT_NOT_FOUND",
+            message: "Project or render job not found",
+          },
+        },
+        { status: 404 }
+      );
+    }
+
     return errorHandler(error);
   }
 }
