@@ -1,9 +1,11 @@
 "use client";
 
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { formatTime, timeToPixels } from "@/lib/editor/utils";
 import type { ClipHandleProps, DragState } from "@/lib/editor/types";
+import { Waveform } from "../audio/waveform";
+import { useWaveform } from "@/hooks/useWaveform";
 
 /**
  * ClipHandle Component
@@ -18,6 +20,7 @@ export function ClipHandle({
   isDragging,
   isLocked,
   trackColor = "from-primary/80 to-accent/80",
+  trackType,
   onSelect,
   onDragStart,
   onDragEnd,
@@ -25,12 +28,27 @@ export function ClipHandle({
 }: ClipHandleProps & {
   isLocked?: boolean;
   trackColor?: string;
+  trackType?: "video" | "audio" | "text";
 }) {
   const clipRef = useRef<HTMLDivElement>(null);
 
   // Calculate position and dimensions
   const xPosition = timeToPixels(clip.startTime, 1, pixelsPerSecond);
   const width = timeToPixels(clip.duration, 1, pixelsPerSecond);
+
+  // Determine if we should show waveform (for audio and video clips)
+  const shouldShowWaveform = useMemo(() => {
+    return trackType === "audio" || trackType === "video";
+  }, [trackType]);
+
+  // Generate waveform data for audio/video clips
+  const { waveformData, loading: waveformLoading } = useWaveform(
+    shouldShowWaveform ? clip.sourceUrl : null,
+    {
+      peakCount: Math.max(50, Math.floor(width / 3)), // Adjust resolution based on width
+      autoGenerate: shouldShowWaveform,
+    }
+  );
 
   /**
    * Handle clip selection
@@ -119,19 +137,38 @@ export function ClipHandle({
     >
       {/* Clip Content */}
       <div className="relative h-full p-1.5 overflow-hidden">
+        {/* Waveform visualization for audio/video clips */}
+        {shouldShowWaveform && waveformData && !waveformLoading && (
+          <div className="absolute inset-0 flex items-center justify-center opacity-60">
+            <Waveform
+              data={waveformData}
+              width={Math.max(width - 4, 10)}
+              height={Math.max(40, Math.min(60, width / 4))}
+              color="rgba(255, 255, 255, 0.7)"
+              backgroundColor="transparent"
+              className="pointer-events-none"
+            />
+          </div>
+        )}
+
+        {/* Loading indicator for waveform */}
+        {shouldShowWaveform && waveformLoading && width > 40 && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-[10px] text-white/50">Loading...</div>
+          </div>
+        )}
+
         {/* Clip Name */}
-        <div className="text-xs font-medium text-white truncate">
+        <div className="relative text-xs font-medium text-white truncate z-10">
           {clip.name}
         </div>
 
         {/* Duration (shown if clip is wide enough) */}
         {width > 60 && (
-          <div className="absolute bottom-1 left-1.5 text-[10px] text-white/70">
+          <div className="absolute bottom-1 left-1.5 text-[10px] text-white/70 z-10">
             {formatTime(clip.duration)}
           </div>
         )}
-
-        {/* Waveform or thumbnail preview could go here */}
       </div>
 
       {/* Trim Handles (visible when selected or hovered) */}

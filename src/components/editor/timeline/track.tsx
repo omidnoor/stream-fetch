@@ -164,6 +164,7 @@ export function Track({
             isDragging={false}
             isLocked={track.locked}
             trackColor={trackColor}
+            trackType={track.type}
             onSelect={(multiSelect) => onClipSelect(clip.id, multiSelect)}
             onDragStart={(dragType) => onClipDragStart(clip.id, dragType)}
             onDragEnd={onClipDragEnd}
