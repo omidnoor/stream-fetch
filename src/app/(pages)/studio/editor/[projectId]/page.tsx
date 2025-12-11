@@ -5,7 +5,7 @@ import { ArrowLeft, Save, Download as DownloadIcon, Loader2, AlertCircle, Folder
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { VideoPlayer } from "@/components/editor/video-player"
-import { Timeline } from "@/components/editor/timeline"
+import { TimelineEditor } from "@/components/editor/timeline"
 import { ExportDialog } from "@/components/editor/export-dialog"
 import { MediaLibrary } from "@/components/editor/media/media-library"
 import { EffectsPanel } from "@/components/editor/effects/effects-panel"
@@ -14,7 +14,8 @@ import { TransitionPicker } from "@/components/editor/transitions/transition-pic
 import { AudioMixer } from "@/components/editor/audio/audio-mixer"
 import { TransformPanel } from "@/components/editor/transform/transform-panel"
 import { toast } from "sonner"
-import type { MediaAsset, AudioMixerState, Transform, TransitionType, ClipEffect } from "@/lib/editor/types"
+import type { MediaAsset, AudioMixerState, Transform, TransitionType, ClipEffect, TimelineTrack, TimelineClip } from "@/lib/editor/types"
+import { createVideoTrack, generateClipId } from "@/lib/editor/utils"
 
 interface Clip {
   id: string
@@ -75,6 +76,7 @@ export default function ProjectEditorPage({
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [clips, setClips] = useState<Clip[]>([])
+  const [tracks, setTracks] = useState<TimelineTrack[]>([])
   const [saving, setSaving] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
 
@@ -134,7 +136,7 @@ export default function ProjectEditorPage({
         clearTimeout(saveTimeoutRef.current)
       }
     }
-  }, [clips, project])
+  }, [tracks, project])
 
   const loadProject = async () => {
     if (!projectId) return
@@ -157,7 +159,7 @@ export default function ProjectEditorPage({
       setProject(projectData)
       setDuration(projectData.timeline?.duration || 0)
 
-      // Convert timeline clips to our clip format
+      // Convert timeline clips to track format for TimelineEditor
       if (projectData.timeline?.clips) {
         const convertedClips: Clip[] = projectData.timeline.clips.map((clip: any) => ({
           id: clip.id,
@@ -168,6 +170,26 @@ export default function ProjectEditorPage({
           sourceUrl: clip.sourceUrl,
         }))
         setClips(convertedClips)
+
+        // Create track structure for TimelineEditor
+        const videoTrack = createVideoTrack("Video Track")
+        videoTrack.clips = projectData.timeline.clips.map((clip: any) => ({
+          id: clip.id,
+          trackId: videoTrack.id,
+          startTime: clip.startTime,
+          duration: clip.duration,
+          sourceStart: 0,
+          sourceEnd: clip.duration,
+          sourceUrl: clip.sourceUrl,
+          name: `Clip ${clip.id.substring(0, 6)}`,
+          volume: clip.volume ?? 1,
+          muted: clip.muted ?? false,
+          layer: clip.layer ?? 0,
+        }))
+        setTracks([videoTrack])
+      } else {
+        // No clips, create empty track
+        setTracks([createVideoTrack("Video Track")])
       }
     } catch (err) {
       console.error("Error loading project:", err)
@@ -185,21 +207,25 @@ export default function ProjectEditorPage({
     try {
       setSaving(true)
 
-      // Convert clips back to timeline format
-      const updatedTimeline = {
-        ...project.timeline,
-        clips: clips.map((clip) => ({
+      // Convert tracks back to flat timeline format for backend
+      const allClips = tracks.flatMap((track) =>
+        track.clips.map((clip) => ({
           id: clip.id,
           sourceUrl: clip.sourceUrl,
           startTime: clip.startTime,
           endTime: clip.startTime + clip.duration,
           duration: clip.duration,
-          position: clip.position,
-          layer: 0,
-          volume: 1,
-          muted: false,
+          position: clip.startTime, // Use startTime as position
+          layer: clip.layer ?? 0,
+          volume: clip.volume ?? 1,
+          muted: clip.muted ?? false,
           effects: [],
-        })),
+        }))
+      )
+
+      const updatedTimeline = {
+        ...project.timeline,
+        clips: allClips,
       }
 
       const response = await fetch(`/api/editor/project/${projectId}`, {
@@ -273,6 +299,17 @@ export default function ProjectEditorPage({
       setActiveTab("effects")
     }
   }, [activeTab])
+
+  // Handlers for TimelineEditor
+  const handleTimelineStateChange = useCallback((newTracks: TimelineTrack[], newDuration: number) => {
+    setTracks(newTracks)
+    setDuration(newDuration)
+    setHasUnsavedChanges(true)
+  }, [])
+
+  const handleTimelineTimeChange = useCallback((time: number) => {
+    setCurrentTime(time)
+  }, [])
 
   const handleExport = () => {
     setExportDialogOpen(true)
@@ -396,14 +433,12 @@ export default function ProjectEditorPage({
             {/* Timeline */}
             <div className="space-y-2">
               <h2 className="text-sm font-medium text-muted-foreground">Timeline</h2>
-              <Timeline
-                clips={clips}
-                duration={duration}
+              <TimelineEditor
+                initialTracks={tracks}
                 currentTime={currentTime}
-                onClipsChange={handleClipsChange}
-                onSeek={handleTimelineSeek}
-                onDeleteClip={handleDeleteClip}
-                onClipSelect={handleClipSelect}
+                onStateChange={handleTimelineStateChange}
+                onTimeChange={handleTimelineTimeChange}
+                className="w-full"
               />
             </div>
           </div>
@@ -426,7 +461,7 @@ export default function ProjectEditorPage({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Clips:</span>
-                  <span className="font-medium">{clips.length}</span>
+                  <span className="font-medium">{tracks.reduce((sum, track) => sum + track.clips.length, 0)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Resolution:</span>
@@ -525,17 +560,55 @@ export default function ProjectEditorPage({
                   <MediaLibrary
                     projectId={projectId}
                     onAssetSelect={(asset: MediaAsset) => {
-                      // Add asset to timeline as a new clip
-                      const newClip: Clip = {
-                        id: `clip-${Date.now()}`,
-                        name: asset.originalFilename,
-                        startTime: 0,
-                        duration: asset.metadata.duration || 10,
-                        position: duration,
-                        sourceUrl: asset.path
-                      }
-                      setClips(prev => [...prev, newClip])
-                      setDuration(prev => prev + (asset.metadata.duration || 10))
+                      // Add asset to timeline as a new clip on the first video track
+                      const clipDuration = asset.metadata.duration || 10
+
+                      setTracks(prevTracks => {
+                        // Ensure we have at least one video track
+                        const videoTracks = prevTracks.filter(t => t.type === 'video')
+                        if (videoTracks.length === 0) {
+                          // Create a new video track with the clip
+                          const newTrack = createVideoTrack("Video Track")
+                          const newClip: TimelineClip = {
+                            id: generateClipId(),
+                            trackId: newTrack.id,
+                            startTime: duration,
+                            duration: clipDuration,
+                            sourceStart: 0,
+                            sourceEnd: clipDuration,
+                            sourceUrl: asset.path,
+                            name: asset.originalFilename,
+                            volume: 1,
+                            muted: false,
+                            layer: 0,
+                          }
+                          newTrack.clips = [newClip]
+                          return [newTrack, ...prevTracks]
+                        } else {
+                          // Add to the first video track
+                          const updatedTracks = [...prevTracks]
+                          const trackIndex = updatedTracks.findIndex(t => t.type === 'video')
+                          const track = { ...updatedTracks[trackIndex] }
+                          const newClip: TimelineClip = {
+                            id: generateClipId(),
+                            trackId: track.id,
+                            startTime: duration,
+                            duration: clipDuration,
+                            sourceStart: 0,
+                            sourceEnd: clipDuration,
+                            sourceUrl: asset.path,
+                            name: asset.originalFilename,
+                            volume: 1,
+                            muted: false,
+                            layer: 0,
+                          }
+                          track.clips = [...track.clips, newClip]
+                          updatedTracks[trackIndex] = track
+                          return updatedTracks
+                        }
+                      })
+
+                      setDuration(prev => prev + clipDuration)
                       setHasUnsavedChanges(true)
                       toast.success(`Added ${asset.originalFilename} to timeline`)
                     }}
