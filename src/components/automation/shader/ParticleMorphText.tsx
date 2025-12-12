@@ -58,10 +58,25 @@ export function ParticleMorphText({
   const textIndexRef = useRef<number>(0);
   const lastTextChangeRef = useRef<number>(0);
 
-  // Update fontFamily ref whenever prop changes (outside the main effect)
+  // All dynamic props as refs to avoid WebGL context recreation
+  const scaleRef = useRef<number>(scale);
+  const pointSizeRef = useRef<number>(pointSize);
+  const backgroundRef = useRef<[number, number, number, number]>(background);
+  const settleTimeRef = useRef<number>(settleTime);
+  const testTextsRef = useRef<string[] | undefined>(testTexts);
+  const testDurationRef = useRef<number>(testDuration);
+
+  // Update all refs when props change (without recreating WebGL context)
   useEffect(() => {
     fontFamilyRef.current = fontFamily;
-  }, [fontFamily]);
+    scaleRef.current = scale;
+    pointSizeRef.current = pointSize;
+    backgroundRef.current = background;
+    settleTimeRef.current = settleTime;
+    testTextsRef.current = testTexts;
+    testDurationRef.current = testDuration;
+    textRef.current = text;
+  }, [fontFamily, scale, pointSize, background, settleTime, testTexts, testDuration, text]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -477,7 +492,7 @@ export function ParticleMorphText({
       const cx = oc.width * 0.5;
       const cy = oc.height * 0.5;
       // Scale to clip space with user-defined scale factor
-      const scaleToClip = (2.0 / oc.width) * scale;
+      const scaleToClip = (2.0 / oc.width) * scaleRef.current;
 
       for (let i = 0; i < actualCount; i++) {
         const c = candidates[i % candidates.length];
@@ -527,11 +542,12 @@ export function ParticleMorphText({
     let targetsReady = false;
     let startTime = performance.now();
     let lastKnownFont = fontFamilyRef.current;
-    let lastKnownScale = scale;
-    let lastKnownText = text;
+    let lastKnownScale = scaleRef.current;
+    let lastKnownText = textRef.current;
 
     // Initialize with first text (prefer text prop if different from first testText)
-    const initialText = testTexts && testTexts.length > 0 ? testTexts[0] : text;
+    const initialTestTexts = testTextsRef.current;
+    const initialText = initialTestTexts && initialTestTexts.length > 0 ? initialTestTexts[0] : textRef.current;
     textRef.current = initialText;
     lastTextChangeRef.current = startTime;
 
@@ -546,7 +562,7 @@ export function ParticleMorphText({
 
     // ---------- Entropy curve ----------
     const temperatureFromT = (t: number) => {
-      const k = 4.2 / Math.max(1e-3, settleTime);
+      const k = 4.2 / Math.max(1e-3, settleTimeRef.current);
       const raw = Math.exp(-k * t);
       return Math.max(0, Math.min(1, Math.pow(raw, 0.85)));
     };
@@ -571,29 +587,32 @@ export function ParticleMorphText({
       const temperature = temperatureFromT(tSec);
 
       // Check for font or scale changes and rebuild targets if needed
-      if (fontFamilyRef.current !== lastKnownFont || scale !== lastKnownScale) {
+      if (fontFamilyRef.current !== lastKnownFont || scaleRef.current !== lastKnownScale) {
         lastKnownFont = fontFamilyRef.current;
-        lastKnownScale = scale;
+        lastKnownScale = scaleRef.current;
         buildTargetsFromText(textRef.current);
         startTime = now; // Reset entropy for smooth transition
       }
 
       // Check for text prop changes (user manual input via Update button)
-      if (text !== lastKnownText) {
-        lastKnownText = text;
-        textRef.current = text;
-        buildTargetsFromText(text);
+      if (textRef.current !== lastKnownText) {
+        lastKnownText = textRef.current;
+        buildTargetsFromText(textRef.current);
         startTime = now;
         lastTextChangeRef.current = now;
       }
 
-      // Test mode: cycle through texts automatically (only if no manual text change pending)
-      if (testTexts && testTexts.length > 1) {
+      // Test mode: cycle through texts automatically
+      const currentTestTexts = testTextsRef.current;
+      const currentTestDuration = testDurationRef.current;
+      const currentSettleTime = settleTimeRef.current;
+
+      if (currentTestTexts && currentTestTexts.length > 1) {
         const timeSinceLastChange = (now - lastTextChangeRef.current) / 1000;
-        if (timeSinceLastChange >= testDuration + settleTime) {
+        if (timeSinceLastChange >= currentTestDuration + currentSettleTime) {
           // Cycle to next text
-          textIndexRef.current = (textIndexRef.current + 1) % testTexts.length;
-          const newText = testTexts[textIndexRef.current];
+          textIndexRef.current = (textIndexRef.current + 1) % currentTestTexts.length;
+          const newText = currentTestTexts[textIndexRef.current];
           textRef.current = newText;
           lastKnownText = newText; // Update to prevent double-trigger
           buildTargetsFromText(newText);
@@ -635,7 +654,8 @@ export function ParticleMorphText({
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       setCanvasSize();
 
-      gl.clearColor(background[0], background[1], background[2], background[3]);
+      const bg = backgroundRef.current;
+      gl.clearColor(bg[0], bg[1], bg[2], bg[3]);
       gl.clear(gl.COLOR_BUFFER_BIT);
 
       gl.enable(gl.BLEND);
@@ -655,7 +675,7 @@ export function ParticleMorphText({
       gl.uniform2f(renderLoc.uTexSize, simW, simH);
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      gl.uniform1f(renderLoc.uPointSize, pointSize * dpr);
+      gl.uniform1f(renderLoc.uPointSize, pointSizeRef.current * dpr);
 
       gl.uniform2f(renderLoc.uAspect, 1.0, aspectY);
 
@@ -691,8 +711,9 @@ export function ParticleMorphText({
       const loseContext = gl.getExtension('WEBGL_lose_context');
       if (loseContext) loseContext.loseContext();
     };
+    // Only recreate WebGL context when particle count changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [text, testTexts, testDuration, particleCount, pointSize, scale, background, settleTime]);
+  }, [particleCount]);
 
   return (
     <div className={`relative w-full h-full ${className}`}>

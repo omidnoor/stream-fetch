@@ -12,7 +12,12 @@ import type { NextRequest } from 'next/server';
 const publicRoutes = ['/', '/auth/signin', '/auth/signup', '/auth/error'];
 
 // API routes that don't require authentication
-const publicApiRoutes = ['/api/auth'];
+const publicApiRoutes = [
+  '/api/auth',
+  '/api/automation',
+  '/api/video-info',
+  '/api/download'
+];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

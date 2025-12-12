@@ -3,7 +3,7 @@ import { FolderOpen, Plus } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ProjectGridSkeleton } from "@/components/skeletons/project-card-skeleton"
-import { ProjectsList } from "./_components/projects-list"
+import { ProjectsList } from "@/components/editor/projects-list"
 
 export default function StudioPage() {
   return (

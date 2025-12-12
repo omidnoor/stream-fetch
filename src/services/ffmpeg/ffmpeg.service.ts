@@ -36,7 +36,26 @@ export class FFmpegService {
     this.ffmpegPath = ffmpegPath;
     this.ffprobePath = ffprobePath;
 
-    // Set custom paths if provided
+    // Use bundled static binaries if custom paths not provided
+    if (!this.ffmpegPath) {
+      try {
+        const ffmpegStatic = require('ffmpeg-static');
+        this.ffmpegPath = ffmpegStatic;
+      } catch {
+        // ffmpeg-static not installed, will use system ffmpeg
+      }
+    }
+
+    if (!this.ffprobePath) {
+      try {
+        const ffprobeStatic = require('ffprobe-static');
+        this.ffprobePath = ffprobeStatic.path;
+      } catch {
+        // ffprobe-static not installed, will use system ffprobe
+      }
+    }
+
+    // Set paths
     if (this.ffmpegPath) {
       ffmpeg.setFfmpegPath(this.ffmpegPath);
     }

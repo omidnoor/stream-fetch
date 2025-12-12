@@ -598,6 +598,7 @@ interface SimpleTimelineProps {
   onClipsChange?: (clips: SimpleClip[]) => void;
   onSeek?: (time: number) => void;
   onDeleteClip?: (clipId: string) => void;
+  onClipSelect?: (clipId: string) => void;
   className?: string;
 }
 
@@ -608,6 +609,7 @@ export function Timeline({
   onClipsChange,
   onSeek,
   onDeleteClip,
+  onClipSelect,
   className = "",
 }: SimpleTimelineProps) {
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -645,7 +647,8 @@ export function Timeline({
   const handleClipClick = useCallback((clipId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedClipId(clipId);
-  }, []);
+    onClipSelect?.(clipId);
+  }, [onClipSelect]);
 
   const renderTimeMarkers = () => {
     const markers = [];

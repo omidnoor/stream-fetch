@@ -7,7 +7,7 @@ import http from 'http';
 
 // Test configuration
 const TEST_VIDEO_URL = 'https://www.youtube.com/watch?v=jNQXAC9IVRw'; // "Me at the zoo" - 19 seconds
-const API_BASE = 'http://localhost:3002';
+const API_BASE = 'http://localhost:3000';
 const TARGET_LANGUAGE = 'es';
 const CHUNK_DURATION = 30;
 const MAX_PARALLEL_JOBS = 2;
