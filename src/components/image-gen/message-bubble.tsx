@@ -69,7 +69,7 @@ export function MessageBubble({ message, onImageClick }: MessageBubbleProps) {
       </div>
 
       {/* Content */}
-      <div className={`flex-1 min-w-0 space-y-2 ${isUser ? "items-end" : ""}`}>
+      <div className={`flex-1 min-w-0 flex flex-col gap-2 ${isUser ? "items-end" : "items-start"}`}>
         {/* User's reference images */}
         {isUser && message.referenceImages && message.referenceImages.length > 0 && (
           <div className={`flex gap-2 flex-wrap ${isUser ? "justify-end" : ""}`}>
@@ -87,9 +87,9 @@ export function MessageBubble({ message, onImageClick }: MessageBubbleProps) {
         {/* Message text - only show for user or assistant with content */}
         {message.content && (
           <div
-            className={`inline-block rounded-2xl px-4 py-2.5 max-w-[85%] ${
+            className={`rounded-2xl px-4 py-2.5 max-w-[85%] ${
               isUser
-                ? "bg-primary text-primary-foreground ml-auto"
+                ? "bg-primary text-primary-foreground"
                 : "bg-surface-2 text-foreground"
             }`}
           >
