@@ -3,13 +3,14 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
-import { LayoutDashboard, Download, Settings, Film, Mic2, FileText, Zap, ChevronLeft, ChevronRight } from "lucide-react"
+import { LayoutDashboard, Download, Settings, Film, Mic2, FileText, Zap, ChevronLeft, ChevronRight, ImageIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "YouTube", href: "/youtube", icon: Download },
   { name: "Dubbing", href: "/dubbing", icon: Mic2 },
+  { name: "Image Gen", href: "/image-gen", icon: ImageIcon },
   { name: "Studio", href: "/studio", icon: Film },
   { name: "Automation", href: "/automation", icon: Zap },
   { name: "PDF Editor", href: "/pdf", icon: FileText },
