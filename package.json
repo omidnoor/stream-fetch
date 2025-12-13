@@ -49,6 +49,7 @@
     "uuid": "^13.0.0",
     "wavesurfer.js": "^7.12.1",
     "youtube-ext": "^1.1.25",
+    "youtube-po-token-generator": "^0.6.0",
     "youtubei.js": "^16.0.1"
   },
   "devDependencies": {
